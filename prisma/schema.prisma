@@ -1,0 +1,507 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  COUPLE
+  ADMIN
+}
+
+enum SiteStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum SiteVisibility {
+  PUBLIC
+  PASSWORD_PROTECTED
+  INVITE_ONLY
+}
+
+enum SectionType {
+  HERO
+  STORY
+  EVENTS
+  SCHEDULE
+  TIDBITS
+  DRESS_CODE
+  EXPERIENCE
+  GALLERY
+  VIDEOS
+  RSVP
+  MEMORIES
+  MESSAGES
+  REGISTRY
+  SAVE_THE_DATE
+}
+
+enum EventAudience {
+  ALL_GUESTS
+  FAMILY_ONLY
+  INVITE_ONLY
+}
+
+enum RSVPStatus {
+  ATTENDING
+  MAYBE
+  DECLINED
+}
+
+enum TravelGuideCategory {
+  AIRPORT
+  TRANSPORT
+  HOTELS
+  PARKING
+  FAQ
+  RECOMMENDATIONS
+  WHAT_TO_BRING
+  EMERGENCY
+}
+
+enum MediaCategory {
+  HERO
+  STORY
+  EVENT_BANNER
+  GALLERY
+  DRESS_CODE
+}
+
+enum UploadType {
+  IMAGE
+  VIDEO
+  LINK
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MessageVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum AnalyticsEventType {
+  PAGE_VIEW
+  CTA_CLICK
+  RSVP_SUBMITTED
+  MESSAGE_SUBMITTED
+  UPLOAD_SUBMITTED
+}
+
+model User {
+  id                      String                   @id @default(cuid())
+  email                   String                   @unique
+  passwordHash            String
+  role                    UserRole                 @default(COUPLE)
+  emailVerifiedAt         DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  couple                  Couple?                  @relation("PrimaryOwner")
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+}
+
+model Couple {
+  id              String      @id @default(cuid())
+  primaryUserId   String      @unique
+  partnerOneName  String
+  partnerTwoName  String
+  brandName       String
+  storyBlurb      String?
+  weddingDate     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  primaryUser     User        @relation("PrimaryOwner", fields: [primaryUserId], references: [id], onDelete: Cascade)
+  weddingSite     WeddingSite?
+}
+
+model TemplatePreset {
+  id                String        @id @default(cuid())
+  key               String        @unique
+  name              String
+  description       String
+  mood              String
+  previewGradient   String
+  supportedSections SectionType[]
+  themeDefaults     Json
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  sites             WeddingSite[]
+}
+
+model WeddingSite {
+  id               String            @id @default(cuid())
+  coupleId         String            @unique
+  templatePresetId String
+  slug             String            @unique
+  brandName        String
+  headline         String
+  subtitle         String?
+  tagline          String?
+  weddingDate      DateTime
+  heroImageUrl     String?
+  heroVideoUrl     String?
+  locationSummary  String?
+  seoTitle         String?
+  seoDescription   String?
+  ogImageUrl       String?
+  canonicalUrl     String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  couple           Couple            @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  templatePreset   TemplatePreset    @relation(fields: [templatePresetId], references: [id])
+  theme            SiteTheme?
+  publishSettings  PublishSettings?
+  sectionConfigs   SectionConfig[]
+  storyMilestones  StoryMilestone[]
+  events           Event[]
+  scheduleItems    ScheduleItem[]
+  tidbits          Tidbit[]
+  faqItems         FaqItem[]
+  travelGuideItems TravelGuideItem[]
+  dressCodeGuides  DressCodeGuide[]
+  mediaAssets      MediaAsset[]
+  embeddedVideos   EmbeddedVideo[]
+  inviteGroups     InviteGroup[]
+  rsvpResponses    RSVPResponse[]
+  guestUploads     GuestUpload[]
+  guestMessages    GuestMessage[]
+  analyticsEvents  AnalyticsEvent[]
+}
+
+model SiteTheme {
+  id              String      @id @default(cuid())
+  weddingSiteId   String      @unique
+  paletteKey      String
+  headingFontKey  String
+  bodyFontKey     String
+  primaryColor    String
+  accentColor     String
+  backgroundColor String
+  surfaceColor    String
+  textColor       String
+  mutedColor      String
+  borderRadius    String
+  buttonVariant   String
+  shadowStyle     String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  weddingSite     WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model PublishSettings {
+  id                String         @id @default(cuid())
+  weddingSiteId     String         @unique
+  status            SiteStatus     @default(DRAFT)
+  visibility        SiteVisibility @default(PUBLIC)
+  sitePasswordHash  String?
+  noIndex           Boolean        @default(false)
+  isRsvpOpen        Boolean        @default(true)
+  isUploadsOpen     Boolean        @default(true)
+  isMessagesOpen    Boolean        @default(true)
+  publishedSnapshot Json?
+  publishedAt       DateTime?
+  lastDraftSavedAt  DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  weddingSite       WeddingSite    @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model SectionConfig {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  type          SectionType
+  enabled       Boolean     @default(true)
+  position      Int
+  label         String
+  settings      Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+
+  @@unique([weddingSiteId, type])
+}
+
+model StoryMilestone {
+  id               String      @id @default(cuid())
+  weddingSiteId    String
+  title            String
+  shortLabel       String?
+  eventDateLabel   String
+  description      String
+  imageUrl         String?
+  sortOrder        Int
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  weddingSite      WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id               String         @id @default(cuid())
+  weddingSiteId    String
+  title            String
+  subtitle         String?
+  description      String
+  startDateTime    DateTime
+  endDateTime      DateTime
+  dayLabel         String
+  locationName     String
+  fullAddress      String
+  googleMapsUrl    String?
+  dressCode        String?
+  notes            String?
+  imageUrl         String?
+  rsvpRequired     Boolean        @default(true)
+  audience         EventAudience  @default(ALL_GUESTS)
+  contactName      String?
+  contactPhone     String?
+  sortOrder        Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  weddingSite      WeddingSite    @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  scheduleItems    ScheduleItem[]
+  dressCodeGuides  DressCodeGuide[]
+  rsvpSelections   RSVPEventSelection[]
+  guestUploads     GuestUpload[]
+}
+
+model ScheduleItem {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  eventId       String?
+  title         String
+  category      String
+  description   String?
+  startDateTime DateTime
+  endDateTime   DateTime?
+  dayLabel      String
+  locationName  String?
+  sortOrder     Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  event         Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
+
+model Tidbit {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  title         String
+  body          String
+  category      String
+  iconKey       String?
+  sortOrder     Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model FaqItem {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  question      String
+  answer        String
+  category      String
+  sortOrder     Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model TravelGuideItem {
+  id            String              @id @default(cuid())
+  weddingSiteId String
+  category      TravelGuideCategory
+  title         String
+  description   String
+  url           String?
+  sortOrder     Int
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  weddingSite   WeddingSite         @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model DressCodeGuide {
+  id                 String      @id @default(cuid())
+  weddingSiteId      String
+  eventId            String?
+  title              String
+  guidance           String
+  palette            Json?
+  inspirationImage   String?
+  sortOrder          Int
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  weddingSite        WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  event              Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
+
+model MediaAsset {
+  id               String        @id @default(cuid())
+  weddingSiteId    String
+  category         MediaCategory
+  title            String?
+  altText          String?
+  caption          String?
+  url              String
+  storageKey       String?
+  mimeType         String?
+  sizeBytes        Int?
+  width            Int?
+  height           Int?
+  sortOrder        Int          @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  weddingSite      WeddingSite   @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model EmbeddedVideo {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  title         String
+  typeLabel     String
+  youtubeUrl    String
+  youtubeId     String
+  thumbnailUrl  String?
+  sortOrder     Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model InviteGroup {
+  id               String         @id @default(cuid())
+  weddingSiteId    String
+  name             String
+  code             String         @unique
+  directLinkToken  String         @unique
+  maxAttendees     Int
+  plusOneAllowed   Boolean        @default(false)
+  responseDeadline DateTime?
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  weddingSite      WeddingSite    @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  guests           Guest[]
+  responses        RSVPResponse[]
+}
+
+model Guest {
+  id            String      @id @default(cuid())
+  inviteGroupId String
+  fullName      String
+  email         String?
+  phone         String?
+  tags          String[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  inviteGroup   InviteGroup @relation(fields: [inviteGroupId], references: [id], onDelete: Cascade)
+}
+
+model RSVPResponse {
+  id                  String               @id @default(cuid())
+  weddingSiteId       String
+  inviteGroupId       String?
+  guestName           String
+  guestEmail          String?
+  inviteCode          String?
+  status              RSVPStatus
+  attendeeCount       Int
+  mealPreference      String?
+  accommodationNeeds  String?
+  travelNotes         String?
+  specialRequests     String?
+  accessibilityNeeds  String?
+  noteToCouple        String?
+  confirmedAt         DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  weddingSite         WeddingSite          @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  inviteGroup         InviteGroup?         @relation(fields: [inviteGroupId], references: [id], onDelete: SetNull)
+  eventSelections     RSVPEventSelection[]
+}
+
+model RSVPEventSelection {
+  id             String       @id @default(cuid())
+  responseId     String
+  eventId        String
+  status         RSVPStatus
+  createdAt      DateTime     @default(now())
+  response       RSVPResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([responseId, eventId])
+}
+
+model GuestUpload {
+  id            String           @id @default(cuid())
+  weddingSiteId String
+  eventId       String?
+  type          UploadType
+  submitterName String
+  caption       String?
+  message       String?
+  url           String?
+  externalUrl   String?
+  storageKey    String?
+  mimeType      String?
+  sizeBytes     Int?
+  status        ModerationStatus @default(PENDING)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  moderatedAt   DateTime?
+  weddingSite   WeddingSite      @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  event         Event?           @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
+
+model GuestMessage {
+  id            String            @id @default(cuid())
+  weddingSiteId String
+  authorName    String
+  email         String?
+  message       String
+  feedback      String?
+  visibility    MessageVisibility
+  status        ModerationStatus  @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  moderatedAt   DateTime?
+  weddingSite   WeddingSite       @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model AnalyticsEvent {
+  id            String             @id @default(cuid())
+  weddingSiteId String
+  type          AnalyticsEventType
+  path          String?
+  metadata      Json?
+  occurredAt    DateTime           @default(now())
+  weddingSite   WeddingSite        @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerificationToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

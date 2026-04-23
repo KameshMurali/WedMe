@@ -1,0 +1,282 @@
+"use server";
+
+import type { Route } from "next";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { initialActionState, type ActionState } from "@/lib/action-state";
+import { reservedSlugs, sectionLabels, sectionOrder, workspaceResumeCookieName } from "@/lib/constants";
+import { findTemplateByKey } from "@/lib/template-registry";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  mapRegisterValidationErrors,
+  registerSchema,
+  resetPasswordSchema,
+} from "@/lib/validations/auth";
+import { hashPassword, verifyPassword } from "@/server/auth/password";
+import { clearSessionCookie, setSessionCookie } from "@/server/auth/session";
+import { generatePlainToken, hashToken } from "@/server/auth/tokens";
+import { prisma } from "@/server/prisma";
+import { sendEmail } from "@/server/services/email";
+
+export async function registerAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = registerSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    const fieldErrors = mapRegisterValidationErrors(parsed.error.issues);
+
+    return {
+      error: parsed.error.issues[0]?.message ?? "Please check the registration form.",
+      fieldErrors,
+    };
+  }
+
+  const { email, partnerOneName, partnerTwoName, brandName, slug, weddingDate, password } = parsed.data;
+
+  if (reservedSlugs.includes(slug)) {
+    return {
+      error: "Please choose a different wedding URL slug.",
+      fieldErrors: {
+        slug: "Please choose a different wedding URL slug.",
+      },
+    };
+  }
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    return {
+      error: "An account with this email already exists.",
+      fieldErrors: {
+        email: "An account with this email already exists.",
+      },
+    };
+  }
+
+  const existingSlug = await prisma.weddingSite.findUnique({ where: { slug } });
+  if (existingSlug) {
+    return {
+      error: "That wedding URL is already taken.",
+      fieldErrors: {
+        slug: "That wedding URL is already taken.",
+      },
+    };
+  }
+
+  const template = findTemplateByKey("classic-elegant");
+  const passwordHash = await hashPassword(password);
+  const verificationToken = generatePlainToken();
+
+  const created = await prisma.$transaction(async (transaction) => {
+    const user = await transaction.user.create({
+      data: {
+        email,
+        passwordHash,
+      },
+    });
+
+    const couple = await transaction.couple.create({
+      data: {
+        primaryUserId: user.id,
+        partnerOneName,
+        partnerTwoName,
+        brandName,
+        weddingDate: new Date(weddingDate),
+      },
+    });
+
+    const templatePreset = await transaction.templatePreset.findUnique({
+      where: { key: template.key },
+    });
+
+    if (!templatePreset) {
+      throw new Error("The default template preset is missing from the database.");
+    }
+
+    const site = await transaction.weddingSite.create({
+      data: {
+        coupleId: couple.id,
+        templatePresetId: templatePreset.id,
+        slug,
+        brandName,
+        headline: `${partnerOneName} & ${partnerTwoName} are getting married`,
+        subtitle: "A joyful celebration filled with family, rituals, music, and beautiful memories.",
+        tagline: "Welcome to our wedding website",
+        weddingDate: new Date(weddingDate),
+        locationSummary: "Dubai, United Arab Emirates",
+        theme: {
+          create: template.themeDefaults,
+        },
+        publishSettings: {
+          create: {
+            status: "DRAFT",
+            visibility: "PUBLIC",
+            isRsvpOpen: true,
+            isUploadsOpen: true,
+            isMessagesOpen: true,
+            lastDraftSavedAt: new Date(),
+          },
+        },
+        sectionConfigs: {
+          create: sectionOrder.map((type, index) => ({
+            type,
+            label: sectionLabels[type],
+            position: index,
+            enabled: true,
+          })),
+        },
+      },
+    });
+
+    await transaction.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(verificationToken),
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      },
+    });
+
+    return { user, site };
+  });
+
+  await sendEmail({
+    to: email,
+    subject: `Welcome to ${brandName}`,
+    text: `Your ToNewBeginning.com workspace is ready. Verify your email by visiting ${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}`,
+    html: `<p>Your ToNewBeginning.com workspace is ready.</p><p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}">Verify your email</a></p>`,
+  });
+
+  await setSessionCookie({
+    userId: created.user.id,
+    email: created.user.email,
+    role: created.user.role,
+  });
+
+  redirect("/dashboard");
+}
+
+export async function loginAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = loginSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email and password." };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: parsed.data.email },
+  });
+
+  if (!user) {
+    return { error: "We couldn’t find an account with that email." };
+  }
+
+  const isValid = await verifyPassword(parsed.data.password, user.passwordHash);
+  if (!isValid) {
+    return { error: "Incorrect password. Please try again." };
+  }
+
+  await setSessionCookie({
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+  });
+
+  const cookieStore = await cookies();
+  const resumePath = cookieStore.get(workspaceResumeCookieName)?.value;
+  const safeResumePath = (resumePath?.startsWith("/dashboard") ? resumePath : "/dashboard") as Route;
+
+  redirect(safeResumePath);
+}
+
+export async function requestPasswordResetAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email address." };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: parsed.data.email },
+  });
+
+  if (user) {
+    const plainToken = generatePlainToken();
+    await prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(plainToken),
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+      },
+    });
+
+    await sendEmail({
+      to: user.email,
+      subject: "Reset your ToNewBeginning.com password",
+      text: `Reset your password: ${process.env.APP_URL ?? "http://localhost:3000"}/reset-password/${plainToken}`,
+      html: `<p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/reset-password/${plainToken}">Reset your password</a></p>`,
+    });
+  }
+
+  return {
+    success: "If an account exists for that email, a password reset link has been prepared.",
+  };
+}
+
+export async function resetPasswordAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = resetPasswordSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please review the new password details." };
+  }
+
+  const tokenRecord = await prisma.passwordResetToken.findUnique({
+    where: {
+      tokenHash: hashToken(parsed.data.token),
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  if (!tokenRecord || tokenRecord.usedAt || tokenRecord.expiresAt < new Date()) {
+    return { error: "This reset link is no longer valid." };
+  }
+
+  const passwordHash = await hashPassword(parsed.data.password);
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: tokenRecord.userId },
+      data: { passwordHash },
+    }),
+    prisma.passwordResetToken.update({
+      where: { id: tokenRecord.id },
+      data: { usedAt: new Date() },
+    }),
+  ]);
+
+  await setSessionCookie({
+    userId: tokenRecord.user.id,
+    email: tokenRecord.user.email,
+    role: tokenRecord.user.role,
+  });
+
+  redirect("/dashboard");
+}
+
+export async function logoutAction() {
+  await clearSessionCookie();
+  redirect("/login");
+}
