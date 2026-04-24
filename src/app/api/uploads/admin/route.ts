@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 
-import { validateImageFile } from "@/lib/validations/upload";
-import { requireUser } from "@/server/auth/session";
+import { adminSignedUploadSchema, validateImageFile } from "@/lib/validations/upload";
+import { getCurrentUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { consumeRateLimit } from "@/server/security/rate-limit";
 import { storage } from "@/server/storage";
 
 const adminUploadSchema = z.object({
@@ -16,10 +17,34 @@ const adminUploadSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const user = await requireUser();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Please sign in to upload media." }, { status: 401 });
+    }
+
     const site = await getWeddingSiteForUser(user.id);
     if (!site) {
       return NextResponse.json({ error: "No wedding site was found for this account." }, { status: 404 });
+    }
+
+    const rateLimit = await consumeRateLimit({
+      action: "admin_upload",
+      source: request,
+      limit: 25,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [user.id, site.slug],
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Too many uploads were attempted from this dashboard. Please wait a moment and try again." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+          },
+        },
+      );
     }
 
     const formData = await request.formData();
@@ -38,19 +63,48 @@ export async function POST(request: Request) {
     }
 
     const file = formData.get("file");
-    if (!(file instanceof File) || file.size === 0) {
+    const uploadedUrl = formData.get("uploadedUrl");
+
+    let stored: { url: string; storageKey: string };
+    let mimeType: string;
+    let sizeBytes: number;
+
+    if (file instanceof File && file.size > 0) {
+      validateImageFile(file);
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      stored = await storage.upload({
+        buffer,
+        filename: file.name,
+        mimeType: file.type,
+        folder: site.slug,
+      });
+      mimeType = file.type;
+      sizeBytes = file.size;
+    } else if (typeof uploadedUrl === "string" && uploadedUrl) {
+      const signedUpload = adminSignedUploadSchema.safeParse({
+        uploadedUrl,
+        storageKey: formData.get("storageKey"),
+        mimeType: formData.get("mimeType"),
+        sizeBytes: formData.get("sizeBytes"),
+      });
+
+      if (!signedUpload.success) {
+        return NextResponse.json(
+          { error: signedUpload.error.issues[0]?.message ?? "Please review the uploaded file details." },
+          { status: 400 },
+        );
+      }
+
+      stored = {
+        url: signedUpload.data.uploadedUrl,
+        storageKey: signedUpload.data.storageKey,
+      };
+      mimeType = signedUpload.data.mimeType;
+      sizeBytes = signedUpload.data.sizeBytes;
+    } else {
       return NextResponse.json({ error: "Please select an image file." }, { status: 400 });
     }
-
-    validateImageFile(file);
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const stored = await storage.upload({
-      buffer,
-      filename: file.name,
-      mimeType: file.type,
-      folder: site.slug,
-    });
 
     await prisma.$transaction(async (transaction) => {
       await transaction.mediaAsset.create({
@@ -62,8 +116,8 @@ export async function POST(request: Request) {
           caption: parsed.data.caption || null,
           url: stored.url,
           storageKey: stored.storageKey,
-          mimeType: file.type,
-          sizeBytes: file.size,
+          mimeType,
+          sizeBytes,
         },
       });
 

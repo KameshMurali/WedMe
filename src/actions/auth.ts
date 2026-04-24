@@ -1,7 +1,7 @@
 "use server";
 
 import type { Route } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { initialActionState, type ActionState } from "@/lib/action-state";
@@ -18,6 +18,7 @@ import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { clearSessionCookie, setSessionCookie } from "@/server/auth/session";
 import { generatePlainToken, hashToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/prisma";
+import { consumeRateLimit } from "@/server/security/rate-limit";
 import { sendEmail } from "@/server/services/email";
 
 export async function registerAction(
@@ -166,6 +167,21 @@ export async function loginAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email and password." };
+  }
+
+  const loginHeaders = await headers();
+  const rateLimit = await consumeRateLimit({
+    action: "login",
+    source: loginHeaders,
+    limit: 5,
+    windowMs: 10 * 60 * 1000,
+    keyParts: [parsed.data.email],
+  });
+
+  if (!rateLimit.ok) {
+    return {
+      error: `Too many login attempts. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+    };
   }
 
   const user = await prisma.user.findUnique({

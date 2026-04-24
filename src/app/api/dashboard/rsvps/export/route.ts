@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireUser } from "@/server/auth/session";
+import { getCurrentUser } from "@/server/auth/session";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 
 function quote(value: string | number | null | undefined) {
@@ -9,7 +9,11 @@ function quote(value: string | number | null | undefined) {
 }
 
 export async function GET() {
-  const user = await requireUser();
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Please sign in to export RSVPs." }, { status: 401 });
+  }
+
   const site = await getWeddingSiteForUser(user.id);
 
   if (!site) {

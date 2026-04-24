@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { guestUploadSchema } from "@/lib/validations/guest";
-import { validateGuestMedia } from "@/lib/validations/upload";
+import { getGuestUploadType, guestSignedUploadSchema, validateGuestMedia } from "@/lib/validations/upload";
 import { prisma } from "@/server/prisma";
+import { consumeRateLimit } from "@/server/security/rate-limit";
 import { storage } from "@/server/storage";
 
 export async function POST(request: Request) {
@@ -16,6 +17,26 @@ export async function POST(request: Request) {
       externalUrl: formData.get("externalUrl"),
       eventId: formData.get("eventId"),
     });
+
+    const rateLimit = await consumeRateLimit({
+      action: "guest_upload",
+      source: request,
+      limit: 6,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [parsed.success ? parsed.data.slug : "unknown"],
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Too many uploads were submitted from this connection. Please wait a little while and try again." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+          },
+        },
+      );
+    }
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -35,8 +56,19 @@ export async function POST(request: Request) {
 
     const file = formData.get("file");
     const externalUrl = parsed.data.externalUrl || null;
+    const uploadedUrl = formData.get("uploadedUrl");
 
-    if (!(file instanceof File) && !externalUrl) {
+    const hasBinaryFile = file instanceof File && file.size > 0;
+    const hasSignedFile = typeof uploadedUrl === "string" && uploadedUrl.length > 0;
+
+    if ((hasBinaryFile || hasSignedFile) && externalUrl) {
+      return NextResponse.json(
+        { error: "Please choose either a file upload or an external video link, not both." },
+        { status: 400 },
+      );
+    }
+
+    if (!hasBinaryFile && !hasSignedFile && !externalUrl) {
       return NextResponse.json({ error: "Please upload a file or submit a link." }, { status: 400 });
     }
 
@@ -50,7 +82,7 @@ export async function POST(request: Request) {
         }
       | undefined;
 
-    if (file instanceof File && file.size > 0) {
+    if (hasBinaryFile && file instanceof File) {
       validateGuestMedia(file);
       const buffer = Buffer.from(await file.arrayBuffer());
       const stored = await storage.upload({
@@ -65,7 +97,29 @@ export async function POST(request: Request) {
         storageKey: stored.storageKey,
         mimeType: file.type,
         sizeBytes: file.size,
-        type: file.type.startsWith("image/") ? "IMAGE" : "VIDEO",
+        type: getGuestUploadType(file.type),
+      };
+    } else if (hasSignedFile && typeof uploadedUrl === "string") {
+      const signedUpload = guestSignedUploadSchema.safeParse({
+        uploadedUrl,
+        storageKey: formData.get("storageKey"),
+        mimeType: formData.get("mimeType"),
+        sizeBytes: formData.get("sizeBytes"),
+      });
+
+      if (!signedUpload.success) {
+        return NextResponse.json(
+          { error: signedUpload.error.issues[0]?.message ?? "Please review the uploaded media details." },
+          { status: 400 },
+        );
+      }
+
+      uploadResult = {
+        url: signedUpload.data.uploadedUrl,
+        storageKey: signedUpload.data.storageKey,
+        mimeType: signedUpload.data.mimeType,
+        sizeBytes: signedUpload.data.sizeBytes,
+        type: getGuestUploadType(signedUpload.data.mimeType),
       };
     } else {
       uploadResult = {

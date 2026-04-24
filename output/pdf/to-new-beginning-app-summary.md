@@ -1,6 +1,6 @@
 # ToNewBeginning.com App Summary
 
-Generated: 2026-04-19
+Generated: 2026-04-25
 
 ## Product summary
 
@@ -56,15 +56,21 @@ The platform currently includes:
 
 ## Current production readiness notes
 
-The product is close to investor-demo ready, but there are two important production items to address before a true live launch:
+The product now includes the key production hardening needed for a real Vercel deployment:
 
-1. Storage
-   The current code supports local file storage and S3-style storage, but Vercel production should not use local filesystem uploads because that storage is not durable across deployments and instances.
+1. Server-only secrets and Prisma boundaries
+   DATABASE_URL, SMTP credentials, and storage tokens remain server-only, and Prisma is imported only through server modules.
 
-2. Email delivery
-   The current email service falls back to console preview output. For real production email, the implementation in src/server/services/email.ts must be wired to SMTP or a provider such as Resend, Postmark, SES, or similar.
+2. Auth and abuse protection
+   Dashboard routes are protected by signed-session auth, and login, RSVP, message, and upload flows now use database-backed rate limiting.
 
-## Vercel launch checklist for www.ToNewBeginning.com
+3. Upload hardening
+   Uploads validate file type and size, and Vercel Blob can now use signed client uploads instead of proxying raw production files through the app server.
+
+4. Email delivery
+   SMTP delivery is supported, but production still needs real SMTP/provider credentials configured.
+
+## Vercel launch checklist for wed.tonewbeginning.com
 
 ### 1. Prepare Vercel project
 
@@ -76,40 +82,36 @@ The product is close to investor-demo ready, but there are two important product
 
 Set these in Vercel Project Settings -> Environment Variables for Production:
 
-- APP_URL=https://www.ToNewBeginning.com
+- APP_URL=https://wed.tonewbeginning.com
 - AUTH_SECRET=<long random secret>
 - DATABASE_URL=<production Postgres connection string>
-- STORAGE_DRIVER=s3
-- AWS_REGION=<your bucket region>
-- AWS_S3_BUCKET=<your production bucket>
-- AWS_ACCESS_KEY_ID=<bucket access key>
-- AWS_SECRET_ACCESS_KEY=<bucket secret>
+- STORAGE_DRIVER=blob
+- BLOB_READ_WRITE_TOKEN=<vercel blob read-write token>
 - EMAIL_DELIVERY_MODE=smtp
 - SMTP_HOST=<provider host>
 - SMTP_PORT=<provider port>
 - SMTP_USER=<provider username>
 - SMTP_PASSWORD=<provider password>
-- SMTP_FROM=ToNewBeginning.com <noreply@ToNewBeginning.com>
+- SMTP_FROM=ToNewBeginning.com <noreply@tonewbeginning.com>
 
-If you do not finish S3 and SMTP setup first, uploads and outbound emails will not be production-ready.
+If you do not finish Blob and SMTP setup first, uploads and outbound emails will not be production-ready.
 
-### 3. Add both domains to the same Vercel project
+### 3. Add the production subdomain to the Vercel project
 
 Add:
 
-- ToNewBeginning.com
-- www.ToNewBeginning.com
+- wed.tonewbeginning.com
 
-Vercel recommends adding both and using www as the primary domain.
+This app can live directly on the `wed` subdomain.
 
-### 4. Make www the primary domain
+### 4. Configure the custom domain
 
 In Vercel Project Settings -> Domains:
 
-- Set www.ToNewBeginning.com as the primary domain
-- Edit ToNewBeginning.com and redirect it to www.ToNewBeginning.com
+- Add `wed.tonewbeginning.com`
+- Let Vercel verify the domain before switching production traffic
 
-This is the recommended setup because Vercel states that using the www subdomain as the primary domain gives the CDN better control for reliability, speed, and security.
+If you later want apex-domain redirects, configure those separately at the registrar or in another Vercel project rule.
 
 ### 5. Configure DNS at your registrar or DNS provider
 
@@ -117,35 +119,29 @@ If you use external DNS, configure the records Vercel shows for your project.
 
 General pattern from Vercel documentation:
 
-- Apex domain A record:
-  Host: @
-  Value: 76.76.21.21
-
-- www subdomain CNAME:
-  Host: www
+- Subdomain CNAME:
+  Host: wed
   Value: use the exact target Vercel shows for your project
 
-Vercel's documentation shows a general-purpose CNAME example of cname.vercel-dns-0.com, but also notes that each project may have its own specific CNAME target. Always copy the exact record shown in the Vercel domain settings or vercel domains inspect output.
+Always copy the exact CNAME target shown in the Vercel domain settings or `vercel domains inspect` output.
 
 ### 6. Verify domain ownership and SSL
 
 - Wait for Vercel to verify DNS
 - Confirm SSL certificate provisioning completes
-- Re-test both hosts:
-  - https://ToNewBeginning.com
-  - https://www.ToNewBeginning.com
+- Re-test the production host:
+  - https://wed.tonewbeginning.com
 
 Expected result:
 
-- www.ToNewBeginning.com loads the app
-- ToNewBeginning.com redirects to www.ToNewBeginning.com
+- wed.tonewbeginning.com loads the app over HTTPS
 
 ### 7. Align app-level settings after deployment
 
-- Confirm APP_URL is set to https://www.ToNewBeginning.com
+- Confirm APP_URL is set to https://wed.tonewbeginning.com
 - Confirm metadataBase resolves from APP_URL
-- Confirm canonical URLs use the www host
-- Update any seeded or dashboard-entered canonical URLs to the final www host
+- Confirm canonical URLs use the `wed` host
+- Update any seeded or dashboard-entered canonical URLs to the final `wed` host
 
 ### 8. Post-launch smoke test
 
@@ -167,14 +163,12 @@ Run this checklist against the live deployment:
 ## Recommended deployment sequence
 
 1. Finish S3 storage wiring
-2. Finish SMTP or provider email wiring
+2. Set the Vercel Blob token and SMTP credentials
 3. Set production environment variables in Vercel
 4. Deploy successfully on the default Vercel domain
-5. Add both custom domains
-6. Set www as primary
-7. Add apex redirect to www
-8. Validate SSL, redirects, and app flows
-9. Publish the real wedding workspace
+5. Add `wed.tonewbeginning.com`
+6. Validate SSL and app flows
+7. Publish the real wedding workspace
 
 ## Official Vercel references used for the checklist
 
@@ -188,5 +182,5 @@ Run this checklist against the live deployment:
 ## Repo notes
 
 - Root metadata now respects APP_URL through metadataBase
-- Seeded canonical URL now uses https://www.ToNewBeginning.com/kammonbeginnings
+- Seeded canonical URL now uses https://wed.tonewbeginning.com/kammonbeginnings
 - Local development should remain on http://localhost:3000

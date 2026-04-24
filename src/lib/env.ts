@@ -4,8 +4,9 @@ const environmentSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters"),
   APP_URL: z.string().url().default("http://localhost:3000"),
-  STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
+  STORAGE_DRIVER: z.enum(["local", "s3", "blob"]).default("local"),
   LOCAL_UPLOAD_DIR: z.string().default("public/uploads"),
+  BLOB_READ_WRITE_TOKEN: z.string().optional(),
   AWS_REGION: z.string().optional(),
   AWS_S3_BUCKET: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),
@@ -14,7 +15,7 @@ const environmentSchema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-  SMTP_FROM: z.string().default("ToNewBeginning.com <noreply@example.com>"),
+  SMTP_FROM: z.string().default("ToNewBeginning.com <noreply@tonewbeginning.com>"),
   EMAIL_DELIVERY_MODE: z.enum(["console", "smtp"]).default("console"),
 });
 
@@ -24,6 +25,7 @@ export const env = environmentSchema.parse({
   APP_URL: process.env.APP_URL,
   STORAGE_DRIVER: process.env.STORAGE_DRIVER,
   LOCAL_UPLOAD_DIR: process.env.LOCAL_UPLOAD_DIR,
+  BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
   AWS_REGION: process.env.AWS_REGION,
   AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,

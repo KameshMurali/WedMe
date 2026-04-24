@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 
 import { authCookieName } from "@/lib/constants";
 import { env } from "@/lib/env";
-import { prisma } from "@/server/prisma";
 
 const sessionKey = new TextEncoder().encode(env.AUTH_SECRET);
 const sessionMaxAge = 60 * 60 * 24 * 14;
@@ -63,6 +62,8 @@ export async function getSession() {
 export async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
+
+  const { prisma } = await import("@/server/prisma");
 
   return prisma.user.findUnique({
     where: { id: session.userId },

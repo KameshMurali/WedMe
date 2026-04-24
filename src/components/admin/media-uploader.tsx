@@ -4,15 +4,16 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { uploadFileWithSignedUrl } from "@/lib/uploads/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
-export function AdminMediaUploader() {
+export function AdminMediaUploader({ slug, useSignedUploads }: { slug: string; useSignedUploads: boolean }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const [category, setCategory] = useState("GALLERY");
+  const [category, setCategory] = useState<"HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE">("GALLERY");
   const [title, setTitle] = useState("");
   const [altText, setAltText] = useState("");
   const [caption, setCaption] = useState("");
@@ -27,32 +28,54 @@ export function AdminMediaUploader() {
     }
 
     const formData = new FormData();
-    formData.append("file", file);
     formData.append("category", category);
     formData.append("title", title);
     formData.append("altText", altText);
     formData.append("caption", caption);
 
-    setIsUploading(true);
-    const response = await fetch("/api/uploads/admin", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      setIsUploading(true);
 
-    const data = (await response.json()) as { error?: string; success?: string };
-    setIsUploading(false);
+      if (useSignedUploads) {
+        const uploaded = await uploadFileWithSignedUrl({
+          folder: slug,
+          file,
+          payload: {
+            scope: "admin",
+            category,
+          },
+        });
 
-    if (!response.ok) {
-      toast.error(data.error ?? "Upload failed.");
-      return;
+        formData.append("uploadedUrl", uploaded.uploadedUrl);
+        formData.append("storageKey", uploaded.storageKey);
+        formData.append("mimeType", uploaded.mimeType);
+        formData.append("sizeBytes", String(uploaded.sizeBytes));
+      } else {
+        formData.append("file", file);
+      }
+
+      const response = await fetch("/api/uploads/admin", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as { error?: string; success?: string };
+      if (!response.ok) {
+        toast.error(data.error ?? "Upload failed.");
+        return;
+      }
+
+      toast.success(data.success ?? "Image uploaded.");
+      setFile(null);
+      setTitle("");
+      setAltText("");
+      setCaption("");
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setIsUploading(false);
     }
-
-    toast.success(data.success ?? "Image uploaded.");
-    setFile(null);
-    setTitle("");
-    setAltText("");
-    setCaption("");
-    router.refresh();
   }
 
   return (
@@ -63,7 +86,12 @@ export function AdminMediaUploader() {
           Upload hero images, gallery media, and supporting visuals directly from the dashboard.
         </p>
       </div>
-      <Select value={category} onChange={(event) => setCategory(event.target.value)}>
+      <Select
+        value={category}
+        onChange={(event) =>
+          setCategory(event.target.value as "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE")
+        }
+      >
         <option value="HERO">Hero image</option>
         <option value="GALLERY">Gallery</option>
         <option value="STORY">Story</option>

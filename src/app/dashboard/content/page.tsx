@@ -11,6 +11,7 @@ import { AdminMediaUploader } from "@/components/admin/media-uploader";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
 
 export default async function DashboardContentPage() {
   const user = await requireUser();
@@ -23,7 +24,7 @@ export default async function DashboardContentPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">Content</p>
         <h1 className="mt-3 font-display text-5xl text-[color:var(--text)]">Storytelling sections</h1>
       </div>
-      <AdminMediaUploader />
+      <AdminMediaUploader slug={site.slug} useSignedUploads={directBlobUploadsEnabled} />
       <ArrayEditor
         title="Story timeline"
         description="Edit the milestones that tell the couple’s journey."

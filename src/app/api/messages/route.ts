@@ -2,11 +2,32 @@ import { NextResponse } from "next/server";
 
 import { guestMessageSchema } from "@/lib/validations/guest";
 import { prisma } from "@/server/prisma";
+import { consumeRateLimit } from "@/server/security/rate-limit";
 
 export async function POST(request: Request) {
   try {
     const json = await request.json();
     const parsed = guestMessageSchema.safeParse(json);
+
+    const rateLimit = await consumeRateLimit({
+      action: "guest_message",
+      source: request,
+      limit: 6,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [parsed.success ? parsed.data.slug : "unknown"],
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Too many messages were submitted from this connection. Please try again a little later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+          },
+        },
+      );
+    }
 
     if (!parsed.success) {
       return NextResponse.json(

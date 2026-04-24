@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getApprovedGuestUploadsBySlug } from "@/server/repositories/guest-engagement";
 import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
+import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
 
 export default async function MemoriesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -32,6 +33,7 @@ export default async function MemoriesPage({ params }: { params: Promise<{ slug:
               slug={slug}
               isOpen={snapshot.publish.isUploadsOpen}
               events={snapshot.events.map((event) => ({ id: event.id, title: event.title }))}
+              useSignedUploads={directBlobUploadsEnabled}
             />
           </Card>
           <div className="space-y-4">
