@@ -2,11 +2,32 @@ import { NextResponse } from "next/server";
 
 import { rsvpSchema } from "@/lib/validations/rsvp";
 import { prisma } from "@/server/prisma";
+import { consumeRateLimit } from "@/server/security/rate-limit";
 
 export async function POST(request: Request) {
   try {
     const json = await request.json();
     const parsed = rsvpSchema.safeParse(json);
+
+    const rateLimit = await consumeRateLimit({
+      action: "rsvp_submission",
+      source: request,
+      limit: 8,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [parsed.success ? parsed.data.slug : "unknown"],
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Too many RSVP submissions from this connection. Please wait a few minutes and try again." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+          },
+        },
+      );
+    }
 
     if (!parsed.success) {
       return NextResponse.json(

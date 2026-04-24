@@ -42,8 +42,9 @@ This repo is not a single static wedding page. It is structured as a scalable we
 - Prisma schema for users, couples, wedding sites, templates, sections, events, RSVP responses, uploads, messages, and analytics
 - Prisma 7 config via `prisma.config.ts`
 - PostgreSQL runtime via Prisma’s official `@prisma/adapter-pg`
-- local storage adapter for uploaded media with clean abstraction for future S3 support
+- storage abstraction with local-dev uploads plus Vercel Blob signed-upload support
 - Zod validation across auth, RSVP, content, and upload workflows
+- database-backed rate limiting for login, RSVP, guest messages, and upload endpoints
 
 ## Demo seed
 
@@ -70,7 +71,7 @@ Public demo slug:
 - Forms: React Hook Form + Zod
 - Database: PostgreSQL + Prisma ORM
 - Auth: custom secure email/password auth with hashed passwords and signed cookies
-- Storage: local filesystem adapter today, S3-ready abstraction in `src/server/storage`
+- Storage: local filesystem for development, Vercel Blob signed uploads for production, S3-ready abstraction in `src/server/storage`
 
 ## Local setup
 
@@ -98,6 +99,15 @@ For local development, the default storage driver can stay:
 STORAGE_DRIVER="local"
 LOCAL_UPLOAD_DIR="public/uploads"
 EMAIL_DELIVERY_MODE="console"
+```
+
+For Vercel production with direct client uploads, switch to:
+
+```env
+APP_URL="https://wed.tonewbeginning.com"
+STORAGE_DRIVER="blob"
+BLOB_READ_WRITE_TOKEN="vercel_blob_rw_..."
+EMAIL_DELIVERY_MODE="smtp"
 ```
 
 ### 3. Generate Prisma client
@@ -210,17 +220,28 @@ This keeps the platform extensible while preserving a safe editing workflow.
 ### Recommended production setup
 
 - Managed PostgreSQL: Neon, Supabase, RDS, or Railway Postgres
-- Object storage: S3, Cloudflare R2, or Supabase Storage
+- Object storage: Vercel Blob with signed uploads enabled
 - Email: Resend, Postmark, SES, or SMTP
 - Hosting: Vercel or a Node-compatible platform
+
+### Production safeguards now built in
+
+- `DATABASE_URL`, SMTP credentials, and storage tokens remain server-only
+- Prisma is imported only from server modules
+- `/dashboard` routes are protected by signed-session auth in both middleware and server layouts
+- login, RSVP, message, and upload endpoints are rate limited in PostgreSQL
+- guest-facing and dashboard forms validate with Zod on the server
+- uploads enforce MIME and size restrictions before persistence
+- Vercel Blob uploads can use signed client upload tokens instead of sending raw files through the app server
 
 ### Before deploying
 
 - replace local `AUTH_SECRET`
 - point `DATABASE_URL` to production PostgreSQL
-- set `APP_URL=https://www.ToNewBeginning.com`
-- finish `src/server/storage/s3-storage.ts` for real object storage
-- wire `src/server/services/email.ts` to your provider
+- set `APP_URL=https://wed.tonewbeginning.com`
+- set `STORAGE_DRIVER=blob`
+- set `BLOB_READ_WRITE_TOKEN`
+- set real SMTP credentials in `src/server/services/email.ts`
 - optionally add custom domains and invite-only password UX polish
 
 ## Notes

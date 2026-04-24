@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client/default";
 
 import { sectionLabels, sectionOrder } from "@/lib/constants";
 import { env } from "@/lib/env";
@@ -100,7 +100,7 @@ async function main() {
         "Celebrate Kamesh and Monisha’s wedding journey with event details, RSVP, gallery, memories, and guest guidance.",
       ogImageUrl:
         "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80",
-      canonicalUrl: "https://www.ToNewBeginning.com/kammonbeginnings",
+      canonicalUrl: "https://wed.tonewbeginning.com/kammonbeginnings",
       theme: {
         create: {
           paletteKey: "champagne",

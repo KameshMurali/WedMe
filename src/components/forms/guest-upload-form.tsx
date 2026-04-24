@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { uploadFileWithSignedUrl } from "@/lib/uploads/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -25,10 +26,12 @@ export function GuestUploadForm({
   slug,
   events,
   isOpen,
+  useSignedUploads,
 }: {
   slug: string;
   events: Array<{ id: string; title: string }>;
   isOpen: boolean;
+  useSignedUploads: boolean;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
@@ -44,49 +47,115 @@ export function GuestUploadForm({
 
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
 
-  const onSubmit = handleSubmit(
-    (values) =>
-      new Promise<void>((resolve) => {
-        const formData = new FormData();
-        formData.append("slug", slug);
-        formData.append("submitterName", values.submitterName);
-        formData.append("eventId", values.eventId ?? "");
-        formData.append("caption", values.caption ?? "");
-        formData.append("message", values.message ?? "");
-        formData.append("externalUrl", values.externalUrl ?? "");
+  function appendSharedFields(formData: FormData, values: UploadValues) {
+    formData.append("slug", slug);
+    formData.append("submitterName", values.submitterName);
+    formData.append("eventId", values.eventId ?? "");
+    formData.append("caption", values.caption ?? "");
+    formData.append("message", values.message ?? "");
+    formData.append("externalUrl", values.externalUrl ?? "");
+  }
 
-        if (file) {
-          formData.append("file", file);
+  function submitWithXhr(formData: FormData) {
+    return new Promise<void>((resolve) => {
+      const request = new XMLHttpRequest();
+      request.open("POST", "/api/uploads/guest");
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          setProgress(Math.round((event.loaded / event.total) * 100));
         }
+      };
 
-        const request = new XMLHttpRequest();
-        request.open("POST", "/api/uploads/guest");
-        request.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            setProgress(Math.round((event.loaded / event.total) * 100));
+      request.onload = () => {
+        const response = JSON.parse(request.responseText) as { error?: string; success?: string };
+        if (request.status >= 400) {
+          toast.error(response.error ?? "Upload failed.");
+        } else {
+          toast.success(response.success ?? "Upload submitted for moderation.");
+          setFile(null);
+          setProgress(0);
+          reset();
+        }
+        resolve();
+      };
+
+      request.onerror = () => {
+        toast.error("Upload failed.");
+        resolve();
+      };
+
+      request.send(formData);
+    });
+  }
+
+  const onSubmit = handleSubmit(
+    async (values) => {
+      const formData = new FormData();
+      appendSharedFields(formData, values);
+
+      if (file && useSignedUploads) {
+        try {
+          const uploaded = await uploadFileWithSignedUrl({
+            folder: slug,
+            file,
+            payload: {
+              scope: "guest",
+              slug,
+            },
+            onProgress: (event) => {
+              setProgress(Math.round(event.percentage));
+            },
+          });
+
+          formData.append("uploadedUrl", uploaded.uploadedUrl);
+          formData.append("storageKey", uploaded.storageKey);
+          formData.append("mimeType", uploaded.mimeType);
+          formData.append("sizeBytes", String(uploaded.sizeBytes));
+
+          const response = await fetch("/api/uploads/guest", {
+            method: "POST",
+            body: formData,
+          });
+
+          const payload = (await response.json()) as { error?: string; success?: string };
+          if (!response.ok) {
+            toast.error(payload.error ?? "Upload failed.");
+            return;
           }
-        };
 
-        request.onload = () => {
-          const response = JSON.parse(request.responseText) as { error?: string; success?: string };
-          if (request.status >= 400) {
-            toast.error(response.error ?? "Upload failed.");
-          } else {
-            toast.success(response.success ?? "Upload submitted for moderation.");
-            setFile(null);
-            setProgress(0);
-            reset();
-          }
-          resolve();
-        };
+          toast.success(payload.success ?? "Upload submitted for moderation.");
+          setFile(null);
+          setProgress(0);
+          reset();
+          return;
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Upload failed.");
+          return;
+        }
+      }
 
-        request.onerror = () => {
-          toast.error("Upload failed.");
-          resolve();
-        };
+      if (file) {
+        formData.append("file", file);
+        await submitWithXhr(formData);
+        return;
+      }
 
-        request.send(formData);
-      }),
+      const response = await fetch("/api/uploads/guest", {
+        method: "POST",
+        body: formData,
+      });
+
+      const payload = (await response.json()) as { error?: string; success?: string };
+      if (!response.ok) {
+        toast.error(payload.error ?? "Upload failed.");
+        return;
+      }
+
+      toast.success(payload.success ?? "Upload submitted for moderation.");
+      setFile(null);
+      setProgress(0);
+      reset();
+    },
   );
 
   if (!isOpen) {
