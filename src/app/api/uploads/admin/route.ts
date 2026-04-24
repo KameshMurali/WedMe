@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client/default";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Please select an image file." }, { status: 400 });
     }
 
-    await prisma.$transaction(async (transaction) => {
+    await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       await transaction.mediaAsset.create({
         data: {
           weddingSiteId: site.id,

@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@prisma/client/default";
 import type { Route } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -71,7 +72,7 @@ export async function registerAction(
   const passwordHash = await hashPassword(password);
   const verificationToken = generatePlainToken();
 
-  const created = await prisma.$transaction(async (transaction) => {
+  const created = await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
     const user = await transaction.user.create({
       data: {
         email,

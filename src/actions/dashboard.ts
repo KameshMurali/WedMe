@@ -202,7 +202,7 @@ async function replaceCollection<T>(
   items: T[],
   replace: (tx: Prisma.TransactionClient, items: T[]) => Promise<unknown>,
 ) {
-  await prisma.$transaction(async (transaction) => {
+  await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
     await replace(transaction, items);
     await transaction.publishSettings.update({
       where: { weddingSiteId: siteId },

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client/default";
 import { NextResponse } from "next/server";
 
 import { rsvpSchema } from "@/lib/validations/rsvp";
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await prisma.$transaction(async (transaction) => {
+    await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const response = await transaction.rSVPResponse.create({
         data: {
           weddingSiteId: site.id,
