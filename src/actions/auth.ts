@@ -36,6 +36,43 @@ async function redirectToWorkspace(): Promise<never> {
   redirect(safeResumePath);
 }
 
+function mapRegisterPersistenceError(error: unknown): ActionState {
+  if (
+    error instanceof Error &&
+    "code" in error &&
+    error.code === "P2002" &&
+    "meta" in error &&
+    error.meta &&
+    typeof error.meta === "object" &&
+    "target" in error.meta &&
+    Array.isArray(error.meta.target)
+  ) {
+    const targets = error.meta.target.map(String);
+
+    if (targets.includes("email")) {
+      return {
+        error: "An account with this email already exists.",
+        fieldErrors: {
+          email: "An account with this email already exists.",
+        },
+      };
+    }
+
+    if (targets.includes("slug")) {
+      return {
+        error: "That wedding URL is already taken.",
+        fieldErrors: {
+          slug: "That wedding URL is already taken.",
+        },
+      };
+    }
+  }
+
+  return {
+    error: "We couldn’t create the workspace right now. Please try again in a moment.",
+  };
+}
+
 export async function registerAction(
   _previousState: ActionState = initialActionState,
   formData: FormData,
@@ -62,29 +99,50 @@ export async function registerAction(
     };
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return {
-      error: "An account with this email already exists.",
-      fieldErrors: {
-        email: "An account with this email already exists.",
-      },
-    };
-  }
+  try {
+    const [existingUser, existingSlug] = await Promise.all([
+      prisma.user.findUnique({ where: { email } }),
+      prisma.weddingSite.findUnique({ where: { slug } }),
+    ]);
 
-  const existingSlug = await prisma.weddingSite.findUnique({ where: { slug } });
-  if (existingSlug) {
+    if (existingUser) {
+      return {
+        error: "An account with this email already exists.",
+        fieldErrors: {
+          email: "An account with this email already exists.",
+        },
+      };
+    }
+
+    if (existingSlug) {
+      return {
+        error: "That wedding URL is already taken.",
+        fieldErrors: {
+          slug: "That wedding URL is already taken.",
+        },
+      };
+    }
+  } catch (error) {
+    console.error("registerAction preflight failed", error);
     return {
-      error: "That wedding URL is already taken.",
-      fieldErrors: {
-        slug: "That wedding URL is already taken.",
-      },
+      error: "We couldn’t validate this workspace right now. Please try again in a moment.",
     };
   }
 
   const template = findTemplateByKey("classic-elegant");
-  const passwordHash = await hashPassword(password);
-  const verificationToken = generatePlainToken();
+  let passwordHash: string;
+  let verificationToken: string;
+
+  try {
+    passwordHash = await hashPassword(password);
+    verificationToken = generatePlainToken();
+  } catch (error) {
+    console.error("registerAction setup failed", error);
+    return {
+      error: "We couldn’t prepare this workspace right now. Please try again in a moment.",
+    };
+  }
+
   let created: { user: { id: string; email: string; role: UserRole } };
 
   try {
@@ -161,9 +219,7 @@ export async function registerAction(
     });
   } catch (error) {
     console.error("registerAction failed", error);
-    return {
-      error: "We couldn’t create the workspace right now. Please try again in a moment.",
-    };
+    return mapRegisterPersistenceError(error);
   }
 
   try {
@@ -177,11 +233,18 @@ export async function registerAction(
     console.error("registerAction email send failed", error);
   }
 
-  await setSessionCookie({
-    userId: created.user.id,
-    email: created.user.email,
-    role: created.user.role,
-  });
+  try {
+    await setSessionCookie({
+      userId: created.user.id,
+      email: created.user.email,
+      role: created.user.role,
+    });
+  } catch (error) {
+    console.error("registerAction session setup failed", error);
+    return {
+      error: "Your workspace was created, but we couldn’t start your session. Please log in to continue.",
+    };
+  }
 
   redirect("/dashboard");
 }
