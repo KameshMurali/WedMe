@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { CalendarDays, MapPin, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -106,6 +106,7 @@ export function SiteShell({
 }) {
   const template = findTemplateByKey(snapshot.theme.templateKey);
   const isDark = template.key === "cinematic-modern";
+  const showBackToPlatformHome = snapshot.site.slug === "kammonbeginnings";
 
   return (
     <div
@@ -136,6 +137,17 @@ export function SiteShell({
             )}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-[color:var(--accent)]/10" />
+            {showBackToPlatformHome ? (
+              <div className="relative border-b border-black/6 px-5 py-3 sm:px-6">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/20 bg-white/70 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:bg-white"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Home
+                </Link>
+              </div>
+            ) : null}
             <div className="relative flex flex-col gap-5 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[1.3rem] bg-[color:var(--accent)]/16 text-[color:var(--primary)]">
