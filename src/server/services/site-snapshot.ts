@@ -2,7 +2,7 @@ import { type SiteStatus, type SiteVisibility } from "@prisma/client";
 
 import { findTemplateByKey } from "@/lib/template-registry";
 import type { SiteSnapshot } from "@/types";
-import { demoSiteSnapshot, isDemoSiteSlug } from "@/server/services/demo-site";
+import { demoSiteSnapshot, isDemoSiteSlug, isDemoUserId } from "@/server/services/demo-site";
 import {
   getWeddingSiteBySlug,
   getWeddingSiteForUser,
@@ -397,12 +397,21 @@ export async function getPublishedSiteSnapshot(slug: string) {
 }
 
 export async function getDraftSiteSnapshotForUser(userId: string) {
-  const record = await getWeddingSiteForUser(userId);
-  if (!record) {
-    return null;
+  if (isDemoUserId(userId)) {
+    return demoSiteSnapshot;
   }
 
-  return buildSnapshot(record);
+  try {
+    const record = await getWeddingSiteForUser(userId);
+    if (!record) {
+      return null;
+    }
+
+    return buildSnapshot(record);
+  } catch (error) {
+    console.error("Failed to load draft site snapshot", error);
+    return null;
+  }
 }
 
 export function buildPublishSnapshot(record: WeddingSiteRecord) {

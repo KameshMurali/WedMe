@@ -26,7 +26,15 @@ import { clearSessionCookie, setSessionCookie } from "@/server/auth/session";
 import { generatePlainToken, hashToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/prisma";
 import { consumeRateLimit } from "@/server/security/rate-limit";
+import { demoSessionUser, matchesDemoCredentials } from "@/server/services/demo-site";
 import { sendEmail } from "@/server/services/email";
+
+async function redirectToWorkspace(): Promise<never> {
+  const cookieStore = await cookies();
+  const resumePath = cookieStore.get(workspaceResumeCookieName)?.value;
+  const safeResumePath = resolveWorkspaceResumePath(resumePath) as Route;
+  redirect(safeResumePath);
+}
 
 export async function registerAction(
   _previousState: ActionState = initialActionState,
@@ -219,12 +227,25 @@ export async function loginAction(
     });
   } catch (error) {
     console.error("loginAction pre-auth failed", error);
+
+    if (matchesDemoCredentials(parsed.data.email, parsed.data.password)) {
+      await setSessionCookie(demoSessionUser);
+      await redirectToWorkspace();
+      return initialActionState;
+    }
+
     return {
       error: "We couldn’t complete sign-in right now. Please try again in a moment.",
     };
   }
 
   if (!user) {
+    if (matchesDemoCredentials(parsed.data.email, parsed.data.password)) {
+      await setSessionCookie(demoSessionUser);
+      await redirectToWorkspace();
+      return initialActionState;
+    }
+
     return { error: "We couldn’t find an account with that email." };
   }
 
@@ -234,6 +255,13 @@ export async function loginAction(
     isValid = await verifyPassword(parsed.data.password, user.passwordHash);
   } catch (error) {
     console.error("loginAction password verification failed", error);
+
+    if (matchesDemoCredentials(parsed.data.email, parsed.data.password)) {
+      await setSessionCookie(demoSessionUser);
+      await redirectToWorkspace();
+      return initialActionState;
+    }
+
     return {
       error: "We couldn’t complete sign-in right now. Please try again in a moment.",
     };
@@ -256,11 +284,8 @@ export async function loginAction(
     };
   }
 
-  const cookieStore = await cookies();
-  const resumePath = cookieStore.get(workspaceResumeCookieName)?.value;
-  const safeResumePath = resolveWorkspaceResumePath(resumePath) as Route;
-
-  redirect(safeResumePath);
+  await redirectToWorkspace();
+  return initialActionState;
 }
 
 export async function requestPasswordResetAction(

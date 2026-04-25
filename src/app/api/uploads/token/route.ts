@@ -13,6 +13,7 @@ import { getCurrentUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
+import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 
 function isSafeUploadPath(pathname: string, expectedFolder: string) {
   return pathname.startsWith(`${expectedFolder}/`) && !pathname.includes("..");
@@ -73,6 +74,9 @@ export async function POST(request: Request) {
           const site = await getWeddingSiteForUser(user.id);
           if (!site) {
             throw new Error("No wedding site was found for this account.");
+          }
+          if (isDemoSiteId(site.id)) {
+            throw new Error(demoWorkspaceReadOnlyMessage);
           }
 
           if (!isSafeUploadPath(pathname, site.slug)) {

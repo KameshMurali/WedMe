@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
+import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 import { storage } from "@/server/storage";
 
 const adminUploadSchema = z.object({
@@ -26,6 +27,9 @@ export async function POST(request: Request) {
     const site = await getWeddingSiteForUser(user.id);
     if (!site) {
       return NextResponse.json({ error: "No wedding site was found for this account." }, { status: 404 });
+    }
+    if (isDemoSiteId(site.id)) {
+      return NextResponse.json({ error: demoWorkspaceReadOnlyMessage }, { status: 400 });
     }
 
     const rateLimit = await consumeRateLimit({

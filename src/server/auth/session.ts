@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { authCookieName } from "@/lib/constants";
 import { env } from "@/lib/env";
+import { demoCurrentUser, isDemoUserId } from "@/server/services/demo-site";
 
 const sessionKey = new TextEncoder().encode(env.AUTH_SECRET);
 const sessionMaxAge = 60 * 60 * 24 * 14;
@@ -63,22 +64,31 @@ export async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
 
-  const { prisma } = await import("@/server/prisma");
+  if (isDemoUserId(session.userId)) {
+    return demoCurrentUser;
+  }
 
-  return prisma.user.findUnique({
-    where: { id: session.userId },
-    include: {
-      couple: {
-        include: {
-          weddingSite: {
-            include: {
-              publishSettings: true,
+  try {
+    const { prisma } = await import("@/server/prisma");
+
+    return await prisma.user.findUnique({
+      where: { id: session.userId },
+      include: {
+        couple: {
+          include: {
+            weddingSite: {
+              include: {
+                publishSettings: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("getCurrentUser failed", error);
+    return null;
+  }
 }
 
 export async function requireUser() {

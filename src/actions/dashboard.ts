@@ -22,6 +22,7 @@ import { hashPassword } from "@/server/auth/password";
 import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
 
@@ -49,6 +50,14 @@ function revalidateSitePaths(slug: string) {
   revalidatePath(`/${slug}/wishes`);
 }
 
+function readOnlyDemoState(): ActionState {
+  return { error: demoWorkspaceReadOnlyMessage };
+}
+
+function guardEditableSite(site: { id: string }): ActionState | null {
+  return isDemoSiteId(site.id) ? readOnlyDemoState() : null;
+}
+
 export async function updateSiteBasicsAction(
   _previousState: ActionState = initialActionState,
   formData: FormData,
@@ -56,6 +65,8 @@ export async function updateSiteBasicsAction(
   const user = await requireUser();
   const site = await getWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
+  const readOnlyState = guardEditableSite(site);
+  if (readOnlyState) return readOnlyState;
 
   const parsed = siteBasicsSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -96,6 +107,8 @@ export async function updateTemplateThemeAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const parsed = templateSelectionSchema.safeParse(Object.fromEntries(formData));
     if (!parsed.success) {
@@ -142,6 +155,8 @@ export async function updatePublishSettingsAction(
   const user = await requireUser();
   const site = await getWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
+  const readOnlyState = guardEditableSite(site);
+  if (readOnlyState) return readOnlyState;
 
   const parsed = publishSettingsSchema.safeParse({
     visibility: formData.get("visibility"),
@@ -179,6 +194,8 @@ export async function publishSiteAction() {
   const user = await requireUser();
   const site = await getWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
+  const readOnlyState = guardEditableSite(site);
+  if (readOnlyState) return readOnlyState;
 
   const snapshot = buildPublishSnapshot(site);
 
@@ -281,6 +298,8 @@ export async function replaceStoryMilestonesAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = storyMilestoneInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -313,6 +332,8 @@ export async function replaceEventsAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = eventInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -356,6 +377,8 @@ export async function replaceScheduleItemsAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = scheduleItemInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -390,6 +413,8 @@ export async function replaceTidbitsAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = tidbitInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -421,6 +446,8 @@ export async function replaceFaqItemsAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = faqInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -451,6 +478,8 @@ export async function replaceTravelGuideItemsAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = travelGuideInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -482,6 +511,8 @@ export async function replaceDressCodesAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = dressCodeInputSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -514,6 +545,8 @@ export async function replaceVideosAction(
     const user = await requireUser();
     const site = await getWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
 
     const items = youtubeVideoSchema.array().parse(parseJsonArray(formData, "items"));
 
@@ -545,6 +578,8 @@ export async function moderateUploadAction(uploadId: string, status: "APPROVED" 
   const user = await requireUser();
   const site = await getWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
+  const readOnlyState = guardEditableSite(site);
+  if (readOnlyState) return readOnlyState;
 
   await prisma.guestUpload.updateMany({
     where: {
@@ -565,6 +600,8 @@ export async function moderateMessageAction(messageId: string, status: "APPROVED
   const user = await requireUser();
   const site = await getWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
+  const readOnlyState = guardEditableSite(site);
+  if (readOnlyState) return readOnlyState;
 
   await prisma.guestMessage.updateMany({
     where: {
