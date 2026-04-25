@@ -85,44 +85,55 @@ export async function consumeRateLimit({
   windowMs,
   keyParts,
 }: RateLimitConfig): Promise<RateLimitResult> {
-  await ensureRateLimitTable();
+  try {
+    await ensureRateLimitTable();
 
-  const now = new Date();
-  const windowStart = getWindowStart(now, windowMs);
-  const windowEnd = new Date(windowStart.getTime() + windowMs);
-  const expiresAt = new Date(windowEnd.getTime() + windowMs);
-  const keyHash = buildKey(source, keyParts);
+    const now = new Date();
+    const windowStart = getWindowStart(now, windowMs);
+    const windowEnd = new Date(windowStart.getTime() + windowMs);
+    const expiresAt = new Date(windowEnd.getTime() + windowMs);
+    const keyHash = buildKey(source, keyParts);
 
-  const [bucket] = await prisma.$queryRawUnsafe<RateLimitRow[]>(
-    `
-      INSERT INTO "RateLimitBucket" ("id", "action", "keyHash", "windowStart", "count", "expiresAt")
-      VALUES ($1, $2, $3, $4, 1, $5)
-      ON CONFLICT ("action", "keyHash", "windowStart")
-      DO UPDATE
-        SET "count" = "RateLimitBucket"."count" + 1,
-            "expiresAt" = EXCLUDED."expiresAt",
-            "updatedAt" = CURRENT_TIMESTAMP
-      RETURNING "count";
-    `,
-    crypto.randomUUID(),
-    action,
-    keyHash,
-    windowStart,
-    expiresAt,
-  );
+    const [bucket] = await prisma.$queryRawUnsafe<RateLimitRow[]>(
+      `
+        INSERT INTO "RateLimitBucket" ("id", "action", "keyHash", "windowStart", "count", "expiresAt")
+        VALUES ($1, $2, $3, $4, 1, $5)
+        ON CONFLICT ("action", "keyHash", "windowStart")
+        DO UPDATE
+          SET "count" = "RateLimitBucket"."count" + 1,
+              "expiresAt" = EXCLUDED."expiresAt",
+              "updatedAt" = CURRENT_TIMESTAMP
+        RETURNING "count";
+      `,
+      crypto.randomUUID(),
+      action,
+      keyHash,
+      windowStart,
+      expiresAt,
+    );
 
-  const count = bucket?.count ?? 1;
-  const retryAfterSeconds = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000));
-  const remaining = Math.max(0, limit - count);
+    const count = bucket?.count ?? 1;
+    const retryAfterSeconds = Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000));
+    const remaining = Math.max(0, limit - count);
 
-  if (Math.random() < 0.02) {
-    void prisma.$executeRawUnsafe(`DELETE FROM "RateLimitBucket" WHERE "expiresAt" < $1`, now).catch(() => undefined);
+    if (Math.random() < 0.02) {
+      void prisma.$executeRawUnsafe(`DELETE FROM "RateLimitBucket" WHERE "expiresAt" < $1`, now).catch(() => undefined);
+    }
+
+    return {
+      ok: count <= limit,
+      limit,
+      remaining,
+      retryAfterSeconds,
+    };
+  } catch (error) {
+    console.error("consumeRateLimit failed; allowing request", { action, error });
+
+    return {
+      ok: true,
+      limit,
+      remaining: limit,
+      retryAfterSeconds: 0,
+    };
   }
-
-  return {
-    ok: count <= limit,
-    limit,
-    remaining,
-    retryAfterSeconds,
-  };
 }

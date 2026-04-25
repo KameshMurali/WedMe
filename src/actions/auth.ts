@@ -1,12 +1,18 @@
 "use server";
 
-import type { Prisma } from "@prisma/client";
+import type { Prisma, UserRole } from "@prisma/client";
 import type { Route } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { initialActionState, type ActionState } from "@/lib/action-state";
-import { reservedSlugs, sectionLabels, sectionOrder, workspaceResumeCookieName } from "@/lib/constants";
+import {
+  reservedSlugs,
+  resolveWorkspaceResumePath,
+  sectionLabels,
+  sectionOrder,
+  workspaceResumeCookieName,
+} from "@/lib/constants";
 import { findTemplateByKey } from "@/lib/template-registry";
 import {
   forgotPasswordSchema,
@@ -71,85 +77,97 @@ export async function registerAction(
   const template = findTemplateByKey("classic-elegant");
   const passwordHash = await hashPassword(password);
   const verificationToken = generatePlainToken();
+  let created: { user: { id: string; email: string; role: UserRole } };
 
-  const created = await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
-    const user = await transaction.user.create({
-      data: {
-        email,
-        passwordHash,
-      },
-    });
-
-    const couple = await transaction.couple.create({
-      data: {
-        primaryUserId: user.id,
-        partnerOneName,
-        partnerTwoName,
-        brandName,
-        weddingDate: new Date(weddingDate),
-      },
-    });
-
-    const templatePreset = await transaction.templatePreset.findUnique({
-      where: { key: template.key },
-    });
-
-    if (!templatePreset) {
-      throw new Error("The default template preset is missing from the database.");
-    }
-
-    const site = await transaction.weddingSite.create({
-      data: {
-        coupleId: couple.id,
-        templatePresetId: templatePreset.id,
-        slug,
-        brandName,
-        headline: `${partnerOneName} & ${partnerTwoName} are getting married`,
-        subtitle: "A joyful celebration filled with family, rituals, music, and beautiful memories.",
-        tagline: "Welcome to our wedding website",
-        weddingDate: new Date(weddingDate),
-        locationSummary: "Dubai, United Arab Emirates",
-        theme: {
-          create: template.themeDefaults,
+  try {
+    created = await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
+      const user = await transaction.user.create({
+        data: {
+          email,
+          passwordHash,
         },
-        publishSettings: {
-          create: {
-            status: "DRAFT",
-            visibility: "PUBLIC",
-            isRsvpOpen: true,
-            isUploadsOpen: true,
-            isMessagesOpen: true,
-            lastDraftSavedAt: new Date(),
+      });
+
+      const couple = await transaction.couple.create({
+        data: {
+          primaryUserId: user.id,
+          partnerOneName,
+          partnerTwoName,
+          brandName,
+          weddingDate: new Date(weddingDate),
+        },
+      });
+
+      const templatePreset = await transaction.templatePreset.findUnique({
+        where: { key: template.key },
+      });
+
+      if (!templatePreset) {
+        throw new Error("The default template preset is missing from the database.");
+      }
+
+      await transaction.weddingSite.create({
+        data: {
+          coupleId: couple.id,
+          templatePresetId: templatePreset.id,
+          slug,
+          brandName,
+          headline: `${partnerOneName} & ${partnerTwoName} are getting married`,
+          subtitle: "A joyful celebration filled with family, rituals, music, and beautiful memories.",
+          tagline: "Welcome to our wedding website",
+          weddingDate: new Date(weddingDate),
+          locationSummary: "Dubai, United Arab Emirates",
+          theme: {
+            create: template.themeDefaults,
+          },
+          publishSettings: {
+            create: {
+              status: "DRAFT",
+              visibility: "PUBLIC",
+              isRsvpOpen: true,
+              isUploadsOpen: true,
+              isMessagesOpen: true,
+              lastDraftSavedAt: new Date(),
+            },
+          },
+          sectionConfigs: {
+            create: sectionOrder.map((type, index) => ({
+              type,
+              label: sectionLabels[type],
+              position: index,
+              enabled: true,
+            })),
           },
         },
-        sectionConfigs: {
-          create: sectionOrder.map((type, index) => ({
-            type,
-            label: sectionLabels[type],
-            position: index,
-            enabled: true,
-          })),
+      });
+
+      await transaction.emailVerificationToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: hashToken(verificationToken),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
-      },
+      });
+
+      return { user };
     });
+  } catch (error) {
+    console.error("registerAction failed", error);
+    return {
+      error: "We couldn’t create the workspace right now. Please try again in a moment.",
+    };
+  }
 
-    await transaction.emailVerificationToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: hashToken(verificationToken),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-      },
+  try {
+    await sendEmail({
+      to: email,
+      subject: `Welcome to ${brandName}`,
+      text: `Your ToNewBeginning.com workspace is ready. Verify your email by visiting ${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}`,
+      html: `<p>Your ToNewBeginning.com workspace is ready.</p><p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}">Verify your email</a></p>`,
     });
-
-    return { user, site };
-  });
-
-  await sendEmail({
-    to: email,
-    subject: `Welcome to ${brandName}`,
-    text: `Your ToNewBeginning.com workspace is ready. Verify your email by visiting ${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}`,
-    html: `<p>Your ToNewBeginning.com workspace is ready.</p><p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}">Verify your email</a></p>`,
-  });
+  } catch (error) {
+    console.error("registerAction email send failed", error);
+  }
 
   await setSessionCookie({
     userId: created.user.id,
@@ -170,43 +188,77 @@ export async function loginAction(
     return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email and password." };
   }
 
-  const loginHeaders = await headers();
-  const rateLimit = await consumeRateLimit({
-    action: "login",
-    source: loginHeaders,
-    limit: 5,
-    windowMs: 10 * 60 * 1000,
-    keyParts: [parsed.data.email],
-  });
+  let user:
+    | {
+        id: string;
+        email: string;
+        role: UserRole;
+        passwordHash: string;
+      }
+    | null
+    | undefined;
 
-  if (!rateLimit.ok) {
+  try {
+    const loginHeaders = await headers();
+    const rateLimit = await consumeRateLimit({
+      action: "login",
+      source: loginHeaders,
+      limit: 5,
+      windowMs: 10 * 60 * 1000,
+      keyParts: [parsed.data.email],
+    });
+
+    if (!rateLimit.ok) {
+      return {
+        error: `Too many login attempts. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+
+    user = await prisma.user.findUnique({
+      where: { email: parsed.data.email },
+    });
+  } catch (error) {
+    console.error("loginAction pre-auth failed", error);
     return {
-      error: `Too many login attempts. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+      error: "We couldn’t complete sign-in right now. Please try again in a moment.",
     };
   }
-
-  const user = await prisma.user.findUnique({
-    where: { email: parsed.data.email },
-  });
 
   if (!user) {
     return { error: "We couldn’t find an account with that email." };
   }
 
-  const isValid = await verifyPassword(parsed.data.password, user.passwordHash);
+  let isValid = false;
+
+  try {
+    isValid = await verifyPassword(parsed.data.password, user.passwordHash);
+  } catch (error) {
+    console.error("loginAction password verification failed", error);
+    return {
+      error: "We couldn’t complete sign-in right now. Please try again in a moment.",
+    };
+  }
+
   if (!isValid) {
     return { error: "Incorrect password. Please try again." };
   }
 
-  await setSessionCookie({
-    userId: user.id,
-    email: user.email,
-    role: user.role,
-  });
+  try {
+    await setSessionCookie({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("loginAction session setup failed", error);
+    return {
+      error: "We couldn’t start your session right now. Please try again in a moment.",
+    };
+  }
 
   const cookieStore = await cookies();
   const resumePath = cookieStore.get(workspaceResumeCookieName)?.value;
-  const safeResumePath = (resumePath?.startsWith("/dashboard") ? resumePath : "/dashboard") as Route;
+  const safeResumePath = resolveWorkspaceResumePath(resumePath) as Route;
 
   redirect(safeResumePath);
 }

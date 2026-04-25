@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { workspaceResumeCookieName } from "@/lib/constants";
+import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
 import { getCurrentUser } from "@/server/auth/session";
 
@@ -62,7 +62,7 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   const cookieStore = await cookies();
   const rawResumePath = cookieStore.get(workspaceResumeCookieName)?.value;
-  const safeResumePath = rawResumePath?.startsWith("/dashboard") ? rawResumePath : "/dashboard";
+  const safeResumePath = resolveWorkspaceResumePath(rawResumePath);
   const resumeLabel = getResumeLabel(safeResumePath);
   const hasWorkspace = Boolean(user?.couple?.weddingSite);
   const workspaceHref = (hasWorkspace ? safeResumePath : "/login") as Route;

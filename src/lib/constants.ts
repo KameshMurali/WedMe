@@ -27,6 +27,25 @@ export const reservedSlugs = [
 export const authCookieName = "wedme_session";
 export const workspaceResumeCookieName = "wedme_workspace_resume";
 
+export const dashboardRoutes = [
+  "/dashboard",
+  "/dashboard/templates",
+  "/dashboard/content",
+  "/dashboard/events",
+  "/dashboard/rsvps",
+  "/dashboard/uploads",
+  "/dashboard/settings",
+  "/dashboard/preview",
+] as const;
+
+export function resolveWorkspaceResumePath(pathname?: string | null) {
+  if (!pathname) {
+    return "/dashboard";
+  }
+
+  return dashboardRoutes.includes(pathname as (typeof dashboardRoutes)[number]) ? pathname : "/dashboard";
+}
+
 export const sectionOrder = [
   "HERO",
   "STORY",

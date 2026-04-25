@@ -9,7 +9,7 @@ import { Eye, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users
 import { logoutAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { workspaceResumeCookieName } from "@/lib/constants";
+import { dashboardRoutes, workspaceResumeCookieName } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const navigation: Array<{ href: Route; label: string; icon: typeof Sparkles }> = [
@@ -38,7 +38,7 @@ export function AdminShell({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!pathname.startsWith("/dashboard")) return;
+    if (!dashboardRoutes.includes(pathname as (typeof dashboardRoutes)[number])) return;
 
     document.cookie = `${workspaceResumeCookieName}=${encodeURIComponent(pathname)}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`;
   }, [pathname]);
