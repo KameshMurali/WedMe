@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { getYoutubeEmbedUrl } from "@/lib/youtube";
-import { cn, formatDate, formatTimeRange, groupBy } from "@/lib/utils";
+import { cn, formatDate, formatEnumLabel, formatTimeRange, groupBy } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
 
 function glassPanel(className?: string) {
@@ -270,7 +270,9 @@ function HeroSectionCinematic({ snapshot }: { snapshot: SiteSnapshot }) {
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">{event.dayLabel}</p>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80">{event.audience.replaceAll("_", " ")}</span>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80">
+                  {formatEnumLabel(event.audience, "ALL GUESTS")}
+                </span>
               </div>
               <h3 className="mt-4 font-display text-3xl text-white">{event.title}</h3>
               <p className="mt-2 text-sm leading-7 text-white/72">
@@ -447,7 +449,9 @@ export function EventsSection({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 flex flex-wrap gap-2">
                   <Badge>{event.dayLabel}</Badge>
-                  <Badge className="bg-white/90 text-[color:var(--text)]">{event.audience.replaceAll("_", " ")}</Badge>
+                  <Badge className="bg-white/90 text-[color:var(--text)]">
+                    {formatEnumLabel(event.audience, "ALL GUESTS")}
+                  </Badge>
                 </div>
               </div>
 
@@ -653,7 +657,9 @@ export function ExperienceSection({
           {Object.entries(grouped).map(([category, entries]) => (
             <Card key={category} className="overflow-hidden p-0">
               <div className="border-b border-[color:var(--accent)]/12 bg-[color:var(--accent)]/8 px-6 py-5 sm:px-8">
-                <h3 className="font-display text-4xl text-[color:var(--text)]">{category.replaceAll("_", " ")}</h3>
+                <h3 className="font-display text-4xl text-[color:var(--text)]">
+                  {formatEnumLabel(category, "Guest Guide")}
+                </h3>
               </div>
               <div className="grid gap-4 p-6 sm:p-8">
                 {entries.map((item) => (

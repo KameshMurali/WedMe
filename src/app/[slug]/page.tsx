@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import {
   DressCodeSection,
   EventsSection,
@@ -21,7 +23,7 @@ export default async function WeddingHomePage({
   const snapshot = await getPublishedSiteSnapshot(slug);
 
   if (!snapshot) {
-    return null;
+    notFound();
   }
 
   return (

@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+function toValidDate(value: Date | string) {
+  const resolvedDate = typeof value === "string" ? new Date(value) : value;
+  return Number.isNaN(resolvedDate.getTime()) ? null : resolvedDate;
+}
+
 export function slugify(value: string) {
   return value
     .toLowerCase()
@@ -14,7 +19,11 @@ export function slugify(value: string) {
 }
 
 export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions) {
-  const resolvedDate = typeof date === "string" ? new Date(date) : date;
+  const resolvedDate = toValidDate(date);
+  if (!resolvedDate) {
+    return "Date to be announced";
+  }
+
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
@@ -24,13 +33,30 @@ export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOpt
 }
 
 export function formatTimeRange(start: Date | string, end?: Date | string | null) {
-  const format = (value: Date | string) =>
+  const format = (value: Date | string) => {
+    const resolvedDate = toValidDate(value);
+    if (!resolvedDate) {
+      return null;
+    }
+
     new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
-    }).format(typeof value === "string" ? new Date(value) : value);
+    }).format(resolvedDate);
+  };
 
-  return end ? `${format(start)} - ${format(end)}` : format(start);
+  const startLabel = format(start);
+  const endLabel = end ? format(end) : null;
+
+  if (!startLabel) {
+    return "Time to be announced";
+  }
+
+  return endLabel ? `${startLabel} - ${endLabel}` : startLabel;
+}
+
+export function formatEnumLabel(value: string | null | undefined, fallback = "Details") {
+  return value ? value.replaceAll("_", " ") : fallback;
 }
 
 export function createPublicUrl(path: string) {

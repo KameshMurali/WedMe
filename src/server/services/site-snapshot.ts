@@ -8,6 +8,8 @@ import {
   type WeddingSiteRecord,
 } from "@/server/repositories/wedding-site";
 
+const demoSiteSlugs = new Set(["kammonbeginnings"]);
+
 function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
   const template = findTemplateByKey(record.templatePreset.key);
 
@@ -144,6 +146,229 @@ function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asString(value: unknown, fallback: string) {
+  return typeof value === "string" && value.length > 0 ? value : fallback;
+}
+
+function asNullableString(value: unknown, fallback: string | null = null) {
+  return typeof value === "string" ? value : fallback;
+}
+
+function asBoolean(value: unknown, fallback: boolean) {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function normalizePublishedSnapshot(record: WeddingSiteRecord, snapshotValue: unknown): SiteSnapshot {
+  const base = buildSnapshot(record);
+
+  if (!isRecord(snapshotValue)) {
+    return base;
+  }
+
+  const snapshotSite = isRecord(snapshotValue.site) ? snapshotValue.site : {};
+  const snapshotTheme = isRecord(snapshotValue.theme) ? snapshotValue.theme : {};
+  const snapshotPublish = isRecord(snapshotValue.publish) ? snapshotValue.publish : {};
+
+  const storyMilestones = Array.isArray(snapshotValue.storyMilestones)
+    ? snapshotValue.storyMilestones
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `story-${index}`),
+          title: asString(item.title, "Story milestone"),
+          shortLabel: asNullableString(item.shortLabel),
+          eventDateLabel: asString(item.eventDateLabel, "Coming soon"),
+          description: asString(item.description, ""),
+          imageUrl: asNullableString(item.imageUrl),
+        }))
+    : base.storyMilestones;
+
+  const events = Array.isArray(snapshotValue.events)
+    ? snapshotValue.events
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `event-${index}`),
+          title: asString(item.title, "Wedding event"),
+          subtitle: asNullableString(item.subtitle),
+          description: asString(item.description, ""),
+          startDateTime: asString(item.startDateTime, base.site.weddingDate),
+          endDateTime: asString(item.endDateTime, asString(item.startDateTime, base.site.weddingDate)),
+          dayLabel: asString(item.dayLabel, "Celebration day"),
+          locationName: asString(item.locationName, "Venue details coming soon"),
+          fullAddress: asString(item.fullAddress, ""),
+          googleMapsUrl: asNullableString(item.googleMapsUrl),
+          dressCode: asNullableString(item.dressCode),
+          notes: asNullableString(item.notes),
+          imageUrl: asNullableString(item.imageUrl),
+          rsvpRequired: asBoolean(item.rsvpRequired, true),
+          audience: asString(item.audience, "ALL_GUESTS"),
+          contactName: asNullableString(item.contactName),
+          contactPhone: asNullableString(item.contactPhone),
+        }))
+    : base.events;
+
+  const scheduleItems = Array.isArray(snapshotValue.scheduleItems)
+    ? snapshotValue.scheduleItems
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `schedule-${index}`),
+          title: asString(item.title, "Schedule item"),
+          category: asString(item.category, "Timeline"),
+          description: asNullableString(item.description),
+          startDateTime: asString(item.startDateTime, base.site.weddingDate),
+          endDateTime: asNullableString(item.endDateTime),
+          dayLabel: asString(item.dayLabel, "Celebration day"),
+          locationName: asNullableString(item.locationName),
+        }))
+    : base.scheduleItems;
+
+  const tidbits = Array.isArray(snapshotValue.tidbits)
+    ? snapshotValue.tidbits
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `tidbit-${index}`),
+          title: asString(item.title, "Tidbit"),
+          body: asString(item.body, ""),
+          category: asString(item.category, "Things to know"),
+          iconKey: asNullableString(item.iconKey),
+        }))
+    : base.tidbits;
+
+  const faqItems = Array.isArray(snapshotValue.faqItems)
+    ? snapshotValue.faqItems
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `faq-${index}`),
+          question: asString(item.question, "Question"),
+          answer: asString(item.answer, ""),
+          category: asString(item.category, "General"),
+        }))
+    : base.faqItems;
+
+  const travelGuideItems = Array.isArray(snapshotValue.travelGuideItems)
+    ? snapshotValue.travelGuideItems
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `travel-${index}`),
+          category: asString(item.category, "FAQ"),
+          title: asString(item.title, "Guest guide"),
+          description: asString(item.description, ""),
+          url: asNullableString(item.url),
+        }))
+    : base.travelGuideItems;
+
+  const dressCodeGuides = Array.isArray(snapshotValue.dressCodeGuides)
+    ? snapshotValue.dressCodeGuides
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `dress-${index}`),
+          title: asString(item.title, "Dress code"),
+          guidance: asString(item.guidance, ""),
+          inspirationImage: asNullableString(item.inspirationImage),
+          palette: Array.isArray(item.palette) ? item.palette.map((value) => String(value)) : [],
+          eventTitle: asNullableString(item.eventTitle),
+        }))
+    : base.dressCodeGuides;
+
+  const mediaAssets = Array.isArray(snapshotValue.mediaAssets)
+    ? snapshotValue.mediaAssets
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `media-${index}`),
+          category: asString(item.category, "GALLERY"),
+          title: asNullableString(item.title),
+          altText: asNullableString(item.altText),
+          caption: asNullableString(item.caption),
+          url: asString(item.url, base.site.heroImageUrl ?? ""),
+        }))
+        .filter((item) => item.url.length > 0)
+    : base.mediaAssets;
+
+  const embeddedVideos = Array.isArray(snapshotValue.embeddedVideos)
+    ? snapshotValue.embeddedVideos
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `video-${index}`),
+          title: asString(item.title, "Wedding video"),
+          typeLabel: asString(item.typeLabel, "Video"),
+          youtubeUrl: asString(item.youtubeUrl, ""),
+          youtubeId: asString(item.youtubeId, ""),
+          thumbnailUrl: asNullableString(item.thumbnailUrl),
+        }))
+        .filter((item) => item.youtubeId.length > 0)
+    : base.embeddedVideos;
+
+  const sections = Array.isArray(snapshotValue.sections)
+    ? snapshotValue.sections
+        .filter(isRecord)
+        .map((item, index) => ({
+          type: asString(item.type, `SECTION_${index}`),
+          enabled: asBoolean(item.enabled, true),
+          position: typeof item.position === "number" ? item.position : index,
+          label: asString(item.label, "Section"),
+        }))
+    : base.sections;
+
+  return {
+    site: {
+      ...base.site,
+      brandName: asString(snapshotSite.brandName, base.site.brandName),
+      headline: asString(snapshotSite.headline, base.site.headline),
+      subtitle: asNullableString(snapshotSite.subtitle, base.site.subtitle),
+      tagline: asNullableString(snapshotSite.tagline, base.site.tagline),
+      weddingDate: asString(snapshotSite.weddingDate, base.site.weddingDate),
+      heroImageUrl: asNullableString(snapshotSite.heroImageUrl, base.site.heroImageUrl),
+      heroVideoUrl: asNullableString(snapshotSite.heroVideoUrl, base.site.heroVideoUrl),
+      locationSummary: asNullableString(snapshotSite.locationSummary, base.site.locationSummary),
+      seoTitle: asNullableString(snapshotSite.seoTitle, base.site.seoTitle),
+      seoDescription: asNullableString(snapshotSite.seoDescription, base.site.seoDescription),
+      ogImageUrl: asNullableString(snapshotSite.ogImageUrl, base.site.ogImageUrl),
+      canonicalUrl: base.site.canonicalUrl,
+      coupleNames: asString(snapshotSite.coupleNames, base.site.coupleNames),
+    },
+    theme: {
+      ...base.theme,
+      templateKey: asString(snapshotTheme.templateKey, base.theme.templateKey),
+      templateName: asString(snapshotTheme.templateName, base.theme.templateName),
+      paletteKey: asString(snapshotTheme.paletteKey, base.theme.paletteKey),
+      headingFontKey: asString(snapshotTheme.headingFontKey, base.theme.headingFontKey),
+      bodyFontKey: asString(snapshotTheme.bodyFontKey, base.theme.bodyFontKey),
+      primaryColor: asString(snapshotTheme.primaryColor, base.theme.primaryColor),
+      accentColor: asString(snapshotTheme.accentColor, base.theme.accentColor),
+      backgroundColor: asString(snapshotTheme.backgroundColor, base.theme.backgroundColor),
+      surfaceColor: asString(snapshotTheme.surfaceColor, base.theme.surfaceColor),
+      textColor: asString(snapshotTheme.textColor, base.theme.textColor),
+      mutedColor: asString(snapshotTheme.mutedColor, base.theme.mutedColor),
+      borderRadius: asString(snapshotTheme.borderRadius, base.theme.borderRadius),
+      buttonVariant: asString(snapshotTheme.buttonVariant, base.theme.buttonVariant),
+      shadowStyle: asString(snapshotTheme.shadowStyle, base.theme.shadowStyle),
+    },
+    publish: {
+      ...base.publish,
+      status: base.publish.status,
+      visibility: base.publish.visibility,
+      noIndex: base.publish.noIndex,
+      isRsvpOpen: base.publish.isRsvpOpen,
+      isUploadsOpen: base.publish.isUploadsOpen,
+      isMessagesOpen: base.publish.isMessagesOpen,
+      publishedAt: base.publish.publishedAt ?? asNullableString(snapshotPublish.publishedAt),
+    },
+    sections,
+    storyMilestones,
+    events,
+    scheduleItems,
+    tidbits,
+    faqItems,
+    travelGuideItems,
+    dressCodeGuides,
+    mediaAssets,
+    embeddedVideos,
+  };
+}
+
 export async function getPublishedSiteSnapshot(slug: string) {
   const record = await getWeddingSiteBySlug(slug);
   if (!record || !record.publishSettings) {
@@ -151,11 +376,17 @@ export async function getPublishedSiteSnapshot(slug: string) {
   }
 
   if (record.publishSettings.status !== "PUBLISHED") {
+    if (demoSiteSlugs.has(slug)) {
+      return record.publishSettings.publishedSnapshot
+        ? normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot)
+        : buildSnapshot(record);
+    }
+
     return null;
   }
 
   if (record.publishSettings.publishedSnapshot) {
-    return record.publishSettings.publishedSnapshot as SiteSnapshot;
+    return normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot);
   }
 
   return buildSnapshot(record);

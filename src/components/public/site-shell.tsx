@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { findTemplateByKey } from "@/lib/template-registry";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
 
 const navigationConfig = [
@@ -182,7 +182,7 @@ export function SiteShell({
 
               <div className="flex items-center gap-3">
                 <div className="hidden rounded-full border border-[color:var(--accent)]/18 bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
-                  {snapshot.publish.visibility.replaceAll("_", " ")}
+                  {formatEnumLabel(snapshot.publish.visibility, "PUBLIC")}
                 </div>
                 <Button asChild size="sm">
                   <Link href={`/${snapshot.site.slug}/rsvp` as Route}>Reply to Invite</Link>

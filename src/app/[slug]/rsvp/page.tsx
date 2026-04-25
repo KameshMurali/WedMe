@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { RsvpForm } from "@/components/forms/rsvp-form";
 import { SiteShell } from "@/components/public/site-shell";
 import { Card } from "@/components/ui/card";
@@ -7,7 +9,7 @@ import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
 export default async function RsvpPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const snapshot = await getPublishedSiteSnapshot(slug);
-  if (!snapshot) return null;
+  if (!snapshot) notFound();
 
   return (
     <SiteShell snapshot={snapshot} activeHref={`/${slug}/rsvp`}>

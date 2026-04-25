@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { GuestMessageForm } from "@/components/forms/guest-message-form";
 import { SiteShell } from "@/components/public/site-shell";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +16,7 @@ export default async function WishesPage({ params }: { params: Promise<{ slug: s
     getApprovedGuestMessagesBySlug(slug),
   ]);
 
-  if (!snapshot) return null;
+  if (!snapshot) notFound();
 
   return (
     <SiteShell snapshot={snapshot} activeHref={`/${slug}/wishes`}>

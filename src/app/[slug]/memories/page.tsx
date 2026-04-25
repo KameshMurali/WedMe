@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 import { GuestUploadForm } from "@/components/forms/guest-upload-form";
 import { SiteShell } from "@/components/public/site-shell";
@@ -17,7 +18,7 @@ export default async function MemoriesPage({ params }: { params: Promise<{ slug:
     getApprovedGuestUploadsBySlug(slug),
   ]);
 
-  if (!snapshot) return null;
+  if (!snapshot) notFound();
 
   return (
     <SiteShell snapshot={snapshot} activeHref={`/${slug}/memories`}>
