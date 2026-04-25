@@ -1,5 +1,29 @@
 import { env } from "@/lib/env";
-import nodemailer from "nodemailer";
+
+type SmtpTransport = {
+  sendMail: (message: {
+    from: string;
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }) => Promise<unknown>;
+};
+
+// Nodemailer does not always ship usable type declarations in this deployment path,
+// so load it via Node require and constrain only the surface we use.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const nodemailer = require("nodemailer") as {
+  createTransport: (options: {
+    host: string;
+    port: number;
+    secure: boolean;
+    auth: {
+      user: string;
+      pass: string;
+    };
+  }) => SmtpTransport;
+};
 
 type EmailPayload = {
   to: string;
