@@ -2,13 +2,12 @@ import { type SiteStatus, type SiteVisibility } from "@prisma/client";
 
 import { findTemplateByKey } from "@/lib/template-registry";
 import type { SiteSnapshot } from "@/types";
+import { demoSiteSnapshot, isDemoSiteSlug } from "@/server/services/demo-site";
 import {
   getWeddingSiteBySlug,
   getWeddingSiteForUser,
   type WeddingSiteRecord,
 } from "@/server/repositories/wedding-site";
-
-const demoSiteSlugs = new Set(["kammonbeginnings"]);
 
 function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
   const template = findTemplateByKey(record.templatePreset.key);
@@ -370,26 +369,31 @@ function normalizePublishedSnapshot(record: WeddingSiteRecord, snapshotValue: un
 }
 
 export async function getPublishedSiteSnapshot(slug: string) {
-  const record = await getWeddingSiteBySlug(slug);
-  if (!record || !record.publishSettings) {
-    return null;
-  }
-
-  if (record.publishSettings.status !== "PUBLISHED") {
-    if (demoSiteSlugs.has(slug)) {
-      return record.publishSettings.publishedSnapshot
-        ? normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot)
-        : buildSnapshot(record);
+  try {
+    const record = await getWeddingSiteBySlug(slug);
+    if (!record || !record.publishSettings) {
+      return isDemoSiteSlug(slug) ? demoSiteSnapshot : null;
     }
 
-    return null;
-  }
+    if (record.publishSettings.status !== "PUBLISHED") {
+      if (isDemoSiteSlug(slug)) {
+        return record.publishSettings.publishedSnapshot
+          ? normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot)
+          : buildSnapshot(record);
+      }
 
-  if (record.publishSettings.publishedSnapshot) {
-    return normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot);
-  }
+      return null;
+    }
 
-  return buildSnapshot(record);
+    if (record.publishSettings.publishedSnapshot) {
+      return normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot);
+    }
+
+    return buildSnapshot(record);
+  } catch (error) {
+    console.error("Failed to load published site snapshot", error);
+    return isDemoSiteSlug(slug) ? demoSiteSnapshot : null;
+  }
 }
 
 export async function getDraftSiteSnapshotForUser(userId: string) {
