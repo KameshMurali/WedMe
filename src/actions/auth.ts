@@ -1,6 +1,6 @@
 "use server";
 
-import type { Prisma } from "@prisma/client/default";
+import type { Prisma } from "@prisma/client";
 import type { Route } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";

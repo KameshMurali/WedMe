@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client/default";
+import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { rsvpSchema } from "@/lib/validations/rsvp";

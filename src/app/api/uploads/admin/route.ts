@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client/default";
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 
