@@ -1,8 +1,12 @@
 import { cache } from "react";
 import { type Prisma } from "@prisma/client";
 
+import { reservedSlugs, sectionLabels, sectionOrder } from "@/lib/constants";
+import { findTemplateByKey } from "@/lib/template-registry";
+import { slugify } from "@/lib/utils";
 import { prisma } from "@/server/prisma";
 import { demoDashboardSite, demoDashboardSummary, isDemoSiteId, isDemoSiteSlug, isDemoUserId } from "@/server/services/demo-site";
+import { ensureTemplatePresets } from "@/server/services/template-presets";
 
 export const weddingSiteInclude = {
   couple: true,
@@ -108,6 +112,149 @@ export type WeddingSiteRecord = Prisma.WeddingSiteGetPayload<{
   include: typeof weddingSiteInclude;
 }>;
 
+function toTitleCase(value: string) {
+  return value
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function getFallbackProfile(email: string) {
+  const localPart = email.split("@")[0] ?? "celebration";
+  const title = toTitleCase(localPart) || "Celebration";
+  const partnerOneName = title;
+  const partnerTwoName = "Partner";
+  const brandName = `${partnerOneName} & ${partnerTwoName}`;
+  const weddingDate = new Date();
+  weddingDate.setMonth(weddingDate.getMonth() + 6);
+
+  return {
+    partnerOneName,
+    partnerTwoName,
+    brandName,
+    weddingDate,
+  };
+}
+
+async function createAvailableSlug(
+  transaction: Prisma.TransactionClient,
+  preferredValue: string,
+) {
+  const normalizedBase = slugify(preferredValue).replace(/_/g, "-");
+  const fallbackBase = normalizedBase.length >= 3 ? normalizedBase : "wedding-site";
+  const base = reservedSlugs.includes(fallbackBase) ? `${fallbackBase}-site` : fallbackBase;
+
+  for (let index = 0; index < 25; index += 1) {
+    const candidate = index === 0 ? base : `${base}-${index + 1}`;
+    const existing = await transaction.weddingSite.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return candidate;
+    }
+  }
+
+  return `${base}-${Date.now().toString(36).slice(-6)}`;
+}
+
+async function bootstrapWorkspaceForUser(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      couple: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  await ensureTemplatePresets(prisma);
+  const template = findTemplateByKey("classic-elegant");
+
+  return prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
+    const existingSite = await transaction.weddingSite.findFirst({
+      where: {
+        couple: {
+          primaryUserId: userId,
+        },
+      },
+      include: weddingSiteInclude,
+    });
+
+    if (existingSite) {
+      return existingSite as WeddingSiteRecord;
+    }
+
+    const templatePreset = await transaction.templatePreset.findUnique({
+      where: { key: template.key },
+    });
+
+    if (!templatePreset) {
+      return null;
+    }
+
+    const fallbackProfile = getFallbackProfile(user.email);
+    const couple =
+      user.couple ??
+      (await transaction.couple.create({
+        data: {
+          primaryUserId: user.id,
+          partnerOneName: fallbackProfile.partnerOneName,
+          partnerTwoName: fallbackProfile.partnerTwoName,
+          brandName: fallbackProfile.brandName,
+          weddingDate: fallbackProfile.weddingDate,
+        },
+      }));
+
+    const weddingDate = couple.weddingDate ?? fallbackProfile.weddingDate;
+    const slug = await createAvailableSlug(
+      transaction,
+      couple.brandName || `${couple.partnerOneName}-${couple.partnerTwoName}`,
+    );
+
+    return (await transaction.weddingSite.create({
+      data: {
+        coupleId: couple.id,
+        templatePresetId: templatePreset.id,
+        slug,
+        brandName: couple.brandName,
+        headline: `${couple.partnerOneName} & ${couple.partnerTwoName} are getting married`,
+        subtitle:
+          "A joyful celebration filled with family, rituals, music, and beautiful memories.",
+        tagline: "Welcome to our wedding website",
+        weddingDate,
+        locationSummary: "Location details coming soon",
+        theme: {
+          create: template.themeDefaults,
+        },
+        publishSettings: {
+          create: {
+            status: "DRAFT",
+            visibility: "PUBLIC",
+            isRsvpOpen: true,
+            isUploadsOpen: true,
+            isMessagesOpen: true,
+            lastDraftSavedAt: new Date(),
+          },
+        },
+        sectionConfigs: {
+          create: sectionOrder.map((type, index) => ({
+            type,
+            label: sectionLabels[type],
+            position: index,
+            enabled: true,
+          })),
+        },
+      },
+      include: weddingSiteInclude,
+    })) as WeddingSiteRecord;
+  });
+}
+
 export const getWeddingSiteBySlug = cache(async (slug: string) => {
   try {
     const site = await prisma.weddingSite.findUnique({
@@ -128,7 +275,7 @@ export const getWeddingSiteForUser = cache(async (userId: string) => {
   }
 
   try {
-    return await prisma.weddingSite.findFirst({
+    const site = await prisma.weddingSite.findFirst({
       where: {
         couple: {
           primaryUserId: userId,
@@ -136,8 +283,18 @@ export const getWeddingSiteForUser = cache(async (userId: string) => {
       },
       include: weddingSiteInclude,
     });
+
+    if (site) {
+      return site;
+    }
   } catch (error) {
     console.error("getWeddingSiteForUser failed", error);
+  }
+
+  try {
+    return await bootstrapWorkspaceForUser(userId);
+  } catch (error) {
+    console.error("bootstrapWorkspaceForUser failed", error);
     return null;
   }
 });
