@@ -24,6 +24,7 @@ import { prisma } from "@/server/prisma";
 import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
+import { ensureTemplatePresets } from "@/server/services/template-presets";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
 
 function touchSite(siteId: string) {
@@ -114,6 +115,8 @@ export async function updateTemplateThemeAction(
     if (!parsed.success) {
       return { error: parsed.error.issues[0]?.message ?? "Please review the template settings." };
     }
+
+    await ensureTemplatePresets(prisma);
 
     const { templateKey, ...themeData } = parsed.data;
 

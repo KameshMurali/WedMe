@@ -28,6 +28,7 @@ import { prisma } from "@/server/prisma";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoSessionUser, matchesDemoCredentials } from "@/server/services/demo-site";
 import { sendEmail } from "@/server/services/email";
+import { ensureTemplatePresets } from "@/server/services/template-presets";
 
 async function redirectToWorkspace(): Promise<never> {
   const cookieStore = await cookies();
@@ -126,6 +127,15 @@ export async function registerAction(
     console.error("registerAction preflight failed", error);
     return {
       error: "We couldn’t validate this workspace right now. Please try again in a moment.",
+    };
+  }
+
+  try {
+    await ensureTemplatePresets(prisma);
+  } catch (error) {
+    console.error("registerAction template bootstrap failed", error);
+    return {
+      error: "We couldn’t prepare the workspace templates right now. Please try again in a moment.",
     };
   }
 
