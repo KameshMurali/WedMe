@@ -5,7 +5,7 @@ import { findTemplateByKey } from "@/lib/template-registry";
 import { slugify } from "@/lib/utils";
 import { prisma } from "@/server/prisma";
 import { demoDashboardSite, demoDashboardSummary, isDemoSiteId, isDemoSiteSlug, isDemoUserId } from "@/server/services/demo-site";
-import { ensureTemplatePresets } from "@/server/services/template-presets";
+import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 
 export const weddingSiteInclude = {
   couple: true,
@@ -171,7 +171,6 @@ async function bootstrapWorkspaceForUser(userId: string) {
     return null;
   }
 
-  await ensureTemplatePresets(prisma);
   const template = findTemplateByKey("classic-elegant");
 
   return prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
@@ -188,9 +187,7 @@ async function bootstrapWorkspaceForUser(userId: string) {
       return existingSite as WeddingSiteRecord;
     }
 
-    const templatePreset = await transaction.templatePreset.findUnique({
-      where: { key: template.key },
-    });
+    const templatePreset = await ensureTemplatePresetByKey(template.key, transaction);
 
     if (!templatePreset) {
       return null;

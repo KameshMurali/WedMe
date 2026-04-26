@@ -359,17 +359,9 @@ export async function loginAction(
   }
 
   try {
-    const site = await ensureWeddingSiteForUser(user.id);
-    if (!site) {
-      return {
-        error: "We signed you in, but couldn’t reopen your workspace right now. Please try again in a moment.",
-      };
-    }
+    await ensureWeddingSiteForUser(user.id);
   } catch (error) {
     console.error("loginAction workspace recovery failed", error);
-    return {
-      error: "We signed you in, but couldn’t reopen your workspace right now. Please try again in a moment.",
-    };
   }
 
   await redirectToWorkspace();
