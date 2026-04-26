@@ -25,6 +25,7 @@ import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { clearSessionCookie, setSessionCookie } from "@/server/auth/session";
 import { generatePlainToken, hashToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/prisma";
+import { ensureWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoSessionUser, matchesDemoCredentials } from "@/server/services/demo-site";
 import { sendEmail } from "@/server/services/email";
@@ -357,6 +358,20 @@ export async function loginAction(
     };
   }
 
+  try {
+    const site = await ensureWeddingSiteForUser(user.id);
+    if (!site) {
+      return {
+        error: "We signed you in, but couldn’t reopen your workspace right now. Please try again in a moment.",
+      };
+    }
+  } catch (error) {
+    console.error("loginAction workspace recovery failed", error);
+    return {
+      error: "We signed you in, but couldn’t reopen your workspace right now. Please try again in a moment.",
+    };
+  }
+
   await redirectToWorkspace();
   return initialActionState;
 }
@@ -439,6 +454,8 @@ export async function resetPasswordAction(
     email: tokenRecord.user.email,
     role: tokenRecord.user.role,
   });
+
+  await ensureWeddingSiteForUser(tokenRecord.user.id);
 
   redirect("/dashboard");
 }

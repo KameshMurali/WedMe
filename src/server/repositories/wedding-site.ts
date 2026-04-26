@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { type Prisma } from "@prisma/client";
 
 import { reservedSlugs, sectionLabels, sectionOrder } from "@/lib/constants";
@@ -255,7 +254,7 @@ async function bootstrapWorkspaceForUser(userId: string) {
   });
 }
 
-export const getWeddingSiteBySlug = cache(async (slug: string) => {
+export async function getWeddingSiteBySlug(slug: string) {
   try {
     const site = await prisma.weddingSite.findUnique({
       where: { slug },
@@ -267,9 +266,9 @@ export const getWeddingSiteBySlug = cache(async (slug: string) => {
     console.error("getWeddingSiteBySlug failed", error);
     return isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as WeddingSiteRecord) : null;
   }
-});
+}
 
-export const getWeddingSiteForUser = cache(async (userId: string) => {
+export async function ensureWeddingSiteForUser(userId: string) {
   if (isDemoUserId(userId)) {
     return demoDashboardSite as unknown as WeddingSiteRecord;
   }
@@ -297,7 +296,11 @@ export const getWeddingSiteForUser = cache(async (userId: string) => {
     console.error("bootstrapWorkspaceForUser failed", error);
     return null;
   }
-});
+}
+
+export async function getWeddingSiteForUser(userId: string) {
+  return ensureWeddingSiteForUser(userId);
+}
 
 export async function getDashboardSummary(siteId: string) {
   if (isDemoSiteId(siteId)) {
