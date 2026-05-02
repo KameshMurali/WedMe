@@ -25,7 +25,6 @@ import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { clearSessionCookie, setSessionCookie } from "@/server/auth/session";
 import { generatePlainToken, hashToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/prisma";
-import { ensureWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoSessionUser, matchesDemoCredentials } from "@/server/services/demo-site";
 import { sendEmail } from "@/server/services/email";
@@ -341,12 +340,6 @@ export async function loginAction(
     return {
       error: "We couldn’t start your session right now. Please try again in a moment.",
     };
-  }
-
-  try {
-    await ensureWeddingSiteForUser(user.id);
-  } catch (error) {
-    console.error("loginAction workspace recovery failed", error);
   }
 
   await redirectToWorkspace();
