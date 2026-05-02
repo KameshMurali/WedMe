@@ -202,7 +202,7 @@ export function TemplateCustomizer({
 
   return (
     <form onSubmit={onSubmit} className="space-y-8">
-      <div className="grid gap-5 xl:grid-cols-3">
+      <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-3">
         {templates.map((template) => {
           const isSelected = template.key === selectedTemplateKey;
 
@@ -215,7 +215,7 @@ export function TemplateCustomizer({
             >
               <Card
                 className={cn(
-                  "cursor-pointer overflow-hidden p-0 transition duration-200 hover:-translate-y-0.5",
+                  "h-full cursor-pointer overflow-hidden p-0 transition duration-200 hover:-translate-y-0.5",
                   isSelected && "ring-2 ring-[color:var(--accent)] ring-offset-2 ring-offset-white",
                 )}
               >
@@ -228,9 +228,11 @@ export function TemplateCustomizer({
                   ) : null}
                 </div>
                 <div className="space-y-3 p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-display text-3xl text-[color:var(--text)]">{template.name}</h3>
-                    <span className="rounded-full bg-black/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)]">
+                  <div className="flex flex-wrap items-start gap-3">
+                    <h3 className="min-w-0 flex-1 text-balance font-display text-3xl leading-tight text-[color:var(--text)]">
+                      {template.name}
+                    </h3>
+                    <span className="max-w-full self-start rounded-full bg-black/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)] whitespace-normal break-words leading-5">
                       {template.mood}
                     </span>
                   </div>
@@ -359,7 +361,7 @@ export function TemplateCustomizer({
               <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: mutedColor }}>
                 {paletteKey}
               </p>
-              <h4 className="mt-3 font-display text-3xl" style={{ color: textColor }}>
+              <h4 className="mt-3 break-words font-display text-3xl leading-tight" style={{ color: textColor }}>
                 KamMonBeginnings
               </h4>
               <p className="mt-2 text-sm" style={{ color: mutedColor }}>
