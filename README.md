@@ -122,6 +122,9 @@ npm run db:generate
 npx prisma db push
 ```
 
+This is a separate step on purpose. The production build does not run `prisma db push`
+automatically, so Vercel deploys do not consume extra database sessions during every build.
+
 ### 5. Seed the demo workspace
 
 ```bash
@@ -238,11 +241,17 @@ This keeps the platform extensible while preserving a safe editing workflow.
 
 - replace local `AUTH_SECRET`
 - point `DATABASE_URL` to production PostgreSQL
+- run `npm run db:push` once against the production database before the first live deploy, or whenever the schema changes
 - set `APP_URL=https://wed.tonewbeginning.com`
 - set `STORAGE_DRIVER=blob`
 - set `BLOB_READ_WRITE_TOKEN`
 - set real SMTP credentials in `src/server/services/email.ts`
 - optionally add custom domains and invite-only password UX polish
+
+### Vercel note
+
+- Vercel builds only compile the app with `npm run build`
+- schema sync is intentionally kept out of the build to avoid exhausting pooled PostgreSQL connections on providers like Supabase
 
 ## Notes
 
