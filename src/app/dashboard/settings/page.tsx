@@ -2,11 +2,11 @@ import { PublishSettingsForm } from "@/components/admin/publish-settings-form";
 import { SiteBasicsForm } from "@/components/admin/site-basics-form";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getSettingsSiteForUser } from "@/server/repositories/wedding-site";
 
 export default async function DashboardSettingsPage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getSettingsSiteForUser(user.id);
   if (!site || !site.publishSettings) return null;
 
   return (

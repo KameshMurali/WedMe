@@ -21,10 +21,10 @@ import {
 import { hashPassword } from "@/server/auth/password";
 import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getEditableWeddingSiteForUser, getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
-import { ensureTemplatePresets } from "@/server/services/template-presets";
+import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
 
 function touchSite(siteId: string) {
@@ -64,7 +64,7 @@ export async function updateSiteBasicsAction(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getEditableWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
   const readOnlyState = guardEditableSite(site);
   if (readOnlyState) return readOnlyState;
@@ -106,7 +106,7 @@ export async function updateTemplateThemeAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -116,17 +116,8 @@ export async function updateTemplateThemeAction(
       return { error: parsed.error.issues[0]?.message ?? "Please review the template settings." };
     }
 
-    await ensureTemplatePresets(prisma);
-
     const { templateKey, ...themeData } = parsed.data;
-
-    const template = await prisma.templatePreset.findUnique({
-      where: { key: templateKey },
-    });
-
-    if (!template) {
-      return { error: "That template preset is not available." };
-    }
+    const template = await ensureTemplatePresetByKey(templateKey, prisma);
 
     await prisma.$transaction([
       prisma.weddingSite.update({
@@ -156,7 +147,7 @@ export async function updatePublishSettingsAction(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getEditableWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
   const readOnlyState = guardEditableSite(site);
   if (readOnlyState) return readOnlyState;
@@ -299,7 +290,7 @@ export async function replaceStoryMilestonesAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -333,7 +324,7 @@ export async function replaceEventsAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -378,7 +369,7 @@ export async function replaceScheduleItemsAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -414,7 +405,7 @@ export async function replaceTidbitsAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -447,7 +438,7 @@ export async function replaceFaqItemsAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -479,7 +470,7 @@ export async function replaceTravelGuideItemsAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -512,7 +503,7 @@ export async function replaceDressCodesAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -546,7 +537,7 @@ export async function replaceVideosAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) return { error: "No wedding site was found for this account." };
     const readOnlyState = guardEditableSite(site);
     if (readOnlyState) return readOnlyState;
@@ -579,7 +570,7 @@ export async function replaceVideosAction(
 
 export async function moderateUploadAction(uploadId: string, status: "APPROVED" | "REJECTED") {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getEditableWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
   const readOnlyState = guardEditableSite(site);
   if (readOnlyState) return readOnlyState;
@@ -601,7 +592,7 @@ export async function moderateUploadAction(uploadId: string, status: "APPROVED" 
 
 export async function moderateMessageAction(messageId: string, status: "APPROVED" | "REJECTED") {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getEditableWeddingSiteForUser(user.id);
   if (!site) return { error: "No wedding site was found for this account." };
   const readOnlyState = guardEditableSite(site);
   if (readOnlyState) return readOnlyState;

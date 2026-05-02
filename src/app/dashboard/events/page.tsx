@@ -1,7 +1,7 @@
 import { replaceEventsAction, replaceScheduleItemsAction } from "@/actions/dashboard";
 import { ArrayEditor } from "@/components/admin/array-editor";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getEventsEditorSiteForUser } from "@/server/repositories/wedding-site";
 
 function toDateTimeLocal(date: Date) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -9,7 +9,7 @@ function toDateTimeLocal(date: Date) {
 
 export default async function DashboardEventsPage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getEventsEditorSiteForUser(user.id);
   if (!site) return null;
 
   return (

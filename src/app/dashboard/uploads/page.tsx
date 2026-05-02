@@ -1,11 +1,11 @@
 import { MessageModerationButtons, UploadModerationButtons } from "@/components/admin/moderation-buttons";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getUploadManagerSiteForUser } from "@/server/repositories/wedding-site";
 
 export default async function DashboardUploadsPage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getUploadManagerSiteForUser(user.id);
   if (!site) return null;
 
   return (

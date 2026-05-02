@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
 import { requireUser } from "@/server/auth/session";
-import { getDashboardSummary, getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getDashboardOverviewForUser, getDashboardSummary } from "@/server/repositories/wedding-site";
 
 export default async function DashboardHomePage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getDashboardOverviewForUser(user.id);
   if (!site) return null;
 
   const summary = await getDashboardSummary(site.id);

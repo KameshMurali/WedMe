@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { adminSignedUploadSchema, validateImageFile } from "@/lib/validations/upload";
 import { getCurrentUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getEditableWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 import { storage } from "@/server/storage";
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Please sign in to upload media." }, { status: 401 });
     }
 
-    const site = await getWeddingSiteForUser(user.id);
+    const site = await getEditableWeddingSiteForUser(user.id);
     if (!site) {
       return NextResponse.json({ error: "No wedding site was found for this account." }, { status: 404 });
     }

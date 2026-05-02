@@ -29,7 +29,7 @@ import { ensureWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoSessionUser, matchesDemoCredentials } from "@/server/services/demo-site";
 import { sendEmail } from "@/server/services/email";
-import { ensureTemplatePresets } from "@/server/services/template-presets";
+import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 
 async function redirectToWorkspace(): Promise<never> {
   const cookieStore = await cookies();
@@ -131,15 +131,6 @@ export async function registerAction(
     };
   }
 
-  try {
-    await ensureTemplatePresets(prisma);
-  } catch (error) {
-    console.error("registerAction template bootstrap failed", error);
-    return {
-      error: "We couldn’t prepare the workspace templates right now. Please try again in a moment.",
-    };
-  }
-
   const template = findTemplateByKey("classic-elegant");
   let passwordHash: string;
   let verificationToken: string;
@@ -175,13 +166,7 @@ export async function registerAction(
         },
       });
 
-      const templatePreset = await transaction.templatePreset.findUnique({
-        where: { key: template.key },
-      });
-
-      if (!templatePreset) {
-        throw new Error("The default template preset is missing from the database.");
-      }
+      const templatePreset = await ensureTemplatePresetByKey(template.key, transaction);
 
       await transaction.weddingSite.create({
         data: {

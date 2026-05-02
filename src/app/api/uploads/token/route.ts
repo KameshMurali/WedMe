@@ -11,7 +11,7 @@ import {
 } from "@/lib/validations/upload";
 import { getCurrentUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getEditableWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
             throw new Error("Please sign in to upload media.");
           }
 
-          const site = await getWeddingSiteForUser(user.id);
+          const site = await getEditableWeddingSiteForUser(user.id);
           if (!site) {
             throw new Error("No wedding site was found for this account.");
           }

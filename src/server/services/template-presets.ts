@@ -2,7 +2,7 @@ import "server-only";
 
 import type { Prisma } from "@prisma/client";
 
-import { templateRegistry } from "@/lib/template-registry";
+import { findTemplateByKey, templateRegistry } from "@/lib/template-registry";
 import { prisma } from "@/server/prisma";
 
 type TemplatePresetClient = Pick<Prisma.TransactionClient, "templatePreset">;
@@ -11,7 +11,7 @@ export async function ensureTemplatePresetByKey(
   templateKey: string,
   client: TemplatePresetClient = prisma,
 ) {
-  const template = templateRegistry.find((entry) => entry.key === templateKey) ?? templateRegistry[0];
+  const template = findTemplateByKey(templateKey);
 
   return client.templatePreset.upsert({
     where: { key: template.key },
@@ -36,7 +36,5 @@ export async function ensureTemplatePresetByKey(
 }
 
 export async function ensureTemplatePresets(client: TemplatePresetClient = prisma) {
-  await Promise.all(
-    templateRegistry.map((template) => ensureTemplatePresetByKey(template.key, client)),
-  );
+  await Promise.all(templateRegistry.map((template) => ensureTemplatePresetByKey(template.key, client)));
 }

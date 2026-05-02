@@ -3,13 +3,13 @@ import Link from "next/link";
 import { logoutAction } from "@/actions/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getWorkspaceShellForUser(user.id);
 
   if (!site) {
     return (

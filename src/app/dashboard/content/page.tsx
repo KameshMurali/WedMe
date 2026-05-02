@@ -10,12 +10,12 @@ import { ArrayEditor } from "@/components/admin/array-editor";
 import { AdminMediaUploader } from "@/components/admin/media-uploader";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getContentEditorSiteForUser } from "@/server/repositories/wedding-site";
 import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
 
 export default async function DashboardContentPage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getContentEditorSiteForUser(user.id);
   if (!site) return null;
 
   return (

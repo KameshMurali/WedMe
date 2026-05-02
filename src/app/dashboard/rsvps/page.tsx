@@ -3,11 +3,11 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getRsvpManagerSiteForUser } from "@/server/repositories/wedding-site";
 
 export default async function DashboardRsvpsPage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getRsvpManagerSiteForUser(user.id);
   if (!site) return null;
 
   return (

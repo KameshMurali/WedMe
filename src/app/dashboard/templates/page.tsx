@@ -2,11 +2,11 @@ import { TemplateCustomizer } from "@/components/admin/template-customizer";
 import { Card } from "@/components/ui/card";
 import { templateRegistry } from "@/lib/template-registry";
 import { requireUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getTemplateSettingsForUser } from "@/server/repositories/wedding-site";
 
 export default async function DashboardTemplatesPage() {
   const user = await requireUser();
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getTemplateSettingsForUser(user.id);
   if (!site) return null;
 
   return (

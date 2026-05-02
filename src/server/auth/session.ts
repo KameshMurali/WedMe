@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -60,7 +61,7 @@ export async function getSession() {
   }
 }
 
-export async function getCurrentUser() {
+const loadCurrentUser = cache(async () => {
   const session = await getSession();
   if (!session) return null;
 
@@ -73,22 +74,20 @@ export async function getCurrentUser() {
 
     return await prisma.user.findUnique({
       where: { id: session.userId },
-      include: {
-        couple: {
-          include: {
-            weddingSite: {
-              include: {
-                publishSettings: true,
-              },
-            },
-          },
-        },
+      select: {
+        id: true,
+        email: true,
+        role: true,
       },
     });
   } catch (error) {
     console.error("getCurrentUser failed", error);
     return null;
   }
+});
+
+export async function getCurrentUser() {
+  return loadCurrentUser();
 }
 
 export async function requireUser() {

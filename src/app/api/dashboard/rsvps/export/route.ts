@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/server/auth/session";
-import { getWeddingSiteForUser } from "@/server/repositories/wedding-site";
+import { getRsvpManagerSiteForUser } from "@/server/repositories/wedding-site";
 
 function quote(value: string | number | null | undefined) {
   const safeValue = value == null ? "" : String(value);
@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: "Please sign in to export RSVPs." }, { status: 401 });
   }
 
-  const site = await getWeddingSiteForUser(user.id);
+  const site = await getRsvpManagerSiteForUser(user.id);
 
   if (!site) {
     return NextResponse.json({ error: "No wedding site found." }, { status: 404 });
