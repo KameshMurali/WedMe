@@ -1,5 +1,6 @@
 import { replaceEventsAction, replaceScheduleItemsAction } from "@/actions/dashboard";
 import { ArrayEditor } from "@/components/admin/array-editor";
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { requireUser } from "@/server/auth/session";
 import { getEventsEditorSiteForUser } from "@/server/repositories/wedding-site";
 
@@ -10,7 +11,15 @@ function toDateTimeLocal(date: Date) {
 export default async function DashboardEventsPage() {
   const user = await requireUser();
   const site = await getEventsEditorSiteForUser(user.id);
-  if (!site) return null;
+  if (!site) {
+    return (
+      <DashboardUnavailableState
+        section="Events"
+        title="We couldn't load the event planner yet."
+        description="Event cards and schedule details are taking longer than expected to load. Your login is still active, so you can refresh or come back after opening another section."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

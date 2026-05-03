@@ -1,3 +1,4 @@
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { TemplateCustomizer } from "@/components/admin/template-customizer";
 import { Card } from "@/components/ui/card";
 import { templateRegistry } from "@/lib/template-registry";
@@ -7,7 +8,15 @@ import { getTemplateSettingsForUser } from "@/server/repositories/wedding-site";
 export default async function DashboardTemplatesPage() {
   const user = await requireUser();
   const site = await getTemplateSettingsForUser(user.id);
-  if (!site) return null;
+  if (!site) {
+    return (
+      <DashboardUnavailableState
+        section="Templates"
+        title="We couldn't load your template settings yet."
+        description="The theme editor is temporarily waiting on workspace data. Your session is still active, so you can switch sections or refresh and return once the data reconnects."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

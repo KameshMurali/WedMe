@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth/session";
@@ -8,7 +9,15 @@ import { getRsvpManagerSiteForUser } from "@/server/repositories/wedding-site";
 export default async function DashboardRsvpsPage() {
   const user = await requireUser();
   const site = await getRsvpManagerSiteForUser(user.id);
-  if (!site) return null;
+  if (!site) {
+    return (
+      <DashboardUnavailableState
+        section="RSVPs"
+        title="We couldn't load the RSVP manager yet."
+        description="Guest response data is temporarily unavailable, but your workspace session is still open. Try refreshing or return to overview and come back once the connection settles."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

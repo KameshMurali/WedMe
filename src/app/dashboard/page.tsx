@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
 import { requireUser } from "@/server/auth/session";
@@ -9,7 +10,15 @@ import { getDashboardOverviewForUser, getDashboardSummary } from "@/server/repos
 export default async function DashboardHomePage() {
   const user = await requireUser();
   const site = await getDashboardOverviewForUser(user.id);
-  if (!site) return null;
+  if (!site) {
+    return (
+      <DashboardUnavailableState
+        section="Overview"
+        title="We couldn't load your dashboard overview yet."
+        description="Your account is still signed in, but the summary data for this workspace has not finished loading. Try another section, then come back once the connection settles."
+      />
+    );
+  }
 
   const summary = await getDashboardSummary(site.id);
 

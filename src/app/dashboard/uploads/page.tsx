@@ -1,3 +1,4 @@
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { MessageModerationButtons, UploadModerationButtons } from "@/components/admin/moderation-buttons";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
@@ -6,7 +7,15 @@ import { getUploadManagerSiteForUser } from "@/server/repositories/wedding-site"
 export default async function DashboardUploadsPage() {
   const user = await requireUser();
   const site = await getUploadManagerSiteForUser(user.id);
-  if (!site) return null;
+  if (!site) {
+    return (
+      <DashboardUnavailableState
+        section="Moderation"
+        title="We couldn't load uploads and wishes yet."
+        description="Moderation data is still reconnecting. Your session is active, so you can move to another section and return once the workspace finishes loading."
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

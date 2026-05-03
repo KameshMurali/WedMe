@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Eye, LayoutTemplate, PenSquare, Rocket, Settings2 } from "lucide-react";
 
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { SiteShell } from "@/components/public/site-shell";
 import {
   DressCodeSection,
@@ -42,7 +43,15 @@ const previewNotes = [
 export default async function DashboardPreviewPage() {
   const user = await requireUser();
   const snapshot = await getDraftSiteSnapshotForUser(user.id);
-  if (!snapshot) return null;
+  if (!snapshot) {
+    return (
+      <DashboardUnavailableState
+        section="Preview"
+        title="We couldn't build the draft preview yet."
+        description="The live preview is waiting on the latest workspace snapshot. Your session is still valid, so try again after opening another section or refreshing this page."
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

@@ -1,4 +1,5 @@
 import { type Prisma } from "@prisma/client";
+import { cache } from "react";
 
 import { reservedSlugs, sectionLabels, sectionOrder } from "@/lib/constants";
 import { findTemplateByKey } from "@/lib/template-registry";
@@ -544,7 +545,7 @@ async function bootstrapWorkspaceForUser(userId: string) {
   });
 }
 
-async function ensureWeddingSiteIdForUser(userId: string) {
+async function ensureWeddingSiteIdForUserImpl(userId: string) {
   if (isDemoUserId(userId)) {
     return demoDashboardSite.id;
   }
@@ -575,6 +576,12 @@ async function ensureWeddingSiteIdForUser(userId: string) {
     console.error("bootstrapWorkspaceForUser failed", error);
     return null;
   }
+}
+
+const loadWeddingSiteIdForUser = cache(async (userId: string) => ensureWeddingSiteIdForUserImpl(userId));
+
+async function ensureWeddingSiteIdForUser(userId: string) {
+  return loadWeddingSiteIdForUser(userId);
 }
 
 export async function getWeddingSiteBySlug(slug: string) {

@@ -1,3 +1,4 @@
+import type { UserRole } from "@prisma/client";
 import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -13,7 +14,7 @@ const sessionMaxAge = 60 * 60 * 24 * 14;
 export type SessionPayload = {
   userId: string;
   email: string;
-  role: string;
+  role: UserRole;
 };
 
 export async function createSessionToken(payload: SessionPayload) {
@@ -72,7 +73,7 @@ const loadCurrentUser = cache(async () => {
   try {
     const { prisma } = await import("@/server/prisma");
 
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: session.userId },
       select: {
         id: true,
@@ -80,9 +81,15 @@ const loadCurrentUser = cache(async () => {
         role: true,
       },
     });
+
+    return user;
   } catch (error) {
     console.error("getCurrentUser failed", error);
-    return null;
+    return {
+      id: session.userId,
+      email: session.email,
+      role: session.role,
+    };
   }
 });
 

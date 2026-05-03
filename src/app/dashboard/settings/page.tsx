@@ -1,3 +1,4 @@
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { PublishSettingsForm } from "@/components/admin/publish-settings-form";
 import { SiteBasicsForm } from "@/components/admin/site-basics-form";
 import { Card } from "@/components/ui/card";
@@ -7,7 +8,15 @@ import { getSettingsSiteForUser } from "@/server/repositories/wedding-site";
 export default async function DashboardSettingsPage() {
   const user = await requireUser();
   const site = await getSettingsSiteForUser(user.id);
-  if (!site || !site.publishSettings) return null;
+  if (!site || !site.publishSettings) {
+    return (
+      <DashboardUnavailableState
+        section="Settings"
+        title="We couldn't load your publish settings yet."
+        description="The workspace basics are still reconnecting. Your session has not been lost, so refresh or visit another section and return when the settings data is available again."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

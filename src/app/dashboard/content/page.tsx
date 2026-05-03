@@ -7,6 +7,7 @@ import {
   replaceVideosAction,
 } from "@/actions/dashboard";
 import { ArrayEditor } from "@/components/admin/array-editor";
+import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { AdminMediaUploader } from "@/components/admin/media-uploader";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
@@ -20,7 +21,15 @@ import {
 export default async function DashboardContentPage() {
   const user = await requireUser();
   const site = await getContentEditorSiteForUser(user.id);
-  if (!site) return null;
+  if (!site) {
+    return (
+      <DashboardUnavailableState
+        section="Content"
+        title="We couldn't load the storytelling editor yet."
+        description="The workspace is still signed in, but the content editor data hasn't come through cleanly yet. Refresh or jump to another area while this section reconnects."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
