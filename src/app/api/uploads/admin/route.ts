@@ -9,6 +9,10 @@ import { getEditableWeddingSiteForUser } from "@/server/repositories/wedding-sit
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
 import { storage } from "@/server/storage";
+import {
+  storageUploadsConfigurationMessage,
+  storageUploadsConfigured,
+} from "@/server/storage/upload-config";
 
 const adminUploadSchema = z.object({
   category: z.enum(["HERO", "STORY", "EVENT_BANNER", "GALLERY", "DRESS_CODE"]),
@@ -19,6 +23,17 @@ const adminUploadSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    if (!storageUploadsConfigured) {
+      return NextResponse.json(
+        {
+          error:
+            storageUploadsConfigurationMessage ??
+            "Uploads are not configured for this deployment yet.",
+        },
+        { status: 503 },
+      );
+    }
+
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Please sign in to upload media." }, { status: 401 });

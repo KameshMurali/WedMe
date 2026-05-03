@@ -10,7 +10,17 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
-export function AdminMediaUploader({ slug, useSignedUploads }: { slug: string; useSignedUploads: boolean }) {
+export function AdminMediaUploader({
+  slug,
+  useSignedUploads,
+  uploadsEnabled = true,
+  disabledReason,
+}: {
+  slug: string;
+  useSignedUploads: boolean;
+  uploadsEnabled?: boolean;
+  disabledReason?: string | null;
+}) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState<"HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE">("GALLERY");
@@ -22,6 +32,11 @@ export function AdminMediaUploader({ slug, useSignedUploads }: { slug: string; u
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
 
   async function handleUpload() {
+    if (!uploadsEnabled) {
+      toast.error(disabledReason ?? "Uploads are not available right now.");
+      return;
+    }
+
     if (!file) {
       toast.error("Choose an image to upload.");
       return;
@@ -86,8 +101,14 @@ export function AdminMediaUploader({ slug, useSignedUploads }: { slug: string; u
           Upload hero images, gallery media, and supporting visuals directly from the dashboard.
         </p>
       </div>
+      {!uploadsEnabled && disabledReason ? (
+        <div className="rounded-[1.4rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-950">
+          {disabledReason}
+        </div>
+      ) : null}
       <Select
         value={category}
+        disabled={!uploadsEnabled}
         onChange={(event) =>
           setCategory(event.target.value as "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE")
         }
@@ -98,17 +119,22 @@ export function AdminMediaUploader({ slug, useSignedUploads }: { slug: string; u
         <option value="EVENT_BANNER">Event banner</option>
         <option value="DRESS_CODE">Dress code</option>
       </Select>
-      <Input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      <Input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        disabled={!uploadsEnabled}
+        onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+      />
       {preview ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={preview} alt="Upload preview" className="max-h-80 w-full rounded-[1.4rem] object-cover" />
       ) : null}
       <div className="grid gap-4 md:grid-cols-2">
-        <Input placeholder="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        <Input placeholder="Alt text" value={altText} onChange={(event) => setAltText(event.target.value)} />
+        <Input disabled={!uploadsEnabled} placeholder="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
+        <Input disabled={!uploadsEnabled} placeholder="Alt text" value={altText} onChange={(event) => setAltText(event.target.value)} />
       </div>
-      <Input placeholder="Caption" value={caption} onChange={(event) => setCaption(event.target.value)} />
-      <Button type="button" onClick={handleUpload} disabled={isUploading}>
+      <Input disabled={!uploadsEnabled} placeholder="Caption" value={caption} onChange={(event) => setCaption(event.target.value)} />
+      <Button type="button" onClick={handleUpload} disabled={isUploading || !uploadsEnabled}>
         {isUploading ? "Uploading..." : "Upload image"}
       </Button>
     </Card>
