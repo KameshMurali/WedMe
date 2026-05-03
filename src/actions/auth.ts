@@ -425,8 +425,6 @@ export async function resetPasswordAction(
     role: tokenRecord.user.role,
   });
 
-  await ensureWeddingSiteForUser(tokenRecord.user.id);
-
   redirect("/dashboard");
 }
 
