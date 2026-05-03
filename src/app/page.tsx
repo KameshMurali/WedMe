@@ -21,6 +21,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
 import { getCurrentUser } from "@/server/auth/session";
+import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
 
 const featureHighlights = [
   {
@@ -60,11 +61,12 @@ function getResumeLabel(pathname: string) {
 
 export default async function HomePage() {
   const user = await getCurrentUser();
+  const workspace = user ? await getWorkspaceShellForUser(user.id) : null;
   const cookieStore = await cookies();
   const rawResumePath = cookieStore.get(workspaceResumeCookieName)?.value;
   const safeResumePath = resolveWorkspaceResumePath(rawResumePath);
   const resumeLabel = getResumeLabel(safeResumePath);
-  const hasWorkspace = Boolean(user?.couple?.weddingSite);
+  const hasWorkspace = Boolean(workspace);
   const workspaceHref = (hasWorkspace ? safeResumePath : "/login") as Route;
 
   return (
