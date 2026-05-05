@@ -36,6 +36,7 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isPublished = site.status === "PUBLISHED";
 
   useEffect(() => {
     if (!dashboardRoutes.includes(pathname as (typeof dashboardRoutes)[number])) return;
@@ -56,11 +57,18 @@ export function AdminShell({
               <p className="mt-2 text-sm text-[color:var(--muted)]">{site.coupleNames}</p>
             </div>
             <div className="rounded-3xl bg-[color:var(--accent)]/10 px-4 py-3 text-sm text-[color:var(--text)]">
-              Live URL: /{site.slug}
+              {isPublished ? "Public URL" : "Draft slug"}: /{site.slug}
             </div>
             <div className="rounded-3xl bg-black/5 px-4 py-3 text-sm text-[color:var(--text)]">
               Status: {site.status}
             </div>
+            {!isPublished ? (
+              <p className="text-xs leading-6 text-[color:var(--muted)]">
+                This site is still in draft mode. Guests won&apos;t be able to open{" "}
+                <span className="font-medium text-[color:var(--text)]">/{site.slug}</span> until you
+                publish it from Settings.
+              </p>
+            ) : null}
           </Card>
           <Card className="space-y-2 p-3">
             {navigation.map((item) => {
@@ -85,8 +93,11 @@ export function AdminShell({
           </Card>
           <Card className="space-y-3">
             <Button asChild variant="outline" className="w-full">
-              <Link href={`/${site.slug}` as Route} target="_blank">
-                View public site
+              <Link
+                href={(isPublished ? `/${site.slug}` : "/dashboard/preview") as Route}
+                target={isPublished ? "_blank" : undefined}
+              >
+                {isPublished ? "View public site" : "Preview draft site"}
               </Link>
             </Button>
             <form action={logoutAction}>
