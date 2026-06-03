@@ -1,4 +1,5 @@
 export type SiteSnapshot = {
+  ownerPreview?: boolean;
   site: {
     id: string;
     slug: string;

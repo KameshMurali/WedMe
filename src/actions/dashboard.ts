@@ -34,12 +34,18 @@ function touchSite(siteId: string) {
   });
 }
 
-function revalidateSitePaths(slug: string) {
+function revalidateDashboardPaths() {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/content");
   revalidatePath("/dashboard/events");
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/templates");
+  revalidatePath("/dashboard/rsvps");
+  revalidatePath("/dashboard/uploads");
+  revalidatePath("/dashboard/preview");
+}
+
+function revalidatePublicSitePaths(slug: string) {
   revalidatePath(`/${slug}`);
   revalidatePath(`/${slug}/story`);
   revalidatePath(`/${slug}/events`);
@@ -96,7 +102,7 @@ export async function updateSiteBasicsAction(
     touchSite(site.id),
   ]);
 
-  revalidateSitePaths(parsed.data.slug);
+  revalidateDashboardPaths();
   return { success: "Site basics saved to draft." };
 }
 
@@ -135,7 +141,7 @@ export async function updateTemplateThemeAction(
       touchSite(site.id),
     ]);
 
-    revalidateSitePaths(site.slug);
+    revalidateDashboardPaths();
     return { success: "Template and theme settings saved." };
   } catch (error) {
     return { error: formatDashboardActionError(error, "Unable to save template settings.") };
@@ -180,7 +186,8 @@ export async function updatePublishSettingsAction(
     },
   });
 
-  revalidateSitePaths(site.slug);
+  revalidateDashboardPaths();
+  revalidatePublicSitePaths(site.slug);
   return { success: "Publish settings saved." };
 }
 
@@ -203,7 +210,8 @@ export async function publishSiteAction() {
     },
   });
 
-  revalidateSitePaths(site.slug);
+  revalidateDashboardPaths();
+  revalidatePublicSitePaths(site.slug);
   return { success: "Your wedding site is now published." };
 }
 
@@ -221,7 +229,7 @@ async function replaceCollection<T>(
     });
   });
 
-  revalidateSitePaths(slug);
+  revalidateDashboardPaths();
 }
 
 function parseJsonArray<T>(formData: FormData, key: string) {
@@ -586,7 +594,8 @@ export async function moderateUploadAction(uploadId: string, status: "APPROVED" 
     },
   });
 
-  revalidateSitePaths(site.slug);
+  revalidateDashboardPaths();
+  revalidatePublicSitePaths(site.slug);
   return { success: `Upload ${status.toLowerCase()}.` };
 }
 
@@ -608,6 +617,7 @@ export async function moderateMessageAction(messageId: string, status: "APPROVED
     },
   });
 
-  revalidateSitePaths(site.slug);
+  revalidateDashboardPaths();
+  revalidatePublicSitePaths(site.slug);
   return { success: `Message ${status.toLowerCase()}.` };
 }

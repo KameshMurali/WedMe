@@ -1,7 +1,9 @@
+import { cache } from "react";
 import { type SiteStatus, type SiteVisibility } from "@prisma/client";
 
 import { findTemplateByKey } from "@/lib/template-registry";
 import type { SiteSnapshot } from "@/types";
+import { getSession } from "@/server/auth/session";
 import { demoSiteSnapshot, isDemoSiteSlug, isDemoUserId } from "@/server/services/demo-site";
 import {
   getWeddingSiteBySlug,
@@ -13,6 +15,7 @@ function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
   const template = findTemplateByKey(record.templatePreset.key);
 
   return {
+    ownerPreview: false,
     site: {
       id: record.id,
       slug: record.slug,
@@ -312,6 +315,7 @@ function normalizePublishedSnapshot(record: WeddingSiteRecord, snapshotValue: un
     : base.sections;
 
   return {
+    ownerPreview: asBoolean(snapshotValue.ownerPreview, base.ownerPreview ?? false),
     site: {
       ...base.site,
       brandName: asString(snapshotSite.brandName, base.site.brandName),
@@ -368,14 +372,22 @@ function normalizePublishedSnapshot(record: WeddingSiteRecord, snapshotValue: un
   };
 }
 
-export async function getPublishedSiteSnapshot(slug: string) {
+const loadPublishedSiteSnapshot = cache(async (slug: string) => {
   try {
+    const session = await getSession();
     const record = await getWeddingSiteBySlug(slug);
     if (!record || !record.publishSettings) {
       return isDemoSiteSlug(slug) ? demoSiteSnapshot : null;
     }
 
     if (record.publishSettings.status !== "PUBLISHED") {
+      if (session?.userId && record.couple.primaryUserId === session.userId) {
+        return {
+          ...buildSnapshot(record),
+          ownerPreview: true,
+        };
+      }
+
       if (isDemoSiteSlug(slug)) {
         return record.publishSettings.publishedSnapshot
           ? normalizePublishedSnapshot(record, record.publishSettings.publishedSnapshot)
@@ -394,9 +406,13 @@ export async function getPublishedSiteSnapshot(slug: string) {
     console.error("Failed to load published site snapshot", error);
     return isDemoSiteSlug(slug) ? demoSiteSnapshot : null;
   }
+});
+
+export async function getPublishedSiteSnapshot(slug: string) {
+  return loadPublishedSiteSnapshot(slug);
 }
 
-export async function getDraftSiteSnapshotForUser(userId: string) {
+const loadDraftSiteSnapshotForUser = cache(async (userId: string) => {
   if (isDemoUserId(userId)) {
     return demoSiteSnapshot;
   }
@@ -412,6 +428,10 @@ export async function getDraftSiteSnapshotForUser(userId: string) {
     console.error("Failed to load draft site snapshot", error);
     return null;
   }
+});
+
+export async function getDraftSiteSnapshotForUser(userId: string) {
+  return loadDraftSiteSnapshotForUser(userId);
 }
 
 export function buildPublishSnapshot(record: WeddingSiteRecord) {

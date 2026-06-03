@@ -206,6 +206,17 @@ export function SiteShell({
       </header>
 
       <div className="relative z-10 pb-24">{children}</div>
+      {snapshot.ownerPreview ? (
+        <div className="relative z-20">
+          <div className="section-shell pt-6">
+            <div className="rounded-3xl border border-amber-200 bg-amber-50/95 px-5 py-4 text-sm leading-7 text-amber-950">
+              You&apos;re viewing your unpublished draft at this slug because you&apos;re signed in as
+              the workspace owner. Guests will only be able to open this URL after you publish the
+              site from Settings.
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <footer className="relative z-10 pt-6">
         <div className="section-shell pb-10">
