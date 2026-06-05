@@ -54,6 +54,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Guest uploads are currently closed." }, { status: 400 });
     }
 
+    // Only keep an eventId that still belongs to this site; otherwise null it out
+    // so a stale/invalid reference can't trip a foreign-key error on insert.
+    let eventId = parsed.data.eventId || null;
+    if (eventId) {
+      const event = await prisma.event.findFirst({
+        where: { id: eventId, weddingSiteId: site.id },
+        select: { id: true },
+      });
+      eventId = event?.id ?? null;
+    }
+
     const file = formData.get("file");
     const externalUrl = parsed.data.externalUrl || null;
     const uploadedUrl = formData.get("uploadedUrl");
@@ -131,7 +142,7 @@ export async function POST(request: Request) {
       prisma.guestUpload.create({
         data: {
           weddingSiteId: site.id,
-          eventId: parsed.data.eventId || null,
+          eventId,
           submitterName: parsed.data.submitterName,
           caption: parsed.data.caption || null,
           message: parsed.data.message || null,

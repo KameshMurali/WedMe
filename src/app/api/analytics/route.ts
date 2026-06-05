@@ -39,7 +39,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    // Analytics must never break a page render, so we still return ok — but log
+    // server-side so failures are observable instead of silently swallowed.
+    console.error("analytics event failed", error);
     return NextResponse.json({ ok: true });
   }
 }

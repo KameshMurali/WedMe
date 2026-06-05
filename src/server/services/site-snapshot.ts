@@ -12,7 +12,13 @@ import {
 } from "@/server/repositories/wedding-site";
 
 function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
-  const template = findTemplateByKey(record.templatePreset.key);
+  // Relations can be missing if a workspace bootstrap was interrupted. Fall back
+  // to safe defaults instead of throwing so the public site / draft preview still
+  // renders. findTemplateByKey already defaults to the first registered template.
+  const template = findTemplateByKey(record.templatePreset?.key ?? "");
+  const partnerOne = record.couple?.partnerOneName?.trim();
+  const partnerTwo = record.couple?.partnerTwoName?.trim();
+  const coupleNames = [partnerOne, partnerTwo].filter(Boolean).join(" & ") || record.brandName;
 
   return {
     ownerPreview: false,
@@ -31,11 +37,11 @@ function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
       seoDescription: record.seoDescription,
       ogImageUrl: record.ogImageUrl,
       canonicalUrl: record.canonicalUrl,
-      coupleNames: `${record.couple.partnerOneName} & ${record.couple.partnerTwoName}`,
+      coupleNames,
     },
     theme: {
-      templateKey: record.templatePreset.key,
-      templateName: record.templatePreset.name,
+      templateKey: record.templatePreset?.key ?? template.key,
+      templateName: record.templatePreset?.name ?? template.name,
       paletteKey: record.theme?.paletteKey ?? template.themeDefaults.paletteKey,
       headingFontKey: record.theme?.headingFontKey ?? template.themeDefaults.headingFontKey,
       bodyFontKey: record.theme?.bodyFontKey ?? template.themeDefaults.bodyFontKey,
@@ -381,7 +387,7 @@ const loadPublishedSiteSnapshot = cache(async (slug: string) => {
     }
 
     if (record.publishSettings.status !== "PUBLISHED") {
-      if (session?.userId && record.couple.primaryUserId === session.userId) {
+      if (session?.userId && record.couple?.primaryUserId === session.userId) {
         return {
           ...buildSnapshot(record),
           ownerPreview: true,

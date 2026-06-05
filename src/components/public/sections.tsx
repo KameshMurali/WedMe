@@ -56,6 +56,7 @@ function HeroMediaFrame({
           width={1600}
           height={900}
           priority
+          sizes="100vw"
           className={cn("h-full w-full object-cover", imageClassName)}
         />
       ) : (
@@ -379,6 +380,7 @@ export function StorySection({
                   alt={milestone.title}
                   width={1200}
                   height={900}
+                  sizes="(max-width: 1024px) 100vw, 40vw"
                   className="h-full min-h-[18rem] w-full object-cover"
                 />
               ) : null}
@@ -441,6 +443,7 @@ export function EventsSection({
                     alt={event.title}
                     width={1400}
                     height={920}
+                    sizes={index === 0 ? "(max-width: 1024px) 100vw, 55vw" : "(max-width: 1024px) 100vw, 50vw"}
                     className={cn("w-full object-cover", index === 0 ? "h-full min-h-[24rem]" : "h-64")}
                   />
                 ) : (
@@ -607,6 +610,7 @@ export function DressCodeSection({ guides }: { guides: SiteSnapshot["dressCodeGu
                   alt={guide.title}
                   width={1200}
                   height={960}
+                  sizes="(max-width: 1024px) 100vw, 25vw"
                   className="h-full min-h-[18rem] w-full object-cover"
                 />
               ) : (

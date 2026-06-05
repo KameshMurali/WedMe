@@ -59,6 +59,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Only persist event selections for events that still belong to this site.
+    // Stale or fabricated event IDs would otherwise trip a foreign-key error
+    // and lose the entire RSVP.
+    const validEventIds = new Set(
+      (
+        await prisma.event.findMany({
+          where: { weddingSiteId: site.id },
+          select: { id: true },
+        })
+      ).map((event) => event.id),
+    );
+
+    const selectedEvents = parsed.data.selectedEvents.filter((event) =>
+      validEventIds.has(event.eventId),
+    );
+
     await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const response = await transaction.rSVPResponse.create({
         data: {
@@ -79,13 +95,15 @@ export async function POST(request: Request) {
         },
       });
 
-      await transaction.rSVPEventSelection.createMany({
-        data: parsed.data.selectedEvents.map((event) => ({
-          responseId: response.id,
-          eventId: event.eventId,
-          status: event.status,
-        })),
-      });
+      if (selectedEvents.length > 0) {
+        await transaction.rSVPEventSelection.createMany({
+          data: selectedEvents.map((event) => ({
+            responseId: response.id,
+            eventId: event.eventId,
+            status: event.status,
+          })),
+        });
+      }
 
       await transaction.analyticsEvent.create({
         data: {
