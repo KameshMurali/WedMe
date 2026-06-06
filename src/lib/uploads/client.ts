@@ -10,6 +10,10 @@ type UploadTokenPayload =
       category: "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE";
     }
   | {
+      scope: "site_asset";
+      field: "heroImageUrl" | "heroVideoUrl" | "ogImageUrl";
+    }
+  | {
       scope: "guest";
       slug: string;
     };

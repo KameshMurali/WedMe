@@ -2,6 +2,15 @@ import { z } from "zod";
 
 import { extractYoutubeId } from "@/lib/youtube";
 
+const assetUrlSchema = z
+  .string()
+  .refine(
+    (value) => value === "" || value.startsWith("/") || /^https?:\/\//i.test(value),
+    "Please provide a full URL or upload a file from your device.",
+  )
+  .optional()
+  .or(z.literal(""));
+
 export const siteBasicsSchema = z.object({
   brandName: z.string().min(3).max(120),
   headline: z.string().min(10).max(180),
@@ -9,11 +18,11 @@ export const siteBasicsSchema = z.object({
   tagline: z.string().max(200).optional().or(z.literal("")),
   weddingDate: z.string().min(1),
   locationSummary: z.string().max(200).optional().or(z.literal("")),
-  heroImageUrl: z.string().url().optional().or(z.literal("")),
-  heroVideoUrl: z.string().url().optional().or(z.literal("")),
+  heroImageUrl: assetUrlSchema,
+  heroVideoUrl: assetUrlSchema,
   seoTitle: z.string().max(70).optional().or(z.literal("")),
   seoDescription: z.string().max(160).optional().or(z.literal("")),
-  ogImageUrl: z.string().url().optional().or(z.literal("")),
+  ogImageUrl: assetUrlSchema,
   canonicalUrl: z.string().url().optional().or(z.literal("")),
   slug: z.string().min(3).max(40).regex(/^[a-z0-9-]+$/),
 });
@@ -49,7 +58,7 @@ export const storyMilestoneInputSchema = z.object({
   shortLabel: z.string().max(40).optional().or(z.literal("")),
   eventDateLabel: z.string().min(2).max(80),
   description: z.string().min(10).max(400),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: assetUrlSchema,
 });
 
 export const eventInputSchema = z.object({
@@ -64,7 +73,7 @@ export const eventInputSchema = z.object({
   googleMapsUrl: z.string().url().optional().or(z.literal("")),
   dressCode: z.string().max(140).optional().or(z.literal("")),
   notes: z.string().max(300).optional().or(z.literal("")),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: assetUrlSchema,
   rsvpRequired: z.boolean(),
   audience: z.enum(["ALL_GUESTS", "FAMILY_ONLY", "INVITE_ONLY"]),
   contactName: z.string().max(80).optional().or(z.literal("")),
@@ -123,6 +132,6 @@ export const dressCodeInputSchema = z.object({
   eventId: z.string().optional().or(z.literal("")),
   title: z.string().min(2).max(120),
   guidance: z.string().min(10).max(350),
-  inspirationImage: z.string().url().optional().or(z.literal("")),
+  inspirationImage: assetUrlSchema,
   palette: z.array(z.string().min(4)).max(6),
 });

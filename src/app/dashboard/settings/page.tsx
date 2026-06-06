@@ -4,6 +4,11 @@ import { SiteBasicsForm } from "@/components/admin/site-basics-form";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
 import { getSettingsSiteForUser } from "@/server/repositories/wedding-site";
+import {
+  directBlobUploadsEnabled,
+  storageUploadsConfigurationMessage,
+  storageUploadsConfigured,
+} from "@/server/storage/upload-config";
 
 export default async function DashboardSettingsPage() {
   const user = await requireUser();
@@ -41,6 +46,9 @@ export default async function DashboardSettingsPage() {
             canonicalUrl: site.canonicalUrl ?? "",
             slug: site.slug,
           }}
+          useSignedUploads={directBlobUploadsEnabled}
+          uploadsEnabled={storageUploadsConfigured}
+          disabledReason={storageUploadsConfigurationMessage}
         />
       </Card>
       <Card>

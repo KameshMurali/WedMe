@@ -7,6 +7,10 @@ import {
   imageMimeTypes,
   maxGuestVideoBytes,
   maxImageBytes,
+  maxSiteImageBytes,
+  maxSiteVideoBytes,
+  siteImageMimeTypes,
+  siteVideoMimeTypes,
   uploadTokenPayloadSchema,
 } from "@/lib/validations/upload";
 import { getCurrentUser } from "@/server/auth/session";
@@ -37,13 +41,23 @@ export async function POST(request: Request) {
 
     if (body.type === "blob.generate-client-token") {
       const payload = parseClientPayload(body.payload.clientPayload);
-      const rateLimit = await consumeRateLimit({
-        action: payload.scope === "admin" ? "admin_upload_token" : "guest_upload_token",
-        source: request,
-        limit: payload.scope === "admin" ? 30 : 6,
-        windowMs: 15 * 60 * 1000,
-        keyParts: payload.scope === "admin" ? [payload.category] : [payload.slug],
-      });
+        const rateLimit = await consumeRateLimit({
+          action:
+            payload.scope === "admin"
+              ? "admin_upload_token"
+              : payload.scope === "site_asset"
+                ? "site_asset_upload_token"
+                : "guest_upload_token",
+          source: request,
+          limit: payload.scope === "guest" ? 6 : 30,
+          windowMs: 15 * 60 * 1000,
+          keyParts:
+            payload.scope === "admin"
+              ? [payload.category]
+              : payload.scope === "site_asset"
+                ? [payload.field]
+                : [payload.slug],
+        });
 
       if (!rateLimit.ok) {
         return NextResponse.json(
@@ -65,7 +79,7 @@ export async function POST(request: Request) {
       onBeforeGenerateToken: async (pathname, clientPayload) => {
         const payload = parseClientPayload(clientPayload);
 
-        if (payload.scope === "admin") {
+        if (payload.scope === "admin" || payload.scope === "site_asset") {
           const user = await getCurrentUser();
           if (!user) {
             throw new Error("Please sign in to upload media.");
@@ -83,16 +97,22 @@ export async function POST(request: Request) {
             throw new Error("Upload destination is invalid for this workspace.");
           }
 
+          const isSiteVideoField = payload.scope === "site_asset" && payload.field === "heroVideoUrl";
+
           return {
-            allowedContentTypes: [...imageMimeTypes],
-            maximumSizeInBytes: maxImageBytes,
+            allowedContentTypes: isSiteVideoField ? [...siteVideoMimeTypes] : payload.scope === "site_asset" ? [...siteImageMimeTypes] : [...imageMimeTypes],
+            maximumSizeInBytes: isSiteVideoField
+              ? maxSiteVideoBytes
+              : payload.scope === "site_asset"
+                ? maxSiteImageBytes
+                : maxImageBytes,
             addRandomSuffix: true,
             validUntil: Date.now() + 5 * 60 * 1000,
             tokenPayload: JSON.stringify({
-              scope: "admin",
+              scope: payload.scope,
               siteId: site.id,
               slug: site.slug,
-              category: payload.category,
+              ...(payload.scope === "admin" ? { category: payload.category } : { field: payload.field }),
             }),
           };
         }

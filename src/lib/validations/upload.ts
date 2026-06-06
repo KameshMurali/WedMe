@@ -1,10 +1,15 @@
 import { z } from "zod";
 
 export const imageMimeTypes = ["image/jpeg", "image/png", "image/webp"] as const;
+export const siteVideoMimeTypes = ["video/mp4", "video/quicktime", "video/webm"] as const;
 export const guestVideoMimeTypes = ["video/mp4", "video/quicktime"] as const;
 export const guestMediaMimeTypes = [...imageMimeTypes, ...guestVideoMimeTypes] as const;
+export const siteImageMimeTypes = [...imageMimeTypes] as const;
+export const siteMediaMimeTypes = [...siteImageMimeTypes, ...siteVideoMimeTypes] as const;
 
 export const maxImageBytes = 8 * 1024 * 1024;
+export const maxSiteImageBytes = 2 * 1024 * 1024;
+export const maxSiteVideoBytes = 20 * 1024 * 1024;
 export const maxGuestVideoBytes = 40 * 1024 * 1024;
 
 const adminMimeTypeSchema = z.string().refine((value) => imageMimeTypes.includes(value as (typeof imageMimeTypes)[number]), {
@@ -46,10 +51,43 @@ export const uploadTokenPayloadSchema = z.discriminatedUnion("scope", [
     category: z.enum(["HERO", "STORY", "EVENT_BANNER", "GALLERY", "DRESS_CODE"]),
   }),
   z.object({
+    scope: z.literal("site_asset"),
+    field: z.enum(["heroImageUrl", "heroVideoUrl", "ogImageUrl"]),
+  }),
+  z.object({
     scope: z.literal("guest"),
     slug: z.string().min(3, "A wedding slug is required for guest uploads."),
   }),
 ]);
+
+export function validateSiteImageFile(file: File) {
+  if (!siteImageMimeTypes.includes(file.type as (typeof siteImageMimeTypes)[number])) {
+    throw new Error("Please upload a JPG, PNG, or WEBP image.");
+  }
+
+  if (file.size > maxSiteImageBytes) {
+    throw new Error("Images must be 2MB or smaller after optimisation.");
+  }
+}
+
+export function validateSiteVideoFile(file: File) {
+  if (!siteVideoMimeTypes.includes(file.type as (typeof siteVideoMimeTypes)[number])) {
+    throw new Error("Please upload an MP4, MOV, or WEBM video.");
+  }
+
+  if (file.size > maxSiteVideoBytes) {
+    throw new Error("Videos must be 20MB or smaller.");
+  }
+}
+
+export function validateSiteAssetFile(field: "heroImageUrl" | "heroVideoUrl" | "ogImageUrl", file: File) {
+  if (field === "heroVideoUrl") {
+    validateSiteVideoFile(file);
+    return;
+  }
+
+  validateSiteImageFile(file);
+}
 
 export function validateImageFile(file: File) {
   if (!imageMimeTypes.includes(file.type as (typeof imageMimeTypes)[number])) {
