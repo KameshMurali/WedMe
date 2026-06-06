@@ -5,7 +5,7 @@
 
 import { headers } from "next/headers";
 
-import { currencies, type CurrencyCode } from "@/lib/pricing";
+import { CURRENCY_COOKIE_NAME, currencies, type CurrencyCode } from "@/lib/pricing";
 
 // Country (ISO 3166-1 alpha-2) → currency we display. Bias toward the
 // "biggest neighbor" currency rather than a literal FX swap (e.g. all Eurozone
@@ -25,7 +25,6 @@ const COUNTRY_TO_CURRENCY: Record<string, CurrencyCode> = {
   AE: "AED", SA: "AED", QA: "AED", OM: "AED", BH: "AED", KW: "AED",
 };
 
-export const COOKIE_NAME = "tnb-currency";
 const FALLBACK: CurrencyCode = "USD";
 
 function isCurrency(value: string | undefined): value is CurrencyCode {
@@ -44,7 +43,7 @@ export async function detectCurrency(): Promise<CurrencyCode> {
   const h = await headers();
 
   const cookieHeader = h.get("cookie") ?? "";
-  const cookieMatch = cookieHeader.match(new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]+)`));
+  const cookieMatch = cookieHeader.match(new RegExp(`(?:^|; )${CURRENCY_COOKIE_NAME}=([^;]+)`));
   const cookieValue = cookieMatch ? decodeURIComponent(cookieMatch[1]) : undefined;
   if (isCurrency(cookieValue)) return cookieValue;
 

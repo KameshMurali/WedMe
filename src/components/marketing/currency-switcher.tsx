@@ -4,8 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Globe } from "lucide-react";
 
-import { currencies, type CurrencyCode } from "@/lib/pricing";
-import { COOKIE_NAME } from "@/lib/geo";
+import { CURRENCY_COOKIE_NAME, currencies, type CurrencyCode } from "@/lib/pricing";
 
 export function CurrencySwitcher({ current }: { current: CurrencyCode }) {
   const router = useRouter();
@@ -14,7 +13,7 @@ export function CurrencySwitcher({ current }: { current: CurrencyCode }) {
   function setCurrency(next: CurrencyCode) {
     // 1-year cookie so the user's choice sticks across visits.
     const maxAge = 60 * 60 * 24 * 365;
-    document.cookie = `${COOKIE_NAME}=${next}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+    document.cookie = `${CURRENCY_COOKIE_NAME}=${next}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
     startTransition(() => router.refresh());
   }
 
