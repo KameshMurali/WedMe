@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
+import { getPublicSiteStatus, getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
 
 type RouteParams = {
   params: Promise<{ slug: string }>;
@@ -47,7 +47,13 @@ export default async function WeddingSiteLayout({
   const snapshot = await getPublishedSiteSnapshot(slug);
 
   if (!snapshot) {
-    notFound();
+    // Page-level fallback may render a Coming Soon for draft sites; only 404
+    // when the slug truly doesn't exist (both layout and page must agree, or
+    // the layout's notFound() short-circuits the page's Coming Soon render).
+    const status = await getPublicSiteStatus(slug);
+    if (!status.exists) {
+      notFound();
+    }
   }
 
   return children;
