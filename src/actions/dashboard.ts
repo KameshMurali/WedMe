@@ -45,6 +45,21 @@ function revalidateDashboardPaths() {
   revalidatePath("/dashboard/preview");
 }
 
+// Scoped revalidation so a content edit doesn't needlessly invalidate the
+// events/rsvps/uploads dashboards (and vice versa). All of these affect the
+// draft preview, so it is always included.
+function revalidateContentPaths() {
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/content");
+  revalidatePath("/dashboard/preview");
+}
+
+function revalidateEventsPaths() {
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/events");
+  revalidatePath("/dashboard/preview");
+}
+
 function revalidatePublicSitePaths(slug: string) {
   revalidatePath(`/${slug}`);
   revalidatePath(`/${slug}/story`);
@@ -220,6 +235,7 @@ async function replaceCollection<T>(
   slug: string,
   items: T[],
   replace: (tx: Prisma.TransactionClient, items: T[]) => Promise<unknown>,
+  revalidate: () => void = revalidateContentPaths,
 ) {
   await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
     await replace(transaction, items);
@@ -229,7 +245,7 @@ async function replaceCollection<T>(
     });
   });
 
-  revalidateDashboardPaths();
+  revalidate();
 }
 
 function parseJsonArray<T>(formData: FormData, key: string) {
@@ -363,7 +379,7 @@ export async function replaceEventsAction(
           sortOrder: index,
         })),
       });
-    });
+    }, revalidateEventsPaths);
 
     return { success: "Events saved to draft." };
   } catch (error) {
@@ -399,7 +415,7 @@ export async function replaceScheduleItemsAction(
           sortOrder: index,
         })),
       });
-    });
+    }, revalidateEventsPaths);
 
     return { success: "Schedule items saved to draft." };
   } catch (error) {
