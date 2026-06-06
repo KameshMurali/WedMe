@@ -82,6 +82,9 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              <Button asChild variant="ghost">
+                <Link href="/pricing">Pricing</Link>
+              </Button>
               <Button asChild variant="outline">
                 <Link href={workspaceHref}>
                   <LogIn className="h-4 w-4" />
