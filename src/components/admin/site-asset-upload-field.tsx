@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CheckCircle2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -113,7 +114,17 @@ export function SiteAssetUploadField({
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  // Track the URL we just saved so we can show a brief "Just uploaded"
+  // confirmation in addition to the persistent "Saved" badge.
+  const [justUploadedUrl, setJustUploadedUrl] = useState<string | null>(null);
+  // Ref to the native file input so we can reset its visible filename after a
+  // successful upload (React state alone doesn't clear input.value).
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : currentUrl || null), [currentUrl, file]);
+  const showingLocalPreview = Boolean(file);
+  const showingSavedAsset = !file && Boolean(currentUrl);
+  const justUploaded = showingSavedAsset && justUploadedUrl === currentUrl;
 
   useEffect(() => {
     if (!file || !previewUrl || previewUrl === currentUrl) {
@@ -124,6 +135,14 @@ export function SiteAssetUploadField({
       URL.revokeObjectURL(previewUrl);
     };
   }, [currentUrl, file, previewUrl]);
+
+  // Dismiss the transient "Just uploaded" highlight after a few seconds — the
+  // persistent "Saved" badge stays so the user always knows the state.
+  useEffect(() => {
+    if (!justUploaded) return;
+    const timeout = window.setTimeout(() => setJustUploadedUrl(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [justUploaded]);
 
   async function handleUpload() {
     if (!uploadsEnabled) {
@@ -174,6 +193,12 @@ export function SiteAssetUploadField({
 
       onUploaded(data.url);
       setFile(null);
+      setJustUploadedUrl(data.url);
+      // Reset the native file input so it no longer shows the just-uploaded
+      // filename (otherwise it looks like a pending selection).
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       toast.success(
         data.success ??
           `${label} uploaded. ${kind === "image" ? `Optimised to stay under ${bytesToSize(maxSiteImageBytes)}.` : ""}`,
@@ -209,6 +234,7 @@ export function SiteAssetUploadField({
       ) : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
+          ref={fileInputRef}
           type="file"
           accept={kind === "image" ? "image/jpeg,image/png,image/webp" : "video/mp4,video/quicktime,video/webm"}
           disabled={!uploadsEnabled}
@@ -219,7 +245,36 @@ export function SiteAssetUploadField({
         </Button>
       </div>
       {previewUrl ? (
-        <div className="overflow-hidden rounded-[1.2rem] border border-black/8 bg-white/90 p-2">
+        <div
+          className={`relative overflow-hidden rounded-[1.2rem] border bg-white/90 p-2 transition ${
+            justUploaded
+              ? "border-emerald-300 ring-2 ring-emerald-200"
+              : showingLocalPreview
+                ? "border-amber-200"
+                : "border-black/8"
+          }`}
+        >
+          {/* Status badge — visible on the preview itself so the user always
+              knows whether they're looking at a local file pending upload or
+              the asset that's actually saved on their site. */}
+          <div className="absolute right-3 top-3 z-10">
+            {showingLocalPreview ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/95 px-3 py-1 text-xs font-semibold text-amber-900 shadow-sm ring-1 ring-amber-200">
+                <Eye className="h-3.5 w-3.5" />
+                Preview only — click {kind === "image" ? "Upload image" : "Upload video"} to save
+              </span>
+            ) : justUploaded ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/95 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm ring-1 ring-emerald-200">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Just uploaded
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-emerald-800 shadow-sm ring-1 ring-emerald-200">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Saved to your workspace
+              </span>
+            )}
+          </div>
           {kind === "image" ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={previewUrl} alt={`${label} preview`} className="max-h-72 w-full rounded-[1rem] object-cover" />

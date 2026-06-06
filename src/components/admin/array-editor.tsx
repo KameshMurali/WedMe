@@ -2,8 +2,8 @@
 
 import { useFieldArray, useForm, Controller, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, MapPin, Plus, Trash2, Upload } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { ArrowDown, ArrowUp, CheckCircle2, MapPin, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { uploadFileWithSignedUrl } from "@/lib/uploads/client";
@@ -326,6 +326,15 @@ function ImageUploadField({
   fieldName,
 }: Omit<SubFieldProps, "register">) {
   const [isUploading, setIsUploading] = useState(false);
+  // Track the URL we just uploaded so the preview can flag "Just uploaded"
+  // briefly, distinguishing from an image that was already saved earlier.
+  const [justUploadedUrl, setJustUploadedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!justUploadedUrl) return;
+    const timeout = window.setTimeout(() => setJustUploadedUrl(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [justUploadedUrl]);
 
   return (
     <label className="space-y-2 md:col-span-2">
@@ -349,6 +358,7 @@ function ImageUploadField({
                   payload: { scope: "admin", category },
                 });
                 controllerField.onChange(uploaded.uploadedUrl);
+                setJustUploadedUrl(uploaded.uploadedUrl);
                 toast.success("Image uploaded.");
                 return;
               }
@@ -369,6 +379,7 @@ function ImageUploadField({
               // surface success and let the user paste if needed.
               if (data.url) {
                 controllerField.onChange(data.url);
+                setJustUploadedUrl(data.url);
               }
               toast.success(data.success ?? "Image uploaded.");
             } catch (error) {
@@ -409,12 +420,30 @@ function ImageUploadField({
                 onChange={(event) => controllerField.onChange(event.target.value)}
               />
               {currentUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentUrl}
-                  alt="Preview"
-                  className="max-h-48 w-auto rounded-2xl border border-black/8 object-cover"
-                />
+                <div
+                  className={`relative inline-block overflow-hidden rounded-2xl border bg-white/90 p-1 transition ${
+                    justUploadedUrl === currentUrl
+                      ? "border-emerald-300 ring-2 ring-emerald-200"
+                      : "border-black/8"
+                  }`}
+                >
+                  <span
+                    className={`absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ring-1 ${
+                      justUploadedUrl === currentUrl
+                        ? "bg-emerald-100/95 text-emerald-900 ring-emerald-200"
+                        : "bg-white/95 text-emerald-800 ring-emerald-200"
+                    }`}
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                    {justUploadedUrl === currentUrl ? "Just uploaded" : "Saved"}
+                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentUrl}
+                    alt="Preview"
+                    className="max-h-48 w-auto rounded-xl object-cover"
+                  />
+                </div>
               ) : null}
             </div>
           );
