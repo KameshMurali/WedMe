@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { logoutAction } from "@/actions/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { IdleSessionGuard } from "@/components/auth/idle-session-guard";
 import { requireUser } from "@/server/auth/session";
 import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
 
@@ -56,6 +57,9 @@ export default async function DashboardLayout({
         status: site.publishSettings?.status ?? "DRAFT",
       }}
     >
+      {/* Show an inactivity warning before the JWT cookie quietly expires
+          (and to limit exposure on shared/forgotten devices). */}
+      <IdleSessionGuard />
       {children}
     </AdminShell>
   );

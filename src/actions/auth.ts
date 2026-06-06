@@ -22,7 +22,7 @@ import {
   resetPasswordSchema,
 } from "@/lib/validations/auth";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
-import { clearSessionCookie, setSessionCookie } from "@/server/auth/session";
+import { clearSessionCookie, getSession, setSessionCookie } from "@/server/auth/session";
 import { generatePlainToken, hashToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/prisma";
 import { consumeRateLimit } from "@/server/security/rate-limit";
@@ -444,4 +444,24 @@ export async function resetPasswordAction(
 export async function logoutAction() {
   await clearSessionCookie();
   redirect("/login");
+}
+
+// Re-issues the session cookie (same payload, fresh expiry) so the user
+// can extend their session from the idle-timeout dialog without re-login.
+export async function extendSessionAction(): Promise<
+  { ok: true } | { ok: false; reason: "expired" | "error" }
+> {
+  try {
+    const session = await getSession();
+    if (!session) return { ok: false, reason: "expired" };
+    await setSessionCookie({
+      userId: session.userId,
+      email: session.email,
+      role: session.role,
+    });
+    return { ok: true };
+  } catch (error) {
+    console.error("extendSessionAction failed", error);
+    return { ok: false, reason: "error" };
+  }
 }

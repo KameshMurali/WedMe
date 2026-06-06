@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { GallerySpotlight } from "@/components/public/gallery-spotlight";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { getYoutubeEmbedUrl } from "@/lib/youtube";
 import { cn, formatDate, formatEnumLabel, formatTimeRange, groupBy } from "@/lib/utils";
@@ -743,7 +744,9 @@ export function GallerySection({
   condensed?: boolean;
 }) {
   const gallery = assets.filter((asset) => asset.category === "GALLERY");
-  const items = condensed ? gallery.slice(0, 6) : gallery;
+  // The spotlight is cinematic — too few frames feel awkward, but capping
+  // condensed at 8 keeps the homepage scan-friendly.
+  const items = condensed ? gallery.slice(0, 8) : gallery;
 
   if (!items.length) {
     return <EmptyState title="Gallery is empty" description="Images will appear here once media has been added." />;
@@ -753,41 +756,19 @@ export function GallerySection({
     <section className="section-shell mt-24">
       <SectionHeading
         eyebrow="Gallery"
-        title="A performance-friendly image gallery with an editorial feel."
-        description="Couples can upload images, reorder them, and publish them in a polished visual story instead of a generic grid."
+        title="A cinematic editorial spotlight, one frame at a time."
+        description="A fast editorial spotlight with quick-select frames instead of a laggy drag rail. Tap, swipe, click, or use arrow keys."
       />
-      <div className="mt-10 grid auto-rows-[14rem] gap-4 md:grid-cols-3">
-        {items.map((asset, index) => {
-          const tall = index % 5 === 0 || index % 5 === 3;
-          const wide = index === 0 || index % 6 === 4;
-
-          return (
-            <div
-              key={asset.id}
-              className={cn(
-                "group relative overflow-hidden rounded-[calc(var(--radius)-0.2rem)] bg-white/72 rich-shadow",
-                tall ? "md:row-span-2" : "",
-                wide ? "md:col-span-2" : "",
-              )}
-            >
-              <Image
-                src={asset.url}
-                alt={asset.altText ?? asset.title ?? "Wedding gallery"}
-                width={1400}
-                height={1200}
-                // object-top keeps faces (which are at the top of typical
-                // wedding photos) in frame when the tile crops vertically.
-                className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.03]"
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-90" />
-              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                <p className="font-display text-3xl text-white">{asset.title ?? "Captured memory"}</p>
-                {asset.caption ? <p className="mt-2 max-w-xl text-sm text-white/78">{asset.caption}</p> : null}
-              </div>
-            </div>
-          );
-        })}
+      <div className="mt-10">
+        <GallerySpotlight
+          assets={items.map((asset) => ({
+            id: asset.id,
+            url: asset.url,
+            title: asset.title,
+            caption: asset.caption,
+            altText: asset.altText,
+          }))}
+        />
       </div>
     </section>
   );
