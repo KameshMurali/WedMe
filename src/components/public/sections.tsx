@@ -381,7 +381,7 @@ export function StorySection({
                   width={1200}
                   height={900}
                   sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="h-full min-h-[18rem] w-full object-cover"
+                  className="h-full min-h-[18rem] w-full object-cover object-top"
                 />
               ) : null}
               <div className="relative p-6 sm:p-8 lg:p-10">
@@ -435,7 +435,12 @@ export function EventsSection({
               index === 0 ? "lg:col-span-2" : "",
             )}
           >
-            <div className={cn("grid", index === 0 ? "lg:grid-cols-[1.05fr_0.95fr]" : "")}>
+            <div
+              className={cn(
+                "grid items-start",
+                index === 0 ? "lg:grid-cols-[1.05fr_0.95fr]" : "",
+              )}
+            >
               <div className="relative">
                 {event.imageUrl ? (
                   <Image
@@ -444,10 +449,23 @@ export function EventsSection({
                     width={1400}
                     height={920}
                     sizes={index === 0 ? "(max-width: 1024px) 100vw, 55vw" : "(max-width: 1024px) 100vw, 50vw"}
-                    className={cn("w-full object-cover", index === 0 ? "h-full min-h-[24rem]" : "h-64")}
+                    // Aspect ratio (not h-full) prevents the image from being
+                    // stretched to match a tall right-column text block and
+                    // then over-zoomed by object-cover. object-top keeps faces
+                    // (which live at the top of wedding photos) in frame even
+                    // when there's some vertical cropping.
+                    className={cn(
+                      "w-full object-cover object-top",
+                      index === 0 ? "aspect-[5/4]" : "h-64",
+                    )}
                   />
                 ) : (
-                  <div className={cn("bg-hero-mesh", index === 0 ? "h-full min-h-[24rem]" : "h-64")} />
+                  <div
+                    className={cn(
+                      "bg-hero-mesh",
+                      index === 0 ? "aspect-[5/4]" : "h-64",
+                    )}
+                  />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 flex flex-wrap gap-2">
