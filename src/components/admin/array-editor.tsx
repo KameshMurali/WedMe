@@ -1,11 +1,12 @@
 "use client";
 
-import { useFieldArray, useForm, Controller } from "react-hook-form";
+import { useFieldArray, useForm, Controller, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowDown, ArrowUp, MapPin, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { uploadFileWithSignedUrl } from "@/lib/uploads/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,9 +16,26 @@ type Option = { value: string; label: string };
 type FieldConfig = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "url" | "datetime-local" | "checkbox" | "select" | "array-text";
+  type:
+    | "text"
+    | "textarea"
+    | "url"
+    | "datetime-local"
+    | "checkbox"
+    | "select"
+    | "array-text"
+    | "maps-url"
+    | "image-upload";
   placeholder?: string;
   options?: Option[];
+  // For datetime-local: name of another field whose value is used as `min`.
+  minFromField?: string;
+  // For maps-url: name of another field to seed the Google Maps search query.
+  addressFromField?: string;
+  // For image-upload: which storage folder (e.g. site slug) and signed-upload mode.
+  uploadFolder?: string;
+  useSignedUploads?: boolean;
+  uploadCategory?: "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE";
 };
 
 type ActionResult = { error?: string; success?: string };
@@ -172,6 +190,44 @@ export function ArrayEditor({
                   );
                 }
 
+                if (field.type === "datetime-local") {
+                  return (
+                    <DateTimeField
+                      key={field.name}
+                      control={control}
+                      register={register}
+                      rowIndex={index}
+                      field={field}
+                      fieldName={fieldName}
+                    />
+                  );
+                }
+
+                if (field.type === "maps-url") {
+                  return (
+                    <MapsUrlField
+                      key={field.name}
+                      control={control}
+                      register={register}
+                      rowIndex={index}
+                      field={field}
+                      fieldName={fieldName}
+                    />
+                  );
+                }
+
+                if (field.type === "image-upload") {
+                  return (
+                    <ImageUploadField
+                      key={field.name}
+                      control={control}
+                      rowIndex={index}
+                      field={field}
+                      fieldName={fieldName}
+                    />
+                  );
+                }
+
                 return (
                   <label key={field.name} className="space-y-2">
                     <span className="text-sm text-[color:var(--muted)]">{field.label}</span>
@@ -187,5 +243,183 @@ export function ArrayEditor({
         </Button>
       </form>
     </Card>
+  );
+}
+
+type SubFieldProps = {
+  control: ReturnType<typeof useForm<{ items: Array<Record<string, unknown>> }>>["control"];
+  register: ReturnType<typeof useForm<{ items: Array<Record<string, unknown>> }>>["register"];
+  rowIndex: number;
+  field: FieldConfig;
+  fieldName: string;
+};
+
+// Datetime field that, when given `minFromField`, constrains its `min` to the value
+// of a sibling field in the same row (e.g. End >= Start). Falls back to "now" when
+// no source field is configured, so the user can't pick a past time.
+function DateTimeField({ control, register, rowIndex, field, fieldName }: SubFieldProps) {
+  // Always call useWatch (rules-of-hooks); pass a placeholder name when no source field is set.
+  const watched = useWatch({
+    control,
+    name: `items.${rowIndex}.${field.minFromField ?? "__noop__"}` as never,
+  }) as unknown;
+
+  const min = field.minFromField && typeof watched === "string" ? watched.trim() || undefined : undefined;
+
+  return (
+    <label className="space-y-2">
+      <span className="text-sm text-[color:var(--muted)]">{field.label}</span>
+      <Input
+        type="datetime-local"
+        placeholder={field.placeholder}
+        min={min}
+        {...register(fieldName as never)}
+      />
+    </label>
+  );
+}
+
+// URL input with a "Search on Google Maps" helper. The user types/pastes the share
+// URL in the input; the helper opens Maps prefilled with the row's address so they
+// can grab the URL without leaving the page. Cheap, no API key required.
+function MapsUrlField({ control, register, rowIndex, field, fieldName }: SubFieldProps) {
+  const watched = useWatch({
+    control,
+    name: `items.${rowIndex}.${field.addressFromField ?? "__noop__"}` as never,
+  }) as unknown;
+
+  const searchQuery = field.addressFromField && typeof watched === "string" ? watched.trim() : "";
+  const mapsHref = searchQuery
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`
+    : "https://www.google.com/maps";
+
+  return (
+    <label className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm text-[color:var(--muted)]">{field.label}</span>
+        <a
+          href={mapsHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--primary)] hover:underline"
+        >
+          <MapPin className="h-3.5 w-3.5" />
+          Search on Google Maps
+        </a>
+      </div>
+      <Input
+        type="url"
+        placeholder={field.placeholder ?? "https://maps.google.com/..."}
+        {...register(fieldName as never)}
+      />
+    </label>
+  );
+}
+
+// File-picker that uploads via the existing signed-blob primitive (or direct POST
+// in local mode) and writes the resulting URL into the form's underlying string
+// field. The user can still paste a URL directly into the text input if they prefer.
+function ImageUploadField({
+  control,
+  rowIndex,
+  field,
+  fieldName,
+}: Omit<SubFieldProps, "register">) {
+  const [isUploading, setIsUploading] = useState(false);
+
+  return (
+    <label className="space-y-2 md:col-span-2">
+      <span className="text-sm text-[color:var(--muted)]">{field.label}</span>
+      <Controller
+        control={control}
+        name={fieldName as never}
+        render={({ field: controllerField }) => {
+          const currentUrl = typeof controllerField.value === "string" ? controllerField.value : "";
+
+          async function handleFile(file: File) {
+            try {
+              setIsUploading(true);
+              const folder = field.uploadFolder || "uploads";
+              const category = field.uploadCategory ?? "EVENT_BANNER";
+
+              if (field.useSignedUploads) {
+                const uploaded = await uploadFileWithSignedUrl({
+                  folder,
+                  file,
+                  payload: { scope: "admin", category },
+                });
+                controllerField.onChange(uploaded.uploadedUrl);
+                toast.success("Image uploaded.");
+                return;
+              }
+
+              const formData = new FormData();
+              formData.append("category", category);
+              formData.append("file", file);
+              const response = await fetch("/api/uploads/admin", {
+                method: "POST",
+                body: formData,
+              });
+              const data = (await response.json()) as { error?: string; success?: string; url?: string };
+              if (!response.ok) {
+                toast.error(data.error ?? "Upload failed.");
+                return;
+              }
+              // Local-storage admin upload route doesn't return the URL today;
+              // surface success and let the user paste if needed.
+              if (data.url) {
+                controllerField.onChange(data.url);
+              }
+              toast.success(data.success ?? "Image uploaded.");
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Upload failed.");
+            } finally {
+              setIsUploading(false);
+            }
+          }
+
+          return (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <label
+                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-black/10 bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--text)] transition hover:bg-white ${
+                    isUploading ? "pointer-events-none opacity-60" : ""
+                  }`}
+                >
+                  <Upload className="h-4 w-4" />
+                  {isUploading ? "Uploading…" : currentUrl ? "Replace image" : "Upload from device"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={isUploading}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void handleFile(file);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+                <span className="text-xs text-[color:var(--muted)]">or paste an image URL</span>
+              </div>
+              <Input
+                type="url"
+                placeholder="https://..."
+                value={currentUrl}
+                onChange={(event) => controllerField.onChange(event.target.value)}
+              />
+              {currentUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={currentUrl}
+                  alt="Preview"
+                  className="max-h-48 w-auto rounded-2xl border border-black/8 object-cover"
+                />
+              ) : null}
+            </div>
+          );
+        }}
+      />
+    </label>
   );
 }

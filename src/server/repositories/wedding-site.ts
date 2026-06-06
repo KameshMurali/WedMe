@@ -262,6 +262,7 @@ const contentEditorSelect = {
 } satisfies Prisma.WeddingSiteSelect;
 
 const eventsEditorSelect = {
+  slug: true,
   events: {
     select: {
       title: true,

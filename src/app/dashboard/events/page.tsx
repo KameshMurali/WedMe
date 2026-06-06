@@ -3,6 +3,7 @@ import { ArrayEditor } from "@/components/admin/array-editor";
 import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { requireUser } from "@/server/auth/session";
 import { getEventsEditorSiteForUser } from "@/server/repositories/wedding-site";
+import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
 
 function toDateTimeLocal(date: Date) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -71,14 +72,26 @@ export default async function DashboardEventsPage() {
           { name: "subtitle", label: "Subtitle", type: "text" },
           { name: "description", label: "Description", type: "textarea" },
           { name: "startDateTime", label: "Starts", type: "datetime-local" },
-          { name: "endDateTime", label: "Ends", type: "datetime-local" },
+          { name: "endDateTime", label: "Ends", type: "datetime-local", minFromField: "startDateTime" },
           { name: "dayLabel", label: "Day label", type: "text" },
           { name: "locationName", label: "Location name", type: "text" },
           { name: "fullAddress", label: "Full address", type: "textarea" },
-          { name: "googleMapsUrl", label: "Google Maps URL", type: "url" },
+          {
+            name: "googleMapsUrl",
+            label: "Google Maps URL",
+            type: "maps-url",
+            addressFromField: "fullAddress",
+          },
           { name: "dressCode", label: "Dress code", type: "text" },
           { name: "notes", label: "Notes", type: "textarea" },
-          { name: "imageUrl", label: "Image URL", type: "url" },
+          {
+            name: "imageUrl",
+            label: "Event image",
+            type: "image-upload",
+            uploadFolder: site.slug,
+            useSignedUploads: directBlobUploadsEnabled,
+            uploadCategory: "EVENT_BANNER",
+          },
           {
             name: "audience",
             label: "Audience",
@@ -121,7 +134,7 @@ export default async function DashboardEventsPage() {
           { name: "category", label: "Category", type: "text" },
           { name: "description", label: "Description", type: "textarea" },
           { name: "startDateTime", label: "Starts", type: "datetime-local" },
-          { name: "endDateTime", label: "Ends", type: "datetime-local" },
+          { name: "endDateTime", label: "Ends", type: "datetime-local", minFromField: "startDateTime" },
           { name: "dayLabel", label: "Day label", type: "text" },
           { name: "locationName", label: "Location name", type: "text" },
         ]}
