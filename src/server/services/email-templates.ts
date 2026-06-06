@@ -43,7 +43,7 @@ export function buildWelcomeEmail(input: WelcomeEmailInput) {
     `Verify your email to unlock everything: ${input.verificationUrl}`,
     "",
     `Your dashboard: ${dashboardUrl}`,
-    `Your public wedding site: ${publicSiteUrl}`,
+    `Your public wedding site (goes live when you publish): ${publicSiteUrl}`,
     "",
     "Next steps you can take from the dashboard:",
     "  • Pick a template and customize colors",
@@ -91,7 +91,7 @@ export function buildWelcomeEmail(input: WelcomeEmailInput) {
                   </tr>
                   <tr>
                     <td style="padding:10px 0;font-size:15px;color:#6b554f;">
-                      <strong style="color:#2b1a18;">Your public site</strong><br />
+                      <strong style="color:#2b1a18;">Your public site</strong> <span style="color:#9a7a6a;font-size:13px;">(goes live when you publish)</span><br />
                       <a href="${escape(publicSiteUrl)}" style="color:#7a4b3a;text-decoration:none;">${escape(publicSiteUrl)}</a>
                     </td>
                   </tr>

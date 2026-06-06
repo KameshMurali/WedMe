@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { ComingSoonPage } from "@/components/public/coming-soon";
 import {
   DressCodeSection,
   EventsSection,
@@ -12,7 +13,7 @@ import {
   VideoSection,
 } from "@/components/public/sections";
 import { SiteShell } from "@/components/public/site-shell";
-import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
+import { getPublicSiteStatus, getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
 
 export default async function WeddingHomePage({
   params,
@@ -23,6 +24,21 @@ export default async function WeddingHomePage({
   const snapshot = await getPublishedSiteSnapshot(slug);
 
   if (!snapshot) {
+    // Snapshot is null either because the slug doesn't exist OR because the
+    // site exists but is still a draft (and the visitor isn't the owner).
+    // Differentiate so we can show a friendly "coming soon" page instead of a
+    // dead-end 404 for new accounts whose welcome email URL hasn't been
+    // published yet.
+    const status = await getPublicSiteStatus(slug);
+    if (status.exists && !status.isPublished) {
+      return (
+        <ComingSoonPage
+          brandName={status.brandName}
+          coupleNames={status.coupleNames}
+          weddingDate={status.weddingDate}
+        />
+      );
+    }
     notFound();
   }
 

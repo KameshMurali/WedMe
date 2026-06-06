@@ -5,6 +5,7 @@ import { findTemplateByKey } from "@/lib/template-registry";
 import type { SiteSnapshot } from "@/types";
 import { getSession } from "@/server/auth/session";
 import { demoSiteSnapshot, isDemoSiteSlug, isDemoUserId } from "@/server/services/demo-site";
+import { prisma } from "@/server/prisma";
 import {
   getWeddingSiteBySlug,
   getWeddingSiteForUser,
@@ -438,6 +439,51 @@ const loadDraftSiteSnapshotForUser = cache(async (userId: string) => {
 
 export async function getDraftSiteSnapshotForUser(userId: string) {
   return loadDraftSiteSnapshotForUser(userId);
+}
+
+export type PublicSiteStatus =
+  | { exists: false }
+  | {
+      exists: true;
+      isPublished: boolean;
+      brandName: string;
+      coupleNames: string;
+      weddingDate: Date;
+    };
+
+// Lightweight lookup used to render a friendly "coming soon" page when a slug
+// exists but is still in draft (so the welcome-email URL never dead-ends as 404).
+const loadPublicSiteStatus = cache(async (slug: string): Promise<PublicSiteStatus> => {
+  try {
+    const record = await prisma.weddingSite.findUnique({
+      where: { slug },
+      select: {
+        brandName: true,
+        weddingDate: true,
+        couple: { select: { partnerOneName: true, partnerTwoName: true } },
+        publishSettings: { select: { status: true } },
+      },
+    });
+    if (!record) return { exists: false };
+    const partnerOne = record.couple?.partnerOneName?.trim();
+    const partnerTwo = record.couple?.partnerTwoName?.trim();
+    const coupleNames =
+      [partnerOne, partnerTwo].filter(Boolean).join(" & ") || record.brandName;
+    return {
+      exists: true,
+      isPublished: record.publishSettings?.status === "PUBLISHED",
+      brandName: record.brandName,
+      coupleNames,
+      weddingDate: record.weddingDate,
+    };
+  } catch (error) {
+    console.error("loadPublicSiteStatus failed", error);
+    return { exists: false };
+  }
+});
+
+export async function getPublicSiteStatus(slug: string) {
+  return loadPublicSiteStatus(slug);
 }
 
 export function buildPublishSnapshot(record: WeddingSiteRecord) {
