@@ -343,6 +343,13 @@ const uploadManagerSelect = {
       message: true,
       type: true,
       status: true,
+      // Couples need to see what they're approving — surface the media URL,
+      // external link, mime, size, and submission timestamp.
+      url: true,
+      externalUrl: true,
+      mimeType: true,
+      sizeBytes: true,
+      createdAt: true,
       event: {
         select: {
           title: true,
