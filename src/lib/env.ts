@@ -16,7 +16,8 @@ const environmentSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().default("ToNewBeginning.com <noreply@tonewbeginning.com>"),
-  EMAIL_DELIVERY_MODE: z.enum(["console", "smtp"]).default("console"),
+  EMAIL_DELIVERY_MODE: z.enum(["console", "smtp", "resend"]).default("console"),
+  RESEND_API_KEY: z.string().optional(),
 });
 
 export const env = environmentSchema.parse({
@@ -36,4 +37,5 @@ export const env = environmentSchema.parse({
   SMTP_PASSWORD: process.env.SMTP_PASSWORD,
   SMTP_FROM: process.env.SMTP_FROM,
   EMAIL_DELIVERY_MODE: process.env.EMAIL_DELIVERY_MODE,
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
 });

@@ -1,3 +1,5 @@
+import { Resend } from "resend";
+
 import { env } from "@/lib/env";
 
 type SmtpTransport = {
@@ -32,10 +34,40 @@ type EmailPayload = {
   text: string;
 };
 
+// Lazily instantiate the Resend client so missing creds in console-mode dev
+// don't break the import.
+let resendClient: Resend | null = null;
+function getResend() {
+  if (!env.RESEND_API_KEY) {
+    throw new Error("Resend delivery is enabled, but RESEND_API_KEY is missing.");
+  }
+  if (!resendClient) {
+    resendClient = new Resend(env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
+
 export async function sendEmail(payload: EmailPayload) {
+  // Treat any mode as console when RESEND_API_KEY is set and mode is "resend".
+  // Order: console (explicit) -> resend (if configured) -> smtp.
   if (env.EMAIL_DELIVERY_MODE === "console") {
     console.info("EMAIL_PREVIEW", payload);
     return { delivered: false, preview: payload };
+  }
+
+  if (env.EMAIL_DELIVERY_MODE === "resend") {
+    const resend = getResend();
+    const { error } = await resend.emails.send({
+      from: env.SMTP_FROM,
+      to: payload.to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    });
+    if (error) {
+      throw new Error(`Resend send failed: ${error.message ?? "unknown error"}`);
+    }
+    return { delivered: true };
   }
 
   if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASSWORD) {

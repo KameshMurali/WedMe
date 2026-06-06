@@ -28,6 +28,7 @@ import { prisma } from "@/server/prisma";
 import { consumeRateLimit } from "@/server/security/rate-limit";
 import { demoSessionUser, matchesDemoCredentials } from "@/server/services/demo-site";
 import { sendEmail } from "@/server/services/email";
+import { buildWelcomeEmail } from "@/server/services/email-templates";
 import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 
 async function redirectToWorkspace(): Promise<never> {
@@ -218,13 +219,25 @@ export async function registerAction(
   }
 
   try {
+    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+    const welcome = buildWelcomeEmail({
+      brandName,
+      partnerOneName,
+      partnerTwoName,
+      slug,
+      weddingDate: new Date(weddingDate),
+      verificationUrl: `${appUrl}/verify-email/${verificationToken}`,
+      appUrl,
+    });
+
     await sendEmail({
       to: email,
-      subject: `Welcome to ${brandName}`,
-      text: `Your ToNewBeginning.com workspace is ready. Verify your email by visiting ${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}`,
-      html: `<p>Your ToNewBeginning.com workspace is ready.</p><p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/verify-email/${verificationToken}">Verify your email</a></p>`,
+      subject: welcome.subject,
+      text: welcome.text,
+      html: welcome.html,
     });
   } catch (error) {
+    // Welcome email is best-effort: registration must succeed even if delivery fails.
     console.error("registerAction email send failed", error);
   }
 
