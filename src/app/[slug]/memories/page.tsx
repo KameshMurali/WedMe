@@ -49,7 +49,7 @@ export default async function MemoriesPage({ params }: { params: Promise<{ slug:
                         width={1200}
                         height={900}
                         sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="h-64 w-full object-cover"
+                        className="h-64 w-full object-cover object-top"
                       />
                     ) : (
                       <video src={upload.url} controls className="h-64 w-full object-cover" />

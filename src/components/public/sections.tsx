@@ -629,7 +629,7 @@ export function DressCodeSection({ guides }: { guides: SiteSnapshot["dressCodeGu
                   width={1200}
                   height={960}
                   sizes="(max-width: 1024px) 100vw, 25vw"
-                  className="h-full min-h-[18rem] w-full object-cover"
+                  className="h-full min-h-[18rem] w-full object-cover object-top"
                 />
               ) : (
                 <div className="min-h-[18rem] bg-hero-mesh" />
@@ -775,7 +775,9 @@ export function GallerySection({
                 alt={asset.altText ?? asset.title ?? "Wedding gallery"}
                 width={1400}
                 height={1200}
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                // object-top keeps faces (which are at the top of typical
+                // wedding photos) in frame when the tile crops vertically.
+                className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.03]"
                 sizes="(max-width: 768px) 100vw, 33vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-90" />
