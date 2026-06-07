@@ -91,6 +91,23 @@ export function SiteBasicsForm({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Partner one name" error={errors.partnerOneName?.message}>
+          <Input
+            aria-invalid={Boolean(errors.partnerOneName)}
+            placeholder="Partner one name"
+            {...register("partnerOneName")}
+          />
+        </Field>
+        <Field label="Partner two name" error={errors.partnerTwoName?.message}>
+          <Input
+            aria-invalid={Boolean(errors.partnerTwoName)}
+            placeholder="Partner two name"
+            {...register("partnerTwoName")}
+          />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
         <Field label="Brand name" error={errors.brandName?.message}>
           <Input aria-invalid={Boolean(errors.brandName)} placeholder="Brand name" {...register("brandName")} />
         </Field>

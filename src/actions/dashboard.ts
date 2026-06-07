@@ -95,12 +95,26 @@ export async function updateSiteBasicsAction(
     return { error: parsed.error.issues[0]?.message ?? "Please review the site basics form." };
   }
 
+  const currentDefaultHeadline = `${site.couple.partnerOneName} & ${site.couple.partnerTwoName} are getting married`;
+  const nextDefaultHeadline = `${parsed.data.partnerOneName} & ${parsed.data.partnerTwoName} are getting married`;
+  const resolvedHeadline =
+    parsed.data.headline === currentDefaultHeadline ? nextDefaultHeadline : parsed.data.headline;
+
   await prisma.$transaction([
+    prisma.couple.update({
+      where: { id: site.couple.id },
+      data: {
+        partnerOneName: parsed.data.partnerOneName,
+        partnerTwoName: parsed.data.partnerTwoName,
+        brandName: parsed.data.brandName,
+        weddingDate: new Date(parsed.data.weddingDate),
+      },
+    }),
     prisma.weddingSite.update({
       where: { id: site.id },
       data: {
         brandName: parsed.data.brandName,
-        headline: parsed.data.headline,
+        headline: resolvedHeadline,
         subtitle: parsed.data.subtitle || null,
         tagline: parsed.data.tagline || null,
         weddingDate: new Date(parsed.data.weddingDate),

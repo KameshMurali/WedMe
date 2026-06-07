@@ -12,6 +12,8 @@ const assetUrlSchema = z
   .or(z.literal(""));
 
 export const siteBasicsSchema = z.object({
+  partnerOneName: z.string().min(2).max(80),
+  partnerTwoName: z.string().min(2).max(80),
   brandName: z.string().min(3).max(120),
   headline: z.string().min(10).max(180),
   subtitle: z.string().max(200).optional().or(z.literal("")),

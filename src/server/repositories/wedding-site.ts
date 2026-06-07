@@ -117,6 +117,14 @@ export const weddingSiteInclude = {
 const editableWeddingSiteSelect = {
   id: true,
   slug: true,
+  headline: true,
+  couple: {
+    select: {
+      id: true,
+      partnerOneName: true,
+      partnerTwoName: true,
+    },
+  },
 } satisfies Prisma.WeddingSiteSelect;
 
 const workspaceShellSelect = {
@@ -379,6 +387,12 @@ const settingsSiteSelect = {
   id: true,
   slug: true,
   brandName: true,
+  couple: {
+    select: {
+      partnerOneName: true,
+      partnerTwoName: true,
+    },
+  },
   headline: true,
   subtitle: true,
   tagline: true,

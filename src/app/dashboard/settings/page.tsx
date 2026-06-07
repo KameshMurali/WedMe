@@ -32,6 +32,8 @@ export default async function DashboardSettingsPage() {
       <Card>
         <SiteBasicsForm
           defaultValues={{
+            partnerOneName: site.couple.partnerOneName,
+            partnerTwoName: site.couple.partnerTwoName,
             brandName: site.brandName,
             headline: site.headline,
             subtitle: site.subtitle ?? "",
