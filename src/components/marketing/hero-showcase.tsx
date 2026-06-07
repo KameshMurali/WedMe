@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarRange, ImageIcon, Palette, Sparkles } from "lucide-react";
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, useReducedMotion, type TargetAndTransition, type Variants } from "motion/react";
 
 const cards = [
   {
@@ -88,8 +88,8 @@ export function HeroShowcase() {
         {cards.map((card, index) => {
           const Icon = card.icon;
           // Gentle, staggered infinite float (disabled for reduced motion).
-          const float = reduce
-            ? {}
+          const float: TargetAndTransition | undefined = reduce
+            ? undefined
             : {
                 y: [0, index % 2 === 0 ? -10 : -6, 0],
                 transition: {
