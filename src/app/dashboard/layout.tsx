@@ -3,7 +3,7 @@ import Link from "next/link";
 import { logoutAction } from "@/actions/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { IdleSessionGuard } from "@/components/auth/idle-session-guard";
-import { requireUser } from "@/server/auth/session";
+import { isAdminUser, requireUser } from "@/server/auth/session";
 import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
 
 export default async function DashboardLayout({
@@ -56,6 +56,7 @@ export default async function DashboardLayout({
         coupleNames: `${site.couple.partnerOneName} & ${site.couple.partnerTwoName}`,
         status: site.publishSettings?.status ?? "DRAFT",
       }}
+      isAdmin={isAdminUser(user)}
     >
       {/* Show an inactivity warning before the JWT cookie quietly expires
           (and to limit exposure on shared/forgotten devices). */}

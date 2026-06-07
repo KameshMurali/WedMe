@@ -4,7 +4,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Eye, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users } from "lucide-react";
+import { Eye, ListChecks, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ const navigation: Array<{ href: Route; label: string; icon: typeof Sparkles }> =
 
 export function AdminShell({
   site,
+  isAdmin = false,
   children,
 }: {
   site: {
@@ -33,10 +34,16 @@ export function AdminShell({
     coupleNames: string;
     status: string;
   };
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const isPublished = site.status === "PUBLISHED";
+
+  // Admin-only nav additions, appended after the standard couple navigation.
+  const navItems = isAdmin
+    ? [...navigation, { href: "/dashboard/waitlist" as Route, label: "Waitlist", icon: ListChecks }]
+    : navigation;
 
   useEffect(() => {
     if (!dashboardRoutes.includes(pathname as (typeof dashboardRoutes)[number])) return;
@@ -71,7 +78,7 @@ export function AdminShell({
             ) : null}
           </Card>
           <Card className="space-y-2 p-3">
-            {navigation.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               const active = pathname === item.href;
               return (

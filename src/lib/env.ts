@@ -18,6 +18,9 @@ const environmentSchema = z.object({
   SMTP_FROM: z.string().default("ToNewBeginning.com <noreply@tonewbeginning.com>"),
   EMAIL_DELIVERY_MODE: z.enum(["console", "smtp", "resend"]).default("console"),
   RESEND_API_KEY: z.string().optional(),
+  // Comma-separated list of emails granted admin access (waitlist viewer, etc.)
+  // without needing a DB role change. e.g. "you@example.com,ops@example.com".
+  ADMIN_EMAILS: z.string().optional(),
 });
 
 export const env = environmentSchema.parse({
@@ -38,4 +41,5 @@ export const env = environmentSchema.parse({
   SMTP_FROM: process.env.SMTP_FROM,
   EMAIL_DELIVERY_MODE: process.env.EMAIL_DELIVERY_MODE,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
+  ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 });
