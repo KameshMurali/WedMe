@@ -4,6 +4,7 @@ import { DashboardUnavailableState } from "@/components/admin/dashboard-unavaila
 import { requireUser } from "@/server/auth/session";
 import { getEventsEditorSiteForUser } from "@/server/repositories/wedding-site";
 import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
+import { effectiveEventCap, getPlanLimits, getWorkspacePlanKey } from "@/server/services/plan";
 
 function toDateTimeLocal(date: Date) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -21,6 +22,13 @@ export default async function DashboardEventsPage() {
       />
     );
   }
+
+  // Plan-driven event cap (null = unlimited), grandfathered to the site's
+  // current event count so existing over-limit sites can still edit. Mirrors
+  // the server enforcement in replaceEventsAction.
+  const planKey = getWorkspacePlanKey();
+  const baseEventLimit = getPlanLimits(planKey).maxEvents;
+  const eventLimit = effectiveEventCap(planKey, site.events.length);
 
   return (
     <div className="space-y-6">
@@ -107,6 +115,14 @@ export default async function DashboardEventsPage() {
           { name: "rsvpRequired", label: "RSVP required", type: "checkbox" },
         ]}
         onSave={replaceEventsAction}
+        maxItems={eventLimit ?? undefined}
+        maxItemsNote={
+          eventLimit
+            ? baseEventLimit !== null && eventLimit > baseEventLimit
+              ? `You're at your current event limit (${eventLimit}). Upgrade to Together to add more events.`
+              : `Your free plan includes up to ${eventLimit} events. Upgrade to Together for unlimited events.`
+            : undefined
+        }
       />
       <ArrayEditor
         title="Schedule items"

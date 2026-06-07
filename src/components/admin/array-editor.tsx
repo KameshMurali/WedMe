@@ -47,6 +47,8 @@ export function ArrayEditor({
   items,
   emptyItem,
   onSave,
+  maxItems,
+  maxItemsNote,
 }: {
   title: string;
   description: string;
@@ -54,6 +56,10 @@ export function ArrayEditor({
   items: Array<Record<string, unknown>>;
   emptyItem: Record<string, unknown>;
   onSave: (previousState: ActionResult, formData: FormData) => Promise<ActionResult>;
+  // Optional plan-driven cap. When set, "Add item" is disabled at the limit
+  // and an upgrade note is shown. The server still enforces this authoritatively.
+  maxItems?: number;
+  maxItemsNote?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -64,6 +70,7 @@ export function ArrayEditor({
     control,
     name: "items" as const,
   });
+  const atLimit = typeof maxItems === "number" && rows.length >= maxItems;
 
   const onSubmit = handleSubmit((values) => {
     const formData = new FormData();
@@ -87,15 +94,31 @@ export function ArrayEditor({
           <h3 className="font-display text-4xl text-[color:var(--text)]">{title}</h3>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">{description}</p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => append(JSON.parse(JSON.stringify(emptyItem)) as Record<string, unknown>)}
-        >
-          <Plus className="h-4 w-4" />
-          Add item
-        </Button>
+        <div className="flex flex-col items-end gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={atLimit}
+            onClick={() => {
+              if (atLimit) return;
+              append(JSON.parse(JSON.stringify(emptyItem)) as Record<string, unknown>);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Add item
+          </Button>
+          {typeof maxItems === "number" ? (
+            <span className="text-[11px] text-[color:var(--muted)]">
+              {rows.length}/{maxItems} used
+            </span>
+          ) : null}
+        </div>
       </div>
+      {atLimit && maxItemsNote ? (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+          {maxItemsNote}
+        </div>
+      ) : null}
       <form onSubmit={onSubmit} className="mt-8 space-y-5">
         {rows.map((row, index) => (
           <Card key={row.id} className="border border-black/6 bg-white/70">

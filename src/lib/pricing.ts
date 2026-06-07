@@ -65,6 +65,20 @@ export type Plan = {
   launchOfferPct?: number; // optional discount applied during launch offer window
 };
 
+// Structured, enforceable plan limits — the single source of truth that both
+// the marketing copy and the server-side quota checks must agree with.
+// `null` means unlimited. Keep these in sync with each plan's `highlights`.
+export type PlanLimits = {
+  maxEvents: number | null;
+  maxRsvps: number | null;
+};
+
+export const planLimits: Record<PlanKey, PlanLimits> = {
+  hello: { maxEvents: 2, maxRsvps: 50 },
+  together: { maxEvents: null, maxRsvps: null },
+  forever: { maxEvents: null, maxRsvps: null },
+};
+
 export const plans: Plan[] = [
   {
     key: "hello",

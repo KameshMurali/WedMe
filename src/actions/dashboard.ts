@@ -23,6 +23,7 @@ import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getEditableWeddingSiteForUser, getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
+import { effectiveEventCap, getPlanLimits, getWorkspacePlanKey } from "@/server/services/plan";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
 import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
@@ -368,6 +369,22 @@ export async function replaceEventsAction(
     if (readOnlyState) return readOnlyState;
 
     const items = eventInputSchema.array().parse(parseJsonArray(formData, "items"));
+
+    // Enforce the plan's event quota (authoritative — the UI guard is
+    // convenience only). Grandfathered: sites already over the limit keep
+    // their current count and can edit/reduce, but can't add beyond it.
+    const planKey = getWorkspacePlanKey();
+    const currentCount = await prisma.event.count({ where: { weddingSiteId: site.id } });
+    const cap = effectiveEventCap(planKey, currentCount);
+    if (cap !== null && items.length > cap) {
+      const baseLimit = getPlanLimits(planKey).maxEvents;
+      return {
+        error:
+          currentCount > (baseLimit ?? 0)
+            ? `You're at your current event limit (${cap}). Upgrade to Together to add more events.`
+            : `Your plan includes up to ${cap} events. Upgrade to Together for unlimited events.`,
+      };
+    }
 
     await replaceCollection(site.id, site.slug, items, async (transaction, events) => {
       await transaction.event.deleteMany({ where: { weddingSiteId: site.id } });
