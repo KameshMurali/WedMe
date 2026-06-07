@@ -519,3 +519,18 @@ model RateLimitBucket {
   @@unique([action, keyHash, windowStart], map: "rate_limit_bucket_action_key_window")
   @@index([expiresAt])
 }
+
+// Founding-couple waitlist: captures interest in paid plans before Checkout
+// goes live. One row per (email, plan) so the same person can register
+// interest in multiple tiers without duplicate spam.
+model WaitlistSignup {
+  id        String   @id @default(cuid())
+  email     String
+  planKey   String
+  currency  String
+  source    String?
+  createdAt DateTime @default(now())
+
+  @@unique([email, planKey])
+  @@index([planKey])
+}

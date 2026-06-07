@@ -2,9 +2,11 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Check, Gift } from "lucide-react";
 
+import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { Button } from "@/components/ui/button";
 import {
   applyLaunchOffer,
+  checkoutEnabled,
   currencies,
   isLaunchOfferActive,
   type CurrencyCode,
@@ -98,9 +100,21 @@ export function PricingCard({
       </ul>
 
       <div className="mt-8 flex flex-col gap-3">
-        <Button asChild variant={emphasis ? "solid" : "outline"}>
-          <Link href={registerHref}>{plan.ctaLabel}</Link>
-        </Button>
+        {plan.recurrence === "free" || checkoutEnabled ? (
+          // Free tier always links to register; paid tiers link to Checkout
+          // once it's live.
+          <Button asChild variant={emphasis ? "solid" : "outline"}>
+            <Link href={registerHref}>{plan.ctaLabel}</Link>
+          </Button>
+        ) : (
+          // Pre-launch: capture interest instead of taking payment.
+          <WaitlistForm
+            planKey={plan.key}
+            planName={plan.name}
+            currency={currency}
+            ctaLabel={`Notify me when ${plan.name} launches`}
+          />
+        )}
         {plan.key === "forever" ? (
           <p className="inline-flex items-center justify-center gap-2 text-xs text-[color:var(--muted)]">
             <Gift className="h-3.5 w-3.5" />

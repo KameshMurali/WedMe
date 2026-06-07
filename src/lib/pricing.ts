@@ -9,6 +9,12 @@ export type CurrencyCode = "INR" | "USD" | "GBP" | "EUR" | "AED";
 // geo.ts depends on next/headers and can't enter the client bundle.
 export const CURRENCY_COOKIE_NAME = "tnb-currency";
 
+// Master switch for monetization rollout.
+//   false → paid tiers show a "Notify me — founding-couple pricing" waitlist
+//           capture (validate demand before payments exist).
+//   true  → paid tiers link to real Checkout (flip this when Stripe is wired).
+export const checkoutEnabled = false;
+
 export type PriceAmount = {
   amount: number; // integer in MAJOR units (we don't need cents for these prices)
   display: string; // pre-formatted for paste into headlines (e.g. "$49")
