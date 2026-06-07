@@ -3,9 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import {
   ArrowRight,
-  CalendarRange,
   HeartHandshake,
-  ImageIcon,
   LayoutDashboard,
   LogIn,
   LogOut,
@@ -17,6 +15,7 @@ import { logoutAction } from "@/actions/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { HeroShowcase } from "@/components/marketing/hero-showcase";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
@@ -111,7 +110,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="relative mt-8 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="relative mt-8 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-3xl">
               <Badge>Craft Your Celebration</Badge>
               <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-6xl">
@@ -153,22 +152,8 @@ export default async function HomePage() {
                 </Button>
               </div>
             </div>
-            <div className="grid w-full max-w-xl gap-4 sm:grid-cols-3">
-              <Card className="space-y-3 p-5">
-                <CalendarRange className="h-5 w-5 text-[color:var(--primary)]" />
-                <p className="text-sm font-semibold text-ink">Structured events</p>
-                <p className="text-sm leading-6 text-stone-600">Mehendi to reception with detailed guidance.</p>
-              </Card>
-              <Card className="space-y-3 p-5">
-                <ImageIcon className="h-5 w-5 text-[color:var(--primary)]" />
-                <p className="text-sm font-semibold text-ink">Guest memories</p>
-                <p className="text-sm leading-6 text-stone-600">Moderated uploads, wishes, and post-event galleries.</p>
-              </Card>
-              <Card className="space-y-3 p-5">
-                <Palette className="h-5 w-5 text-[color:var(--primary)]" />
-                <p className="text-sm font-semibold text-ink">Template engine</p>
-                <p className="text-sm leading-6 text-stone-600">Same content model, many premium visual directions.</p>
-              </Card>
+            <div className="flex w-full justify-center lg:w-auto lg:justify-end">
+              <HeroShowcase />
             </div>
           </div>
         </div>
