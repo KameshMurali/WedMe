@@ -374,21 +374,39 @@ export async function requestPasswordResetAction(
   });
 
   if (user) {
-    const plainToken = generatePlainToken();
-    await prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: hashToken(plainToken),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-      },
-    });
+    try {
+      const plainToken = generatePlainToken();
+      await prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: hashToken(plainToken),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+        },
+      });
 
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your ToNewBeginning.com password",
-      text: `Reset your password: ${process.env.APP_URL ?? "http://localhost:3000"}/reset-password/${plainToken}`,
-      html: `<p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/reset-password/${plainToken}">Reset your password</a></p>`,
-    });
+      const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+      const resetUrl = `${appUrl}/reset-password/${plainToken}`;
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your ToNewBeginning.com password",
+        text: `Reset your ToNewBeginning.com password using this link (valid for 1 hour): ${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.`,
+        html: `
+          <div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#2b1a18;line-height:1.6;">
+            <h1 style="font-size:22px;margin:0 0 12px;">Reset your password</h1>
+            <p style="font-size:15px;color:#6b554f;">Click the button below to choose a new password. This link is valid for 1 hour.</p>
+            <p style="margin:20px 0;">
+              <a href="${resetUrl}" style="display:inline-block;background:#7a4b3a;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:999px;">Reset password</a>
+            </p>
+            <p style="font-size:13px;color:#9a7a6a;">If you didn't request this, you can safely ignore this email.</p>
+          </div>
+        `,
+      });
+    } catch (error) {
+      // Token creation / email send is best-effort. We deliberately do NOT
+      // surface failures to the caller (avoids leaking whether the account
+      // exists), but we log so delivery issues are debuggable.
+      console.error("requestPasswordResetAction failed", error);
+    }
   }
 
   return {
