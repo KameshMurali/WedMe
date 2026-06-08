@@ -6,6 +6,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { initialActionState, type ActionState } from "@/lib/action-state";
+import { env } from "@/lib/env";
 import {
   reservedSlugs,
   resolveWorkspaceResumePath,
@@ -369,26 +370,50 @@ export async function requestPasswordResetAction(
     return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email address." };
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: parsed.data.email },
-  });
-
-  if (user) {
-    const plainToken = generatePlainToken();
-    await prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: hashToken(plainToken),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-      },
+  try {
+    const resetHeaders = await headers();
+    const rateLimit = await consumeRateLimit({
+      action: "password-reset",
+      source: resetHeaders,
+      limit: 3,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [parsed.data.email],
     });
 
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your ToNewBeginning.com password",
-      text: `Reset your password: ${process.env.APP_URL ?? "http://localhost:3000"}/reset-password/${plainToken}`,
-      html: `<p><a href="${process.env.APP_URL ?? "http://localhost:3000"}/reset-password/${plainToken}">Reset your password</a></p>`,
+    if (!rateLimit.ok) {
+      return {
+        error: `Too many requests. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+  } catch (error) {
+    console.error("requestPasswordResetAction rate-limit check failed", error);
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: parsed.data.email },
     });
+
+    if (user) {
+      const plainToken = generatePlainToken();
+      await prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: hashToken(plainToken),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+        },
+      });
+
+      const resetUrl = `${env.APP_URL}/reset-password/${plainToken}`;
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your ToNewBeginning.com password",
+        text: `Reset your password: ${resetUrl}`,
+        html: `<p><a href="${resetUrl}">Reset your password</a></p>`,
+      });
+    }
+  } catch (error) {
+    console.error("requestPasswordResetAction failed", error);
   }
 
   return {
