@@ -639,17 +639,22 @@ export function DressCodeSection({ guides }: { guides: SiteSnapshot["dressCodeGu
                 {guide.eventTitle ? <Badge>{guide.eventTitle}</Badge> : null}
                 <h3 className="font-display text-4xl text-[color:var(--text)]">{guide.title}</h3>
                 <p className="text-sm leading-8 text-[color:var(--muted)]">{guide.guidance}</p>
-                <div className="flex flex-wrap gap-3">
-                  {guide.palette.map((color) => (
-                    <span
-                      key={color}
-                      className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/16 bg-white/78 px-4 py-2 text-sm text-[color:var(--muted)]"
-                    >
-                      <span className="h-4 w-4 rounded-full border border-black/10" style={{ backgroundColor: color }} />
-                      {color}
-                    </span>
-                  ))}
-                </div>
+                {guide.palette.length ? (
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {guide.palette.map((color) => (
+                      // Guests just need to see the colour — the hex is kept
+                      // as a hover tooltip (title) for anyone curious, not as
+                      // on-screen text.
+                      <span
+                        key={color}
+                        title={color}
+                        aria-label={`Palette colour ${color}`}
+                        className="h-9 w-9 rounded-full border border-black/10 shadow-sm ring-2 ring-white/70"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
           </Card>
