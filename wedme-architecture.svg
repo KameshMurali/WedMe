@@ -1,0 +1,264 @@
+<svg width="960" height="1080" viewBox="0 0 960 1080" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">
+<defs>
+  <linearGradient id="bgMain" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1c0f14"/>
+    <stop offset="100%" stop-color="#0e090b"/>
+  </linearGradient>
+  <linearGradient id="goldText" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#e8c070"/>
+    <stop offset="100%" stop-color="#c79b66"/>
+  </linearGradient>
+  <linearGradient id="headerFade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#2a1219"/>
+    <stop offset="100%" stop-color="#1c0f14"/>
+  </linearGradient>
+  <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+    <circle cx="16" cy="16" r="1" fill="rgba(255,255,255,0.025)"/>
+  </pattern>
+  <marker id="ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="rgba(199,155,102,0.75)"/>
+  </marker>
+  <marker id="aw" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="rgba(252,248,244,0.45)"/>
+  </marker>
+</defs>
+
+<!-- Background -->
+<rect width="960" height="1080" fill="url(#bgMain)"/>
+<rect width="960" height="1080" fill="url(#dots)"/>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- HEADER  y 0–105                            -->
+<!-- ─────────────────────────────────────────── -->
+<rect x="0" y="0" width="960" height="105" fill="url(#headerFade)"/>
+<rect x="0" y="104" width="960" height="1" fill="rgba(199,155,102,0.2)"/>
+<!-- Decorative gold lines -->
+<rect x="40" y="30" width="140" height="1" fill="rgba(199,155,102,0.2)"/>
+<rect x="780" y="30" width="140" height="1" fill="rgba(199,155,102,0.2)"/>
+<rect x="40" y="75" width="140" height="1" fill="rgba(199,155,102,0.2)"/>
+<rect x="780" y="75" width="140" height="1" fill="rgba(199,155,102,0.2)"/>
+
+<text x="480" y="56" text-anchor="middle" font-size="40" font-weight="700" letter-spacing="6" fill="url(#goldText)">WedMe</text>
+<text x="480" y="84" text-anchor="middle" font-size="11" font-weight="400" letter-spacing="5" fill="rgba(252,248,244,0.4)">ARCHITECTURE  OVERVIEW</text>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- USERS  y 115–200                           -->
+<!-- ─────────────────────────────────────────── -->
+<text x="48" y="132" font-size="9" font-weight="600" letter-spacing="3" fill="rgba(252,248,244,0.3)">USERS</text>
+
+<!-- Couple/Admin -->
+<rect x="40" y="138" width="250" height="52" rx="11" fill="#271420" stroke="#7b5842" stroke-width="1.5"/>
+<rect x="40" y="138" width="5" height="52" rx="2" fill="#7b5842"/>
+<text x="62" y="162" font-size="18">👫</text>
+<text x="90" y="161" font-size="12" font-weight="600" fill="#fcf8f4">Couple / Admin</text>
+<text x="90" y="178" font-size="10" fill="rgba(252,248,244,0.45)">dashboard · content editor · settings</text>
+
+<!-- Guest -->
+<rect x="355" y="138" width="250" height="52" rx="11" fill="#142030" stroke="#4a7a9b" stroke-width="1.5"/>
+<rect x="355" y="138" width="5" height="52" rx="2" fill="#4a7a9b"/>
+<text x="377" y="162" font-size="18">💌</text>
+<text x="405" y="161" font-size="12" font-weight="600" fill="#fcf8f4">Guest</text>
+<text x="405" y="178" font-size="10" fill="rgba(252,248,244,0.45)">RSVP · upload photos · leave wishes</text>
+
+<!-- Visitor -->
+<rect x="670" y="138" width="250" height="52" rx="11" fill="#142215" stroke="#4a8a55" stroke-width="1.5"/>
+<rect x="670" y="138" width="5" height="52" rx="2" fill="#4a8a55"/>
+<text x="692" y="162" font-size="18">🌐</text>
+<text x="720" y="161" font-size="12" font-weight="600" fill="#fcf8f4">Marketing Visitor</text>
+<text x="720" y="178" font-size="10" fill="rgba(252,248,244,0.45)">homepage · pricing · demo site</text>
+
+<!-- Arrows users → entry -->
+<line x1="165" y1="190" x2="165" y2="220" stroke="rgba(199,155,102,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ag)"/>
+<line x1="480" y1="190" x2="480" y2="220" stroke="rgba(74,122,155,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#aw)"/>
+<line x1="795" y1="190" x2="795" y2="220" stroke="rgba(74,138,85,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#aw)"/>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- ENTRY POINTS  y 223–295                    -->
+<!-- ─────────────────────────────────────────── -->
+<text x="48" y="218" font-size="9" font-weight="600" letter-spacing="3" fill="rgba(252,248,244,0.3)">ENTRY POINTS</text>
+
+<rect x="40" y="223" width="250" height="54" rx="10" fill="#1e1020" stroke="#7b5842" stroke-width="1"/>
+<text x="165" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="#c79b66" font-family="'SF Mono','Fira Code',monospace">/dashboard/*</text>
+<text x="165" y="264" text-anchor="middle" font-size="10" fill="rgba(252,248,244,0.45)">protected — middleware guarded</text>
+
+<rect x="355" y="223" width="250" height="54" rx="10" fill="#101a28" stroke="#4a7a9b" stroke-width="1"/>
+<text x="480" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="#6ab0d4" font-family="'SF Mono','Fira Code',monospace">/{slug}/*</text>
+<text x="480" y="264" text-anchor="middle" font-size="10" fill="rgba(252,248,244,0.45)">public wedding site — no auth</text>
+
+<rect x="670" y="223" width="250" height="54" rx="10" fill="#101a12" stroke="#4a8a55" stroke-width="1"/>
+<text x="795" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="#6ac47a" font-family="'SF Mono','Fira Code',monospace">/ (marketing)</text>
+<text x="795" y="264" text-anchor="middle" font-size="10" fill="rgba(252,248,244,0.45)">homepage &amp; pricing pages</text>
+
+<!-- /dashboard arrow → middleware -->
+<line x1="165" y1="277" x2="165" y2="300" stroke="rgba(199,155,102,0.5)" stroke-width="1.5" stroke-dasharray="4,3"/>
+<line x1="165" y1="300" x2="420" y2="300" stroke="rgba(199,155,102,0.3)" stroke-width="1"/>
+<line x1="420" y1="300" x2="420" y2="328" stroke="rgba(199,155,102,0.3)" stroke-width="1" marker-end="url(#ag)"/>
+
+<text x="530" y="292" font-size="9" fill="rgba(252,248,244,0.28)">guest + visitor bypass middleware</text>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- MIDDLEWARE  y 330–405                      -->
+<!-- ─────────────────────────────────────────── -->
+<rect x="40" y="330" width="880" height="72" rx="12" fill="#28121e" stroke="#c79b66" stroke-width="1.5"/>
+<rect x="40" y="330" width="5" height="72" rx="2" fill="#c79b66" opacity="0.85"/>
+
+<text x="64" y="354" font-size="12" font-weight="700" fill="#c79b66">⚡  Edge Middleware — Auth Guard</text>
+<text x="64" y="372" font-size="10" fill="rgba(252,248,244,0.6)">middleware.ts  ·  checks httpOnly JWT cookie before any /dashboard route reaches a page or action</text>
+
+<rect x="600" y="340" width="145" height="24" rx="6" fill="rgba(74,138,85,0.2)" stroke="#4a8a55" stroke-width="1"/>
+<text x="672" y="356" text-anchor="middle" font-size="9.5" fill="#7cd48a">✓  cookie valid → pass through</text>
+
+<rect x="756" y="340" width="145" height="24" rx="6" fill="rgba(180,60,60,0.15)" stroke="rgba(200,80,80,0.4)" stroke-width="1"/>
+<text x="829" y="356" text-anchor="middle" font-size="9.5" fill="rgba(240,120,120,0.9)">✗  no cookie → /login</text>
+
+<!-- Arrow middleware → app layer -->
+<line x1="480" y1="402" x2="480" y2="432" stroke="rgba(199,155,102,0.5)" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- APP LAYER  y 435–730                       -->
+<!-- ─────────────────────────────────────────── -->
+<text x="48" y="430" font-size="9" font-weight="600" letter-spacing="3" fill="rgba(252,248,244,0.3)">APPLICATION LAYER  ·  Next.js 16 App Router</text>
+
+<!-- container -->
+<rect x="36" y="436" width="888" height="292" rx="14" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+<!-- ── Column 1: Dashboard ── -->
+<rect x="52" y="450" width="272" height="266" rx="10" fill="#1c1120" stroke="#7b5842" stroke-width="1.5"/>
+<rect x="52" y="450" width="5" height="266" rx="2" fill="#7b5842" opacity="0.85"/>
+
+<text x="70" y="472" font-size="12" font-weight="700" fill="#c79b66">📊  Dashboard</text>
+<text x="70" y="488" font-size="9" fill="rgba(252,248,244,0.35)" letter-spacing="1">src/app/dashboard/</text>
+<line x1="70" y1="496" x2="314" y2="496" stroke="rgba(199,155,102,0.12)" stroke-width="1"/>
+
+<text x="70" y="516" font-size="10.5" fill="rgba(252,248,244,0.75)">Server Components</text>
+<text x="70" y="534" font-size="10.5" fill="rgba(252,248,244,0.75)">requireUser() on every page</text>
+
+<line x1="188" y1="544" x2="188" y2="562" stroke="rgba(199,155,102,0.45)" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<rect x="68" y="565" width="248" height="54" rx="8" fill="rgba(199,155,102,0.07)" stroke="rgba(199,155,102,0.3)" stroke-width="1"/>
+<text x="192" y="586" text-anchor="middle" font-size="11" font-weight="600" fill="#c79b66">Server Actions</text>
+<text x="192" y="603" text-anchor="middle" font-size="9.5" fill="rgba(252,248,244,0.5)">src/actions/  ·  validate → mutate</text>
+
+<line x1="188" y1="619" x2="188" y2="635" stroke="rgba(199,155,102,0.25)" stroke-width="1" stroke-dasharray="3,2"/>
+
+<text x="70" y="652" font-size="9.5" fill="rgba(252,248,244,0.45)">→  Zod validates (same schema as form)</text>
+<text x="70" y="668" font-size="9.5" fill="rgba(252,248,244,0.45)">→  requireUser() before every DB op</text>
+<text x="70" y="684" font-size="9.5" fill="rgba(252,248,244,0.45)">→  Returns ActionState  { success | error }</text>
+
+<!-- ── Column 2: Public Site ── -->
+<rect x="344" y="450" width="272" height="266" rx="10" fill="#101d2c" stroke="#4a7a9b" stroke-width="1.5"/>
+<rect x="344" y="450" width="5" height="266" rx="2" fill="#4a7a9b" opacity="0.85"/>
+
+<text x="362" y="472" font-size="12" font-weight="700" fill="#6ab0d4">🌸  Public Wedding Site</text>
+<text x="362" y="488" font-size="9" fill="rgba(252,248,244,0.35)" letter-spacing="1">src/app/[slug]/</text>
+<line x1="362" y1="496" x2="606" y2="496" stroke="rgba(74,122,155,0.15)" stroke-width="1"/>
+
+<text x="362" y="516" font-size="10.5" fill="rgba(252,248,244,0.75)">Server Components (read-only)</text>
+<text x="362" y="534" font-size="10.5" fill="rgba(252,248,244,0.75)">No auth required · Public access</text>
+
+<line x1="480" y1="544" x2="480" y2="562" stroke="rgba(74,122,155,0.5)" stroke-width="1.5" marker-end="url(#aw)"/>
+
+<rect x="360" y="565" width="248" height="54" rx="8" fill="rgba(74,122,155,0.1)" stroke="rgba(74,122,155,0.35)" stroke-width="1"/>
+<text x="484" y="586" text-anchor="middle" font-size="11" font-weight="600" fill="#6ab0d4">publishedSnapshot</text>
+<text x="484" y="603" text-anchor="middle" font-size="9.5" fill="rgba(252,248,244,0.5)">frozen JSON column · never draft data</text>
+
+<line x1="480" y1="619" x2="480" y2="635" stroke="rgba(74,122,155,0.25)" stroke-width="1" stroke-dasharray="3,2"/>
+
+<text x="362" y="652" font-size="9.5" fill="rgba(252,248,244,0.45)">→  Decoupled from live editing tables</text>
+<text x="362" y="668" font-size="9.5" fill="rgba(252,248,244,0.45)">→  Publish serialises full site state</text>
+<text x="362" y="684" font-size="9.5" fill="rgba(252,248,244,0.45)">→  Guests always see last published</text>
+
+<!-- ── Column 3: API Routes ── -->
+<rect x="636" y="450" width="272" height="266" rx="10" fill="#10201a" stroke="#4a8a55" stroke-width="1.5"/>
+<rect x="636" y="450" width="5" height="266" rx="2" fill="#4a8a55" opacity="0.85"/>
+
+<text x="654" y="472" font-size="12" font-weight="700" fill="#6ac47a">⚡  API Routes</text>
+<text x="654" y="488" font-size="9" fill="rgba(252,248,244,0.35)" letter-spacing="1">src/app/api/  ·  guest-facing</text>
+<line x1="654" y1="496" x2="898" y2="496" stroke="rgba(74,138,85,0.15)" stroke-width="1"/>
+
+<text x="654" y="516" font-size="10.5" fill="rgba(252,248,244,0.75)">REST endpoints for public ops</text>
+<text x="654" y="534" font-size="10.5" fill="rgba(252,248,244,0.75)">DB-backed Rate Limiter on all</text>
+
+<line x1="772" y1="544" x2="772" y2="562" stroke="rgba(74,138,85,0.5)" stroke-width="1.5" marker-end="url(#aw)"/>
+
+<rect x="652" y="565" width="248" height="54" rx="8" fill="rgba(74,138,85,0.1)" stroke="rgba(74,138,85,0.35)" stroke-width="1"/>
+<text x="776" y="586" text-anchor="middle" font-size="11" font-weight="600" fill="#6ac47a">RSVP · Messages · Uploads</text>
+<text x="776" y="603" text-anchor="middle" font-size="9.5" fill="rgba(252,248,244,0.5)">Analytics · Admin CSV export</text>
+
+<line x1="772" y1="619" x2="772" y2="635" stroke="rgba(74,138,85,0.25)" stroke-width="1" stroke-dasharray="3,2"/>
+
+<text x="654" y="652" font-size="9.5" fill="rgba(252,248,244,0.45)">→  Rate limit: login, RSVP, uploads</text>
+<text x="654" y="668" font-size="9.5" fill="rgba(252,248,244,0.45)">→  No auth for guest endpoints</text>
+<text x="654" y="684" font-size="9.5" fill="rgba(252,248,244,0.45)">→  CSV export requires admin session</text>
+
+<!-- Arrow app → data -->
+<line x1="480" y1="728" x2="480" y2="758" stroke="rgba(199,155,102,0.5)" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- DATA LAYER  y 762–852                      -->
+<!-- ─────────────────────────────────────────── -->
+<text x="48" y="756" font-size="9" font-weight="600" letter-spacing="3" fill="rgba(252,248,244,0.3)">DATA LAYER</text>
+
+<rect x="40" y="762" width="415" height="82" rx="12" fill="#1c1432" stroke="#8b6aaa" stroke-width="1.5"/>
+<rect x="40" y="762" width="5" height="82" rx="2" fill="#8b6aaa" opacity="0.8"/>
+<text x="62" y="786" font-size="12" font-weight="700" fill="#b08ad4">🗃  Prisma 7 ORM</text>
+<text x="62" y="803" font-size="10" fill="rgba(252,248,244,0.55)">Singleton · src/server/prisma.ts</text>
+<text x="62" y="820" font-size="9.5" fill="rgba(252,248,244,0.4)">PostgreSQL adapter · pooled via DATABASE_URL</text>
+<text x="62" y="836" font-size="9.5" fill="rgba(252,248,244,0.4)">Never instantiate elsewhere · always import from here</text>
+
+<line x1="455" y1="803" x2="505" y2="803" stroke="#8b6aaa" stroke-width="1.5" marker-end="url(#aw)"/>
+
+<rect x="505" y="762" width="415" height="82" rx="12" fill="#101c2e" stroke="#4a7a9b" stroke-width="1.5"/>
+<rect x="505" y="762" width="5" height="82" rx="2" fill="#4a7a9b" opacity="0.8"/>
+<text x="527" y="786" font-size="12" font-weight="700" fill="#6ab0d4">🐘  PostgreSQL</text>
+<text x="527" y="803" font-size="10" fill="rgba(252,248,244,0.55)">25+ models · RateLimitBucket in DB</text>
+<text x="527" y="820" font-size="9.5" fill="rgba(252,248,244,0.4)">User · Couple · WeddingSite · RSVPResponse</text>
+<text x="527" y="836" font-size="9.5" fill="rgba(252,248,244,0.4)">GuestUpload · GuestMessage · Analytics · Events</text>
+
+<!-- Arrow data → services -->
+<line x1="480" y1="844" x2="480" y2="874" stroke="rgba(199,155,102,0.45)" stroke-width="1.5" marker-end="url(#ag)"/>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SERVICES  y 878–990                        -->
+<!-- ─────────────────────────────────────────── -->
+<text x="48" y="872" font-size="9" font-weight="600" letter-spacing="3" fill="rgba(252,248,244,0.3)">PLUGGABLE SERVICES  &amp;  AUTH</text>
+
+<!-- Auth -->
+<rect x="40" y="878" width="272" height="108" rx="12" fill="#1c1230" stroke="#9b6ab0" stroke-width="1.5"/>
+<rect x="40" y="878" width="5" height="108" rx="2" fill="#9b6ab0" opacity="0.8"/>
+<text x="62" y="902" font-size="12" font-weight="700" fill="#c49bd4">🔐  Auth</text>
+<line x1="62" y1="910" x2="302" y2="910" stroke="rgba(155,106,176,0.15)" stroke-width="1"/>
+<text x="62" y="928" font-size="10" fill="rgba(252,248,244,0.65)">bcryptjs  ·  password hashing</text>
+<text x="62" y="945" font-size="10" fill="rgba(252,248,244,0.65)">jose  ·  signed JWT sessions</text>
+<text x="62" y="962" font-size="10" fill="rgba(252,248,244,0.65)">httpOnly cookie  ·  14-day expiry</text>
+<text x="62" y="979" font-size="9.5" fill="rgba(252,248,244,0.35)">no OAuth · fully custom auth</text>
+
+<!-- Storage -->
+<rect x="344" y="878" width="272" height="108" rx="12" fill="#101e18" stroke="#5a9a65" stroke-width="1.5"/>
+<rect x="344" y="878" width="5" height="108" rx="2" fill="#5a9a65" opacity="0.8"/>
+<text x="366" y="902" font-size="12" font-weight="700" fill="#8acd94">📦  Storage Driver</text>
+<line x1="366" y1="910" x2="606" y2="910" stroke="rgba(90,154,101,0.15)" stroke-width="1"/>
+<text x="366" y="928" font-size="10" fill="rgba(252,248,244,0.65)">STORAGE_DRIVER env var selects:</text>
+<text x="366" y="945" font-size="10" fill="rgba(252,248,244,0.5)">local   ·  filesystem  public/uploads/</text>
+<text x="366" y="962" font-size="10" fill="rgba(252,248,244,0.5)">blob    ·  Vercel Blob</text>
+<text x="366" y="979" font-size="10" fill="rgba(252,248,244,0.5)">s3      ·  AWS S3</text>
+
+<!-- Email -->
+<rect x="648" y="878" width="272" height="108" rx="12" fill="#1c1c10" stroke="#9a9a40" stroke-width="1.5"/>
+<rect x="648" y="878" width="5" height="108" rx="2" fill="#9a9a40" opacity="0.8"/>
+<text x="670" y="902" font-size="12" font-weight="700" fill="#d4d470">✉️  Email Driver</text>
+<line x1="670" y1="910" x2="910" y2="910" stroke="rgba(154,154,64,0.15)" stroke-width="1"/>
+<text x="670" y="928" font-size="10" fill="rgba(252,248,244,0.65)">EMAIL_DELIVERY_MODE selects:</text>
+<text x="670" y="945" font-size="10" fill="rgba(252,248,244,0.5)">console  ·  stdout only (dev default)</text>
+<text x="670" y="962" font-size="10" fill="rgba(252,248,244,0.5)">smtp     ·  Nodemailer</text>
+<text x="670" y="979" font-size="10" fill="rgba(252,248,244,0.5)">resend   ·  Resend API</text>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- FOOTER  y 1006–1080                        -->
+<!-- ─────────────────────────────────────────── -->
+<rect x="0" y="1006" width="960" height="74" fill="rgba(0,0,0,0.35)"/>
+<rect x="0" y="1006" width="960" height="1" fill="rgba(199,155,102,0.18)"/>
+<text x="480" y="1034" text-anchor="middle" font-size="11" fill="rgba(252,248,244,0.45)" letter-spacing="1.5">Next.js 16  ·  React 19  ·  TypeScript  ·  TailwindCSS  ·  Prisma 7  ·  PostgreSQL</text>
+<text x="480" y="1056" text-anchor="middle" font-size="10" fill="rgba(252,248,244,0.25)" letter-spacing="2">multi-tenant wedding website SaaS  ·  wed.tonewbeginning.com</text>
+
+</svg>
