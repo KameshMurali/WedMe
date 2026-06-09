@@ -34,8 +34,8 @@ const securityHeaders = [
       "connect-src 'self'",
       // No plug-ins, no embeds.
       "object-src 'none'",
-      // No iframes from any origin.
-      "frame-src 'none'",
+      // YouTube embeds are used in the VideoSection component.
+      "frame-src https://www.youtube.com",
       // Prevent this page from being embedded anywhere (CSP equivalent of X-Frame-Options).
       "frame-ancestors 'none'",
       // Restrict <base> tag to same origin.
