@@ -206,11 +206,17 @@ export default async function HomePage() {
       <section className="section-shell mt-20">
         <Card className="grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
           <div>
-            <SectionHeading
-              eyebrow="Demo Site : KamMonBeginnings"
-              title="A seeded wedding experience is included for Kamesh & Monisha."
-              description="Sample events, story milestones, dress code boards, FAQs, RSVP data, guest messages, uploads, and themed imagery are all seeded so the platform feels investor-demo ready on day one."
-            />
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                Demo Site : KamMonBeginnings
+              </span>
+              <h2 className="mt-5 font-display text-4xl leading-tight text-white sm:text-5xl">
+                A seeded wedding experience is included for Kamesh &amp; Monisha.
+              </h2>
+              <p className="mt-4 text-base leading-8 text-white/75 sm:text-lg">
+                Sample events, story milestones, dress code boards, FAQs, RSVP data, guest messages, uploads, and themed imagery are all seeded so the platform feels investor-demo ready on day one.
+              </p>
+            </div>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="bg-white text-stone-900 hover:bg-amber-100">
                 <Link href="/kammonbeginnings">View the wedding site</Link>
