@@ -123,7 +123,10 @@ export const loginSchema = z.object({
     .string()
     .trim()
     .min(1, "Please enter your email address.")
-    .email("Please enter a valid email address like name@example.com."),
+    .email("Please enter a valid email address like name@example.com.")
+    // Emails are stored lowercased at registration; normalize here so login
+    // works regardless of the casing the user types.
+    .transform((value) => value.toLowerCase()),
   password: z.string().min(8, "Please enter your password."),
 });
 
@@ -132,7 +135,10 @@ export const forgotPasswordSchema = z.object({
     .string()
     .trim()
     .min(1, "Please enter your email address.")
-    .email("Please enter a valid email address like name@example.com."),
+    .email("Please enter a valid email address like name@example.com.")
+    // Match the lowercasing done at registration so reset lookups don't miss
+    // on a capitalized email (e.g. H00417420@gmail.com vs the stored lowercase).
+    .transform((value) => value.toLowerCase()),
 });
 
 export const resetPasswordSchema = z
