@@ -210,6 +210,7 @@ export default async function HomePage() {
               eyebrow="Demo Site : KamMonBeginnings"
               title="A seeded wedding experience is included for Kamesh & Monisha."
               description="Sample events, story milestones, dress code boards, FAQs, RSVP data, guest messages, uploads, and themed imagery are all seeded so the platform feels investor-demo ready on day one."
+              tone="light"
             />
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="bg-white text-stone-900 hover:bg-amber-100">
