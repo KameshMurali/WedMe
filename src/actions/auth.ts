@@ -380,7 +380,9 @@ export async function requestPasswordResetAction(
         data: {
           userId: user.id,
           tokenHash: hashToken(plainToken),
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+          // 24h validity (was 1h) so a link doesn't expire while the user is
+          // away from their inbox.
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
 
@@ -389,14 +391,15 @@ export async function requestPasswordResetAction(
       await sendEmail({
         to: user.email,
         subject: "Reset your ToNewBeginning.com password",
-        text: `Reset your ToNewBeginning.com password using this link (valid for 1 hour): ${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.`,
+        text: `Reset your ToNewBeginning.com password using this link (valid for 24 hours): ${resetUrl}\n\nYour new password needs at least 10 characters with an uppercase letter, a lowercase letter, a number, and a special character.\n\nIf you didn't request this, you can safely ignore this email.`,
         html: `
           <div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#2b1a18;line-height:1.6;">
             <h1 style="font-size:22px;margin:0 0 12px;">Reset your password</h1>
-            <p style="font-size:15px;color:#6b554f;">Click the button below to choose a new password. This link is valid for 1 hour.</p>
+            <p style="font-size:15px;color:#6b554f;">Click the button below to choose a new password. This link is valid for 24 hours.</p>
             <p style="margin:20px 0;">
               <a href="${resetUrl}" style="display:inline-block;background:#7a4b3a;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:999px;">Reset password</a>
             </p>
+            <p style="font-size:13px;color:#6b554f;">Your new password needs at least <strong>10 characters</strong>, including an uppercase letter, a lowercase letter, a number, and a special character (e.g. - _ # @ !).</p>
             <p style="font-size:13px;color:#9a7a6a;">If you didn't request this, you can safely ignore this email.</p>
           </div>
         `,
