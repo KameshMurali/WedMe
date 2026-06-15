@@ -173,7 +173,7 @@ export function SiteShell({
                 </div>
               </div>
 
-              <nav className="overflow-x-auto">
+              <nav className="min-w-0 overflow-x-auto">
                 <div className={cn("flex min-w-max items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
                   {navigationConfig.map((item) => {
                     const href = `/${snapshot.site.slug}${item.href}` as Route;
@@ -192,7 +192,7 @@ export function SiteShell({
                 </div>
               </nav>
 
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 <div className="hidden rounded-full border border-[color:var(--accent)]/18 bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
                   {formatEnumLabel(snapshot.publish.visibility, "PUBLIC")}
                 </div>
