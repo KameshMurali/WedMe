@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
+
 import { ResetPasswordForm } from "@/components/forms/reset-password-form";
 import { Card } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Reset password · ToNewBeginning",
+  description: "Set a new password for your couple dashboard.",
+};
 
 export default async function ResetPasswordPage({
   params,

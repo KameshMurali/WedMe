@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
+
 import { LoginForm } from "@/components/forms/login-form";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Log in · ToNewBeginning",
+  description: "Sign in to your couple dashboard to manage your wedding site, events, and RSVPs.",
+};
 
 export default function LoginPage() {
   return (

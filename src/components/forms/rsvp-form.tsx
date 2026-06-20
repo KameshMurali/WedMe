@@ -108,27 +108,49 @@ export function RsvpForm({
     <form onSubmit={onSubmit} className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <Input placeholder="Your full name" {...register("guestName")} />
+          <label htmlFor="rsvp-name" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Full name <span aria-hidden="true">*</span>
+          </label>
+          <Input id="rsvp-name" placeholder="Your full name" {...register("guestName")} />
           {errors.guestName ? <p className="mt-2 text-sm text-rose-600">{errors.guestName.message}</p> : null}
         </div>
         <div>
-          <Input placeholder="Email address" type="email" {...register("guestEmail")} />
+          <label htmlFor="rsvp-email" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Email address
+          </label>
+          <Input id="rsvp-email" placeholder="Optional" type="email" {...register("guestEmail")} />
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <Input placeholder="Invite code (optional)" {...register("inviteCode")} />
-        <Select {...register("status")}>
-          <option value="ATTENDING">Attending</option>
-          <option value="MAYBE">Maybe</option>
-          <option value="DECLINED">Not attending</option>
-        </Select>
-        <Input
-          type="number"
-          min={1}
-          max={10}
-          placeholder="Attendee count"
-          {...register("attendeeCount", { valueAsNumber: true })}
-        />
+        <div>
+          <label htmlFor="rsvp-code" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Invite code
+          </label>
+          <Input id="rsvp-code" placeholder="Optional" {...register("inviteCode")} />
+        </div>
+        <div>
+          <label htmlFor="rsvp-status" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Response <span aria-hidden="true">*</span>
+          </label>
+          <Select id="rsvp-status" {...register("status")}>
+            <option value="ATTENDING">Attending</option>
+            <option value="MAYBE">Maybe</option>
+            <option value="DECLINED">Not attending</option>
+          </Select>
+        </div>
+        <div>
+          <label htmlFor="rsvp-count" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Attendees <span aria-hidden="true">*</span>
+          </label>
+          <Input
+            id="rsvp-count"
+            type="number"
+            min={1}
+            max={10}
+            placeholder="1"
+            {...register("attendeeCount", { valueAsNumber: true })}
+          />
+        </div>
       </div>
 
       <Card className="space-y-4">
@@ -137,13 +159,12 @@ export function RsvpForm({
           {events.map((event) => (
             <label
               key={event.id}
-              className="flex items-center gap-3 rounded-2xl border border-black/8 bg-white/70 px-4 py-3 text-sm"
+              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-black/8 bg-white/70 px-4 py-3 text-sm"
             >
               <input
                 type="checkbox"
                 value={event.id}
                 {...register("selectedEventIds")}
-                defaultChecked={selectedEventIds?.includes(event.id)}
               />
               <span>
                 <span className="font-medium text-[color:var(--text)]">{event.title}</span>
@@ -158,13 +179,31 @@ export function RsvpForm({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Input placeholder="Meal preferences" {...register("mealPreference")} />
-        <Input placeholder="Accommodation needs" {...register("accommodationNeeds")} />
-        <Input placeholder="Travel notes" {...register("travelNotes")} />
-        <Input placeholder="Accessibility requests" {...register("accessibilityNeeds")} />
+        <div>
+          <label htmlFor="rsvp-meal" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Meal preferences</label>
+          <Input id="rsvp-meal" placeholder="e.g. Vegetarian, Vegan, No nuts" {...register("mealPreference")} />
+        </div>
+        <div>
+          <label htmlFor="rsvp-accommodation" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Accommodation needs</label>
+          <Input id="rsvp-accommodation" placeholder="e.g. Help booking a hotel" {...register("accommodationNeeds")} />
+        </div>
+        <div>
+          <label htmlFor="rsvp-travel" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Travel notes</label>
+          <Input id="rsvp-travel" placeholder="e.g. Flying in from London" {...register("travelNotes")} />
+        </div>
+        <div>
+          <label htmlFor="rsvp-access" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Accessibility requests</label>
+          <Input id="rsvp-access" placeholder="e.g. Wheelchair access needed" {...register("accessibilityNeeds")} />
+        </div>
       </div>
-      <Textarea placeholder="Special requests" {...register("specialRequests")} />
-      <Textarea placeholder="Leave a note to the couple" {...register("noteToCouple")} />
+      <div>
+        <label htmlFor="rsvp-special" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Special requests</label>
+        <Textarea id="rsvp-special" placeholder="Anything else the couple should know" {...register("specialRequests")} />
+      </div>
+      <div>
+        <label htmlFor="rsvp-note" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Note to the couple</label>
+        <Textarea id="rsvp-note" placeholder="A personal message for Kamesh & Monisha" {...register("noteToCouple")} />
+      </div>
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : "Submit RSVP"}
       </Button>

@@ -179,7 +179,6 @@ export async function registerAction(
           subtitle: "A joyful celebration filled with family, rituals, music, and beautiful memories.",
           tagline: "Welcome to our wedding website",
           weddingDate: new Date(weddingDate),
-          locationSummary: "Dubai, United Arab Emirates",
           theme: {
             create: template.themeDefaults,
           },
@@ -220,7 +219,7 @@ export async function registerAction(
   }
 
   try {
-    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+    const appUrl = env.APP_URL;
     const welcome = buildWelcomeEmail({
       brandName,
       partnerOneName,

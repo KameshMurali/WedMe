@@ -26,7 +26,7 @@ export const siteBasicsSchema = z.object({
   seoDescription: z.string().max(160).optional().or(z.literal("")),
   ogImageUrl: assetUrlSchema,
   canonicalUrl: z.string().url().optional().or(z.literal("")),
-  slug: z.string().min(3).max(40).regex(/^[a-z0-9-]+$/),
+  slug: z.string().min(3).max(40).regex(/^[a-z0-9_-]+$/),
 });
 
 export const templateSelectionSchema = z.object({

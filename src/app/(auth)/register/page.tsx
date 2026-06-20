@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
+
 import { RegisterForm } from "@/components/forms/register-form";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Create account · ToNewBeginning",
+  description: "Set up your couple workspace, choose a custom URL, and start building your premium wedding website.",
+};
 
 export default function RegisterPage() {
   return (

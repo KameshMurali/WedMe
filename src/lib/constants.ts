@@ -21,7 +21,11 @@ export const reservedSlugs = [
   "register",
   "forgot-password",
   "reset-password",
+  "verify-email",
+  "pricing",
+  "admin",
   "api",
+  "kammonbeginnings",
 ];
 
 export const authCookieName = "wedme_session";
