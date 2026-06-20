@@ -16,24 +16,35 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <Input name="email" type="email" placeholder="Email address" required />
-      <div className="relative">
-        <Input
-          name="password"
-          type={showPassword ? "text" : "password"}
-          placeholder="Password"
-          className="pr-14"
-          required
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((current) => !current)}
-          className="absolute inset-y-0 right-3 inline-flex items-center justify-center text-stone-500 transition hover:text-stone-900"
-          aria-label={showPassword ? "Hide password" : "Show password"}
-          aria-pressed={showPassword}
-        >
-          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-        </button>
+      <div>
+        <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium">
+          Email address
+        </label>
+        <Input id="login-email" name="email" type="email" placeholder="Email address" required />
+      </div>
+      <div>
+        <label htmlFor="login-password" className="mb-1.5 block text-sm font-medium">
+          Password
+        </label>
+        <div className="relative">
+          <Input
+            id="login-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="pr-14"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((current) => !current)}
+            className="absolute inset-y-0 right-3 inline-flex items-center justify-center text-stone-500 transition hover:text-stone-900"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
       <FormMessage type="error" message={state.error} />
       <SubmitButton label="Log in" loadingLabel="Signing in..." className="w-full" />
