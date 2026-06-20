@@ -130,6 +130,7 @@ export function GuestUploadForm({
           return;
         } catch (error) {
           toast.error(error instanceof Error ? error.message : "Upload failed.");
+          setProgress(0);
           return;
         }
       }
@@ -165,22 +166,43 @@ export function GuestUploadForm({
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <Input placeholder="Your name" {...register("submitterName")} />
-        <Select {...register("eventId")}>
-          <option value="">Select event</option>
-          {events.map((event) => (
-            <option key={event.id} value={event.id}>
-              {event.title}
-            </option>
-          ))}
-        </Select>
+        <div>
+          <label htmlFor="upload-name" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Your name <span aria-hidden="true">*</span>
+          </label>
+          <Input id="upload-name" placeholder="Your name" {...register("submitterName")} />
+        </div>
+        <div>
+          <label htmlFor="upload-event" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Event
+          </label>
+          <Select id="upload-event" {...register("eventId")}>
+            <option value="">Select event</option>
+            {events.map((event) => (
+              <option key={event.id} value={event.id}>
+                {event.title}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
-      <Input
-        type="file"
-        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
-        onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-      />
-      <Input placeholder="Or paste an external video link" {...register("externalUrl")} />
+      <div>
+        <label htmlFor="upload-file" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Photo or video
+        </label>
+        <Input
+          id="upload-file"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+        />
+      </div>
+      <div>
+        <label htmlFor="upload-url" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Or paste an external video link
+        </label>
+        <Input id="upload-url" placeholder="https://..." {...register("externalUrl")} />
+      </div>
       {preview ? (
         <div className="overflow-hidden rounded-3xl border border-black/10 bg-white/70 p-2">
           {file?.type.startsWith("image/") ? (
@@ -191,8 +213,18 @@ export function GuestUploadForm({
           )}
         </div>
       ) : null}
-      <Input placeholder="Caption" {...register("caption")} />
-      <Textarea placeholder="Optional note with your upload" {...register("message")} />
+      <div>
+        <label htmlFor="upload-caption" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Caption
+        </label>
+        <Input id="upload-caption" placeholder="Caption" {...register("caption")} />
+      </div>
+      <div>
+        <label htmlFor="upload-message" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Note with your upload
+        </label>
+        <Textarea id="upload-message" placeholder="Optional note with your upload" {...register("message")} />
+      </div>
       {progress > 0 ? (
         <div className="space-y-2">
           <div className="h-2 rounded-full bg-black/5">

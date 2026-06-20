@@ -1,5 +1,7 @@
 import "server-only";
 
+import { timingSafeEqual } from "crypto";
+
 import type { SiteSnapshot } from "@/types";
 import { sectionLabels, sectionOrder } from "@/lib/constants";
 
@@ -52,7 +54,10 @@ export function isDemoUserEmail(email: string) {
 }
 
 export function matchesDemoCredentials(email: string, password: string) {
-  return isDemoUserEmail(email) && password === demoUserPassword;
+  const a = Buffer.from(password);
+  const b = Buffer.from(demoUserPassword);
+  const passwordMatches = a.length === b.length && timingSafeEqual(a, b);
+  return isDemoUserEmail(email) && passwordMatches;
 }
 
 const baseUrl = `https://wed.tonewbeginning.com/${demoSiteSlug}`;

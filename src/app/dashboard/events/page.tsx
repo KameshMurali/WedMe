@@ -7,7 +7,8 @@ import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
 import { effectiveEventCap, getPlanLimits, getWorkspacePlanKey } from "@/server/services/plan";
 
 function toDateTimeLocal(date: Date) {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
 }
 
 export default async function DashboardEventsPage() {

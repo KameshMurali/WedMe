@@ -59,16 +59,42 @@ export function GuestMessageForm({ slug, isOpen }: { slug: string; isOpen: boole
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <Input placeholder="Your name" {...register("authorName")} />
-        <Input placeholder="Email (optional)" type="email" {...register("email")} />
+        <div>
+          <label htmlFor="message-name" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Your name <span aria-hidden="true">*</span>
+          </label>
+          <Input id="message-name" placeholder="Your name" {...register("authorName")} />
+          {errors.authorName ? <p className="mt-1 text-sm text-rose-600">{errors.authorName.message}</p> : null}
+        </div>
+        <div>
+          <label htmlFor="message-email" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Email
+          </label>
+          <Input id="message-email" placeholder="Optional" type="email" {...register("email")} />
+        </div>
       </div>
-      <Select {...register("visibility")}>
-        <option value="PUBLIC">Allow message on public wall</option>
-        <option value="PRIVATE">Keep this private</option>
-      </Select>
-      <Textarea placeholder="Your wishes for the couple" {...register("message")} />
-      <Textarea placeholder="Optional event feedback" {...register("feedback")} />
-      {errors.message ? <p className="text-sm text-rose-600">{errors.message.message}</p> : null}
+      <div>
+        <label htmlFor="message-visibility" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Visibility
+        </label>
+        <Select id="message-visibility" {...register("visibility")}>
+          <option value="PUBLIC">Allow message on public wall</option>
+          <option value="PRIVATE">Keep this private</option>
+        </Select>
+      </div>
+      <div>
+        <label htmlFor="message-body" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Your message <span aria-hidden="true">*</span>
+        </label>
+        <Textarea id="message-body" placeholder="Your wishes for the couple" {...register("message")} />
+        {errors.message ? <p className="mt-1 text-sm text-rose-600">{errors.message.message}</p> : null}
+      </div>
+      <div>
+        <label htmlFor="message-feedback" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Event feedback
+        </label>
+        <Textarea id="message-feedback" placeholder="Optional event feedback" {...register("feedback")} />
+      </div>
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Sending..." : "Share message"}
       </Button>

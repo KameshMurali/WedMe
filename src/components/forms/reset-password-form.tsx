@@ -14,8 +14,18 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="token" value={token} />
-      <Input name="password" type="password" placeholder="New password" required />
-      <Input name="confirmPassword" type="password" placeholder="Confirm new password" required />
+      <div>
+        <label htmlFor="reset-password" className="mb-1.5 block text-sm font-medium">
+          New password
+        </label>
+        <Input id="reset-password" name="password" type="password" placeholder="New password" required />
+      </div>
+      <div>
+        <label htmlFor="reset-confirm" className="mb-1.5 block text-sm font-medium">
+          Confirm new password
+        </label>
+        <Input id="reset-confirm" name="confirmPassword" type="password" placeholder="Confirm new password" required />
+      </div>
       <FormMessage type="error" message={state.error} />
       <SubmitButton label="Update password" loadingLabel="Updating..." className="w-full" />
     </form>
