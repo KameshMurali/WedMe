@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { GuestMessageForm } from "@/components/forms/guest-message-form";
@@ -8,6 +9,17 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getApprovedGuestMessagesBySlug } from "@/server/repositories/guest-engagement";
 import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const snapshot = await getPublishedSiteSnapshot(slug);
+  if (!snapshot) return {};
+  return {
+    title: `Wishes for ${snapshot.site.coupleNames} | ToNewBeginning`,
+    description: `Leave a message, blessing, or heartfelt memory for ${snapshot.site.coupleNames} on their wedding day. Public messages appear in the couple's guestbook wall.`,
+    alternates: { canonical: `/${slug}/wishes` },
+  };
+}
 
 export default async function WishesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

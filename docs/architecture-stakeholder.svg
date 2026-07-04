@@ -1,0 +1,160 @@
+<svg width="1600" height="980" viewBox="0 0 1600 980" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ToNewBeginning.com architecture diagram</title>
+  <desc id="desc">Stakeholder-oriented architecture diagram for the implemented ToNewBeginning.com wedding website platform.</desc>
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="1500" y2="920" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8F0"/>
+      <stop offset="0.55" stop-color="#FFFDF9"/>
+      <stop offset="1" stop-color="#F7EFE7"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="350" y1="180" x2="1120" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8D6549" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#CBA16A" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="panelTop" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFFCF8"/>
+    </linearGradient>
+    <linearGradient id="coreFill" x1="380" y1="160" x2="1160" y2="770" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9F3"/>
+      <stop offset="1" stop-color="#FFF4EA"/>
+    </linearGradient>
+    <linearGradient id="domainFill" x1="1180" y1="180" x2="1520" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B1A18"/>
+      <stop offset="1" stop-color="#5B4032"/>
+    </linearGradient>
+    <filter id="softShadow" x="-40" y="-40" width="220" height="220" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="#563829" flood-opacity="0.12"/>
+    </filter>
+    <filter id="panelShadow" x="-40" y="-40" width="1800" height="1100" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#563829" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#8D6549"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="980" rx="32" fill="url(#bg)"/>
+  <circle cx="210" cy="128" r="160" fill="#F3E3D4" fill-opacity="0.55"/>
+  <circle cx="1440" cy="140" r="180" fill="#F7E7D6" fill-opacity="0.45"/>
+  <circle cx="1360" cy="820" r="240" fill="#F8E7D4" fill-opacity="0.38"/>
+  <rect x="350" y="160" width="770" height="620" rx="44" fill="url(#accent)"/>
+
+  <text x="70" y="78" fill="#8D6549" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="5">IMPLEMENTED PLATFORM ARCHITECTURE</text>
+  <text x="68" y="136" fill="#231716" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="500">ToNewBeginning.com</text>
+  <text x="70" y="180" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="22">Presentation-style view of the live wedding website platform as implemented in this repository.</text>
+
+  <g filter="url(#softShadow)">
+    <rect x="70" y="230" width="250" height="390" rx="34" fill="url(#panelTop)" stroke="#E7D9CB"/>
+  </g>
+  <text x="105" y="280" fill="#8D6549" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="3">CLIENTS</text>
+  <text x="104" y="332" fill="#231716" font-family="Georgia, 'Times New Roman', serif" font-size="34">Guest browser</text>
+  <text x="104" y="362" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Public wedding website</text>
+  <rect x="102" y="392" width="186" height="84" rx="24" fill="#FFF7EF" stroke="#EADACA"/>
+  <text x="126" y="430" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700">Guest actions</text>
+  <text x="126" y="458" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="18">RSVPs, wishes, uploads</text>
+
+  <text x="104" y="530" fill="#231716" font-family="Georgia, 'Times New Roman', serif" font-size="32">
+    <tspan x="104" dy="0">Couple</tspan>
+    <tspan x="104" dy="34">dashboard</tspan>
+  </text>
+  <text x="104" y="594" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Authenticated workspace</text>
+  <rect x="102" y="594" width="186" height="84" rx="24" fill="#FFF7EF" stroke="#EADACA"/>
+  <text x="126" y="632" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700">Owner actions</text>
+  <text x="126" y="660" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="18">Content, templates, publish</text>
+
+  <g filter="url(#panelShadow)">
+    <rect x="360" y="210" width="760" height="560" rx="40" fill="url(#coreFill)" stroke="#E1D0BE"/>
+  </g>
+  <text x="398" y="264" fill="#8D6549" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="3">NEXT.JS APPLICATION</text>
+  <text x="398" y="305" fill="#231716" font-family="Georgia, 'Times New Roman', serif" font-size="34">Experience and operations surfaces</text>
+
+  <rect x="396" y="336" width="324" height="172" rx="28" fill="#FFFFFF" stroke="#E7D7C8"/>
+  <text x="424" y="377" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700">Public experience</text>
+  <text x="424" y="412" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Slug-based wedding routes</text>
+  <text x="424" y="442" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Story, events, schedule, RSVP</text>
+  <text x="424" y="472" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Gallery, memories, wishes</text>
+
+  <rect x="760" y="336" width="324" height="172" rx="28" fill="#FFFFFF" stroke="#E7D7C8"/>
+  <text x="788" y="377" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700">Auth and dashboard</text>
+  <text x="788" y="412" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Login, register, reset password</text>
+  <text x="788" y="442" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Workspace shell, templates, settings</text>
+  <text x="788" y="472" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="20">Content, events, moderation, preview</text>
+
+  <rect x="396" y="542" width="688" height="102" rx="28" fill="#FFF9F2" stroke="#DFCDBA"/>
+  <text x="424" y="582" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700">Application core</text>
+  <text x="424" y="611" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="18">
+    <tspan x="424" dy="0">Server actions for admin workflows, API routes for guest workflows,</tspan>
+    <tspan x="424" dy="26">and a thin dashboard middleware gate.</tspan>
+  </text>
+
+  <rect x="396" y="668" width="688" height="74" rx="24" fill="#FFFFFF" stroke="#E7D7C8"/>
+  <text x="422" y="713" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="19">Selective revalidation keeps draft editing and public publishing on separate refresh paths.</text>
+
+  <g filter="url(#panelShadow)">
+    <rect x="1165" y="210" width="365" height="560" rx="40" fill="url(#domainFill)"/>
+  </g>
+  <text x="1200" y="262" fill="#F5DAB4" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="3">SERVER DOMAIN LAYER</text>
+  <text x="1200" y="298" fill="#FFF6EE" font-family="Georgia, 'Times New Roman', serif" font-size="32">
+    <tspan x="1200" dy="0">Business logic</tspan>
+    <tspan x="1200" dy="34">and policy</tspan>
+  </text>
+
+  <rect x="1198" y="334" width="299" height="94" rx="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)"/>
+  <text x="1222" y="371" fill="#FFF6EE" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Auth and session</text>
+  <text x="1222" y="401" fill="#EBD9CC" font-family="Arial, Helvetica, sans-serif" font-size="16">JWT cookie verification and role checks</text>
+
+  <rect x="1198" y="444" width="299" height="94" rx="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)"/>
+  <text x="1222" y="481" fill="#FFF6EE" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Repositories</text>
+  <text x="1222" y="511" fill="#EBD9CC" font-family="Arial, Helvetica, sans-serif" font-size="16">Page-specific read models over Prisma</text>
+
+  <rect x="1198" y="554" width="299" height="94" rx="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)"/>
+  <text x="1222" y="591" fill="#FFF6EE" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Services</text>
+  <text x="1222" y="612" fill="#EBD9CC" font-family="Arial, Helvetica, sans-serif" font-size="15">
+    <tspan x="1222" dy="0">Snapshots, template presets,</tspan>
+    <tspan x="1222" dy="20">and demo fallback</tspan>
+  </text>
+
+  <rect x="1198" y="664" width="299" height="74" rx="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)"/>
+  <text x="1222" y="700" fill="#EBD9CC" font-family="Arial, Helvetica, sans-serif" font-size="15">
+    <tspan x="1222" dy="0">Rate limiting, upload policy,</tspan>
+    <tspan x="1222" dy="22">and environment-aware storage</tspan>
+  </text>
+
+  <g filter="url(#panelShadow)">
+    <rect x="70" y="806" width="1460" height="120" rx="34" fill="#FFFFFF" stroke="#E3D1BF"/>
+  </g>
+  <text x="104" y="852" fill="#8D6549" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="3">DATA AND EXTERNAL SERVICES</text>
+
+  <rect x="100" y="872" width="258" height="34" rx="17" fill="#F8EFE5"/>
+  <text x="124" y="894" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Prisma client + PostgreSQL</text>
+
+  <rect x="382" y="872" width="248" height="34" rx="17" fill="#F8EFE5"/>
+  <text x="405" y="894" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Published snapshot JSON</text>
+
+  <rect x="654" y="872" width="232" height="34" rx="17" fill="#F8EFE5"/>
+  <text x="679" y="894" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Vercel Blob signed uploads</text>
+
+  <rect x="910" y="872" width="206" height="34" rx="17" fill="#F8EFE5"/>
+  <text x="937" y="894" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Local or S3 storage</text>
+
+  <rect x="1140" y="872" width="254" height="34" rx="17" fill="#F8EFE5"/>
+  <text x="1166" y="894" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">SMTP, console, or Resend email</text>
+
+  <path d="M319 432H379" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M319 578H379" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M722 422H756" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M923 511V539" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M1088 594H1150" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M1290 742V806" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M740 742V806" stroke="#8D6549" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <rect x="1178" y="84" width="352" height="98" rx="24" fill="#FFF8EF" stroke="#E6D5C4"/>
+  <text x="1204" y="117" fill="#231716" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">
+    <tspan x="1204" dy="0">What makes this implementation distinct</tspan>
+  </text>
+  <text x="1204" y="145" fill="#6F5750" font-family="Arial, Helvetica, sans-serif" font-size="16">
+    <tspan x="1204" dy="0">Snapshot-driven publishing, owner draft preview,</tspan>
+    <tspan x="1204" dy="22">page-specific loaders, and pluggable storage.</tspan>
+  </text>
+</svg>

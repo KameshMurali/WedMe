@@ -1,9 +1,19 @@
+import type { Metadata } from "next";
+
 import { RegisterForm } from "@/components/forms/register-form";
+import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
+export const metadata: Metadata = {
+  title: "Create your free wedding website — ToNewBeginning",
+  description: "Create your free Indian wedding website on ToNewBeginning.com. Set up multi-event timelines, RSVP forms, and a photo gallery in minutes. No credit card required.",
+  alternates: { canonical: "/register" },
+};
+
 export default function RegisterPage() {
   return (
+    <>
     <main className="section-shell flex min-h-screen items-center py-16">
       <div className="grid w-full gap-8 lg:grid-cols-[1fr_1fr]">
         <div className="flex items-center">
@@ -25,8 +35,16 @@ export default function RegisterPage() {
           <div className="mt-8">
             <RegisterForm />
           </div>
+          <p className="mt-6 text-center text-xs text-stone-400">
+            Need help?{" "}
+            <a href="mailto:hello@tonewbeginning.com" className="underline hover:text-stone-600">
+              hello@tonewbeginning.com
+            </a>
+          </p>
         </Card>
       </div>
     </main>
+    <MarketingFooter />
+    </>
   );
 }

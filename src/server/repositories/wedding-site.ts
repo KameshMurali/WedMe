@@ -14,64 +14,52 @@ import {
 } from "@/server/services/demo-site";
 import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 
-export const weddingSiteInclude = {
+// Lightweight include for public site rendering — excludes RSVP responses,
+// guest uploads, messages, and analytics that buildSnapshot() never reads.
+// Cuts the DB payload for every public page load significantly.
+export const publicWeddingSiteInclude = {
   couple: true,
   templatePreset: true,
   theme: true,
   publishSettings: true,
   sectionConfigs: {
-    orderBy: {
-      position: "asc",
-    },
+    orderBy: { position: "asc" },
   },
   storyMilestones: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   events: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   scheduleItems: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   tidbits: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   faqItems: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   travelGuideItems: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   dressCodeGuides: {
     include: {
       event: true,
     },
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   mediaAssets: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
   embeddedVideos: {
-    orderBy: {
-      sortOrder: "asc",
-    },
+    orderBy: { sortOrder: "asc" },
   },
+} satisfies Prisma.WeddingSiteInclude;
+
+// Full include for dashboard/admin contexts that need RSVP, upload, and analytics data.
+export const weddingSiteInclude = {
+  ...publicWeddingSiteInclude,
   inviteGroups: {
     include: {
       guests: true,
@@ -416,6 +404,10 @@ const settingsSiteSelect = {
   },
 } satisfies Prisma.WeddingSiteSelect;
 
+export type PublicWeddingSiteRecord = Prisma.WeddingSiteGetPayload<{
+  include: typeof publicWeddingSiteInclude;
+}>;
+
 export type WeddingSiteRecord = Prisma.WeddingSiteGetPayload<{
   include: typeof weddingSiteInclude;
 }>;
@@ -610,13 +602,13 @@ export async function getWeddingSiteBySlug(slug: string) {
   try {
     const site = await prisma.weddingSite.findUnique({
       where: { slug },
-      include: weddingSiteInclude,
+      include: publicWeddingSiteInclude,
     });
 
-    return site ?? (isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as WeddingSiteRecord) : null);
+    return site ?? (isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as PublicWeddingSiteRecord) : null);
   } catch (error) {
     console.error("getWeddingSiteBySlug failed", error);
-    return isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as WeddingSiteRecord) : null;
+    return isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as PublicWeddingSiteRecord) : null;
   }
 }
 

@@ -34,10 +34,12 @@ function HeroMediaFrame({
   snapshot,
   className,
   imageClassName,
+  imageSizes = "100vw",
 }: {
   snapshot: SiteSnapshot;
   className?: string;
   imageClassName?: string;
+  imageSizes?: string;
 }) {
   return (
     <div className={cn("relative overflow-hidden rounded-[calc(var(--radius)+0.2rem)]", className)}>
@@ -57,7 +59,7 @@ function HeroMediaFrame({
           width={1600}
           height={900}
           priority
-          sizes="100vw"
+          sizes={imageSizes}
           className={cn("h-full w-full object-cover", imageClassName)}
         />
       ) : (
@@ -145,7 +147,7 @@ function HeroSectionClassic({ snapshot }: { snapshot: SiteSnapshot }) {
         </div>
       </div>
       <div className="grid gap-4">
-        <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" />
+        <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
         <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">
           <div className={glassPanel("px-5 py-5")}>
             <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Weekend note</p>
@@ -189,6 +191,7 @@ function HeroSectionEditorial({ snapshot }: { snapshot: SiteSnapshot }) {
           snapshot={snapshot}
           className="ml-auto min-h-[420px] max-w-[44rem]"
           imageClassName="h-full min-h-[420px]"
+          imageSizes="(max-width: 1024px) 100vw, min(44rem, 55vw)"
         />
         <div className="relative -mt-14 grid gap-4 px-4 sm:grid-cols-2">
           <div className={glassPanel("px-5 py-5")}>
@@ -223,12 +226,12 @@ function HeroSectionSplit({ snapshot }: { snapshot: SiteSnapshot }) {
       <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-14">
         <HeroCopy snapshot={snapshot} />
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {metricCard("Template", "Minimal luxury")}
-          {metricCard("Experience", "Clean, calm, guest-first")}
+          {metricCard("Events", `${snapshot.events.length} celebrations planned`)}
+          {metricCard("For guests", "All the details, one place")}
         </div>
       </div>
       <div className="relative min-h-[520px] border-t border-[color:var(--accent)]/14 lg:border-l lg:border-t-0">
-        <HeroMediaFrame snapshot={snapshot} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[520px]" />
+        <HeroMediaFrame snapshot={snapshot} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[520px]" imageSizes="(max-width: 1024px) 100vw, 56vw" />
         <div className="absolute inset-0 bg-gradient-to-l from-black/12 via-transparent to-[color:var(--background)]/16" />
         <div className="absolute bottom-6 left-6 right-6 grid gap-4 sm:grid-cols-2">
           <div className={glassPanel("px-5 py-5")}>
@@ -296,7 +299,7 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
       <div className="self-center">
         <div className="mb-6 inline-flex items-center gap-3 rounded-full bg-[color:var(--accent)]/12 px-4 py-2 text-sm text-[color:var(--primary)]">
           <Sparkles className="h-4 w-4" />
-          Ceremony-rich, guest-friendly, and built for multi-day celebrations
+          A celebration across many beautiful moments and memories
         </div>
         <HeroCopy snapshot={snapshot} large />
         <div className="mt-8 flex flex-wrap gap-3">
@@ -312,7 +315,7 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
         </div>
       </div>
       <div className="grid gap-4">
-        <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" />
+        <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
         <div className="grid gap-4 sm:grid-cols-2">
           <div className={glassPanel("px-5 py-5")}>
             <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Guest note</p>
@@ -369,7 +372,7 @@ export function StorySection({
       <SectionHeading
         eyebrow="Our Story"
         title="A timeline of moments that shaped the journey."
-        description="From the first hello to the wedding countdown, each milestone can be edited, reordered, or hidden from the dashboard."
+        description="From the first hello to the wedding countdown — every chapter of their story, beautifully told."
       />
       <div className="mt-10 grid gap-6">
         {items.map((milestone, index) => (
@@ -542,7 +545,7 @@ export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"
       <SectionHeading
         eyebrow="Itinerary"
         title="A guest-friendly schedule for every day and every event."
-        description="This layout is designed to stay easy to scan on mobile while still feeling premium."
+        description="Everything you need to stay in step — from the first event of the day to the final farewell."
       />
       <div className="mt-10 grid gap-6">
         {Object.entries(grouped).map(([day, entries]) => (
@@ -552,7 +555,7 @@ export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"
                 <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--primary)]">Day overview</p>
                 <h3 className="mt-4 font-display text-4xl text-[color:var(--text)]">{day}</h3>
                 <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  {entries.length} scheduled moments, planned to stay readable on the go and elegant on larger screens.
+                  {entries.length} scheduled {entries.length === 1 ? "moment" : "moments"} — keep this handy throughout the day.
                 </p>
               </div>
               <div className="space-y-4">
@@ -595,7 +598,7 @@ export function TidbitsSection({ items }: { items: SiteSnapshot["tidbits"] }) {
       <SectionHeading
         eyebrow="Tidbits"
         title="Helpful details, traditions, and favourite little things."
-        description="Use this section for what-to-know notes, couple favourites, culture guides, and guest expectations."
+        description="Little details, favourite things, and everything worth knowing before you celebrate with us."
       />
       <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
@@ -617,7 +620,7 @@ export function DressCodeSection({ guides }: { guides: SiteSnapshot["dressCodeGu
       <SectionHeading
         eyebrow="Dress Code"
         title="Styling guidance by event, with colour inspiration."
-        description="Share visual direction while keeping guests comfortable and confident about what to wear."
+        description="Colour palettes and styling cues to help you feel perfectly dressed for each part of the celebration."
       />
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         {guides.map((guide) => (
@@ -678,7 +681,7 @@ export function ExperienceSection({
       <SectionHeading
         eyebrow="Guest Experience"
         title="Travel, stay, move around, and feel looked after."
-        description="This section is designed to make guests feel welcomed before they even arrive."
+        description="Everything you need before you arrive — where to stay, how to get around, and what to expect."
       />
       <div className="mt-10 grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="space-y-6">
@@ -762,7 +765,7 @@ export function GallerySection({
       <SectionHeading
         eyebrow="Gallery"
         title="A cinematic editorial spotlight, one frame at a time."
-        description="A fast editorial spotlight with quick-select frames instead of a laggy drag rail. Tap, swipe, click, or use arrow keys."
+        description="Tap, swipe, or use arrow keys to move through the highlights."
       />
       <div className="mt-10">
         <GallerySpotlight
@@ -789,7 +792,7 @@ export function VideoSection({ videos }: { videos: SiteSnapshot["embeddedVideos"
       <SectionHeading
         eyebrow="Videos"
         title="From invitation teasers to full ceremony highlights."
-        description="Couples can paste a YouTube URL and the platform validates it, extracts the video ID, and renders a cleaner, more cinematic embed section."
+        description="Invitation teasers, ceremony highlights, and behind-the-scenes moments from the celebration."
       />
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         {videos.map((video) => (
@@ -798,6 +801,7 @@ export function VideoSection({ videos }: { videos: SiteSnapshot["embeddedVideos"
               <iframe
                 src={getYoutubeEmbedUrl(video.youtubeId)}
                 title={video.title}
+                loading="lazy"
                 className="h-full w-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

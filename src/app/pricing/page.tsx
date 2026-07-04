@@ -4,15 +4,96 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
 import { CurrencySwitcher } from "@/components/marketing/currency-switcher";
+import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { PricingCard } from "@/components/marketing/pricing-card";
 import { detectCurrency } from "@/lib/geo";
 import { isLaunchOfferActive, launchOffer, plans } from "@/lib/pricing";
 import { getCurrentUser } from "@/server/auth/session";
 
 export const metadata: Metadata = {
-  title: "Pricing · ToNewBeginning",
+  title: "Pricing — Wedding Website Plans · ToNewBeginning",
   description:
-    "Start free. Upgrade when your wedding gets serious. Pay once for the year — or keep your wedding site forever.",
+    "ToNewBeginning.com pricing: start free with the Hello plan (2 events, 50 RSVPs), upgrade to Together (₹3,499 / $49 for your wedding year), or choose Forever for lifetime hosting. No subscriptions.",
+  alternates: { canonical: "/pricing" },
+};
+
+const productSchema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "ToNewBeginning.com — Wedding Website Builder",
+  description:
+    "A wedding website platform for Indian and South Asian couples with multi-event support, RSVP management, photo galleries, and a polished couple dashboard.",
+  brand: { "@type": "Brand", name: "ToNewBeginning" },
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Hello",
+      description: "Free forever — up to 2 wedding events and 50 RSVPs, gallery, story timeline.",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: "https://wed.tonewbeginning.com/register",
+    },
+    {
+      "@type": "Offer",
+      name: "Together",
+      description:
+        "Wedding year plan — unlimited events, unlimited RSVPs, custom domain, no ToNewBeginning branding.",
+      price: "49",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: "https://wed.tonewbeginning.com/register",
+    },
+    {
+      "@type": "Offer",
+      name: "Forever",
+      description:
+        "Lifetime plan — everything in Together plus permanent hosting, anniversary refresh emails, AI content help, and concierge setup.",
+      price: "99",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: "https://wed.tonewbeginning.com/register",
+    },
+  ],
+};
+
+const pricingFaqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What happens after my wedding year ends on Together?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Your site automatically moves to a read-only archive for 6 months. After that you can upgrade to Forever to keep it live, or download a permanent backup.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can someone else gift me Forever?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes — a parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Why are prices different in different countries?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "We anchor prices to local purchasing power, not raw FX. A couple in India and a couple in California pay a fair amount for what the product is worth where they live.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Do I lose work if I never upgrade?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it — more events, more guests, or a custom domain.",
+      },
+    },
+  ],
 };
 
 export default async function PricingPage() {
@@ -22,6 +103,9 @@ export default async function PricingPage() {
   const registerHref = (user ? "/dashboard" : "/register") as Route;
 
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingFaqSchema) }} />
     <main className="section-shell relative pb-24 pt-16 sm:pt-20">
       <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-[color:var(--accent)]/14 to-transparent" />
 
@@ -137,6 +221,8 @@ export default async function PricingPage() {
         </div>
       </div>
     </main>
+    <MarketingFooter />
+    </>
   );
 }
 

@@ -9,10 +9,11 @@ import { prisma } from "@/server/prisma";
 import {
   getWeddingSiteBySlug,
   getWeddingSiteForUser,
+  type PublicWeddingSiteRecord,
   type WeddingSiteRecord,
 } from "@/server/repositories/wedding-site";
 
-function buildSnapshot(record: WeddingSiteRecord): SiteSnapshot {
+function buildSnapshot(record: PublicWeddingSiteRecord): SiteSnapshot {
   // Relations can be missing if a workspace bootstrap was interrupted. Fall back
   // to safe defaults instead of throwing so the public site / draft preview still
   // renders. findTemplateByKey already defaults to the first registered template.
@@ -171,7 +172,7 @@ function asBoolean(value: unknown, fallback: boolean) {
   return typeof value === "boolean" ? value : fallback;
 }
 
-function normalizePublishedSnapshot(record: WeddingSiteRecord, snapshotValue: unknown): SiteSnapshot {
+function normalizePublishedSnapshot(record: PublicWeddingSiteRecord, snapshotValue: unknown): SiteSnapshot {
   const base = buildSnapshot(record);
 
   if (!isRecord(snapshotValue)) {

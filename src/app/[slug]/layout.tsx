@@ -19,18 +19,16 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
     title: snapshot.site.seoTitle ?? `${snapshot.site.brandName} | Wedding Website`,
     description:
       snapshot.site.seoDescription ??
-      `${snapshot.site.coupleNames} invite you to celebrate their wedding journey.`,
-    alternates: snapshot.site.canonicalUrl
-      ? {
-          canonical: snapshot.site.canonicalUrl,
-        }
-      : undefined,
+      `${snapshot.site.coupleNames} invite you to celebrate their wedding. View events, RSVP, explore the gallery, and share your wishes — all on their personal wedding website.`,
+    alternates: {
+      canonical: snapshot.site.canonicalUrl ?? `/${slug}`,
+    },
     robots: snapshot.publish.noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       title: snapshot.site.seoTitle ?? snapshot.site.brandName,
       description:
         snapshot.site.seoDescription ??
-        `${snapshot.site.coupleNames} invite you to celebrate their wedding journey.`,
+        `${snapshot.site.coupleNames} invite you to celebrate their wedding. View events, RSVP, explore the gallery, and share your wishes.`,
       images: snapshot.site.ogImageUrl ? [snapshot.site.ogImageUrl] : [],
     },
   };
