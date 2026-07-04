@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { Route } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -15,12 +16,115 @@ import { logoutAction } from "@/actions/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { HeroShowcase } from "@/components/marketing/hero-showcase";
+import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
+import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
 import { getCurrentUser } from "@/server/auth/session";
 import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
+
+export const metadata: Metadata = {
+  title: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+  description:
+    "Create a beautiful wedding website for your Indian celebration. ToNewBeginning.com supports multi-day events, Haldi to reception RSVPs, photo galleries, and a calm couple dashboard — free to start.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+    description:
+      "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard. Designed for South Asian weddings.",
+    url: "https://wed.tonewbeginning.com",
+    siteName: "ToNewBeginning.com",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+    description:
+      "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard. Designed for South Asian weddings.",
+    images: ["/og-image.png"],
+  },
+};
+
+const BASE_URL = "https://wed.tonewbeginning.com";
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "ToNewBeginning.com",
+  url: BASE_URL,
+  description:
+    "A wedding website builder for Indian and South Asian couples — multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
+};
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "ToNewBeginning.com",
+  applicationCategory: "WebApplication",
+  operatingSystem: "Web",
+  url: BASE_URL,
+  description:
+    "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian celebrations with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
+  offers: [
+    { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan — up to 2 wedding events and 50 RSVPs." },
+    { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan — unlimited events, RSVPs, custom domain." },
+    { "@type": "Offer", name: "Forever", price: "99", priceCurrency: "USD", description: "Lifetime plan — everything in Together plus permanent hosting and anniversary emails." },
+  ],
+};
+
+const homepageFaqs = [
+  {
+    q: "What is ToNewBeginning.com?",
+    a: "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian couples. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard — all in one place.",
+  },
+  {
+    q: "Does it support Indian weddings with multiple ceremonies?",
+    a: "Yes. The platform is built specifically for multi-event celebrations. Each ceremony can have its own date, venue, dress code, timing, and independent RSVP settings. Guests can accept or decline individual events separately.",
+  },
+  {
+    q: "Can guests RSVP to specific events individually?",
+    a: "Absolutely. Guests submit one RSVP form and choose which events they will attend. The couple dashboard shows per-event headcounts and can export attendance data as a CSV for your caterer or venue coordinator.",
+  },
+  {
+    q: "What happens to my wedding website after the wedding?",
+    a: "On the free Hello plan your site remains as an editable draft indefinitely. On the Together plan it archives for 6 months after your wedding year ends. On the Forever plan your site and gallery stay live permanently — a lasting digital memory of your celebration.",
+  },
+  {
+    q: "Is there a custom domain option?",
+    a: "Yes — on the Together and Forever plans you can connect your own domain (e.g. kammonbeginnings.com) so guests see a personal URL rather than the ToNewBeginning subdomain.",
+  },
+  {
+    q: "Can family gift the Forever plan to the couple?",
+    a: "Yes, and it is designed to feel like a real gift. A parent or sibling can purchase Forever and we send a card-style email to the couple — not a billing receipt.",
+  },
+  {
+    q: "How does RSVP work for large Indian wedding guest lists?",
+    a: "RSVPs can be submitted by any guest without an account. Together and Forever plans allow unlimited responses. You can also create invite groups with access codes to restrict who can view private site content.",
+  },
+  {
+    q: "Is the platform built specifically for Indian weddings?",
+    a: "ToNewBeginning.com is designed with South Asian and Indian weddings as the primary use case — multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: homepageFaqs.map(({ q, a }) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
 
 const featureHighlights = [
   {
@@ -69,6 +173,10 @@ export default async function HomePage() {
   const workspaceHref = (hasWorkspace ? safeResumePath : "/login") as Route;
 
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
     <main className="pb-24">
       <section className="section-shell pt-6">
         <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-6 py-6 rich-shadow sm:px-10 lg:px-14 lg:py-10">
@@ -114,12 +222,13 @@ export default async function HomePage() {
             <div className="max-w-3xl">
               <Badge>Craft Your Celebration</Badge>
               <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-6xl">
-                Build your wedding event as a premium platform, not just a single site.
+                The wedding website builder for Indian celebrations — story, events, RSVPs, and memories in one place.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-stone-800 sm:text-lg">
-                ToNewBeginning.com is a next-generation wedding website builder for elegant storytelling,
-                flexible templates, RSVP workflows, guest memories, and a calm, luxurious admin
-                experience.
+                ToNewBeginning.com is a wedding website platform built for South Asian and Indian
+                couples. Create a beautiful site that covers every ceremony — from Haldi and Sangeet
+                to the reception — with per-event RSVPs, a photo gallery, guest messaging, and a
+                calm couple dashboard.
               </p>
               <div className="mt-6 rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
@@ -153,7 +262,7 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="flex w-full justify-center lg:w-auto lg:justify-end">
-              <HeroShowcase />
+              <HeroShowcaseLazy />
             </div>
           </div>
         </div>
@@ -238,6 +347,27 @@ export default async function HomePage() {
           </div>
         </Card>
       </section>
+
+      <section className="section-shell mt-20">
+        <SectionHeading
+          eyebrow="Common questions"
+          title="Everything couples ask before choosing a wedding website builder."
+          description="Answers to the questions we hear most from couples planning Indian and South Asian weddings."
+        />
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          {homepageFaqs.map(({ q, a }) => (
+            <details key={q} className="group rounded-[1.4rem] border border-black/8 bg-white/70 p-5 transition open:bg-white">
+              <summary className="cursor-pointer list-none font-semibold text-[color:var(--text)] [&::-webkit-details-marker]:hidden">
+                <span className="mr-3 inline-block text-[color:var(--primary)] transition group-open:rotate-90">›</span>
+                {q}
+              </summary>
+              <p className="mt-3 pl-5 text-sm leading-7 text-[color:var(--muted)]">{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
     </main>
+    <MarketingFooter />
+    </>
   );
 }

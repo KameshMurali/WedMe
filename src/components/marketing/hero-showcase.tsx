@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { CalendarRange, ImageIcon, Palette, Sparkles } from "lucide-react";
-import { motion, useReducedMotion, type TargetAndTransition, type Variants } from "motion/react";
+import { motion, useInView, useReducedMotion, type TargetAndTransition, type Variants } from "motion/react";
 
 const cards = [
   {
@@ -35,6 +36,11 @@ const sparkles = [
 
 export function HeroShowcase() {
   const reduce = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Only run the infinite float/sparkle loops while the showcase is on screen —
+  // saves CPU when scrolled away and lets the page settle to idle.
+  const inView = useInView(containerRef, { amount: 0.2 });
+  const animate = !reduce && inView;
 
   const container: Variants = {
     hidden: {},
@@ -54,7 +60,7 @@ export function HeroShowcase() {
   };
 
   return (
-    <div className="relative w-full max-w-xl lg:max-w-lg">
+    <div ref={containerRef} className="relative w-full max-w-xl lg:max-w-lg">
       {/* Soft glow behind the stack */}
       <div
         aria-hidden
@@ -62,7 +68,7 @@ export function HeroShowcase() {
       />
 
       {/* Floating sparkles */}
-      {!reduce
+      {animate
         ? sparkles.map((s, i) => (
             <motion.div
               key={i}
@@ -87,10 +93,10 @@ export function HeroShowcase() {
       >
         {cards.map((card, index) => {
           const Icon = card.icon;
-          // Gentle, staggered infinite float (disabled for reduced motion).
-          const float: TargetAndTransition | undefined = reduce
-            ? undefined
-            : {
+          // Gentle, staggered infinite float — only while on screen (and not
+          // for reduced-motion users).
+          const float: TargetAndTransition | undefined = animate
+            ? {
                 y: [0, index % 2 === 0 ? -10 : -6, 0],
                 transition: {
                   duration: 5.5 + index,
@@ -98,7 +104,8 @@ export function HeroShowcase() {
                   ease: "easeInOut",
                   delay: index * 0.4,
                 },
-              };
+              }
+            : undefined;
 
           return (
             <motion.div key={card.title} variants={cardIn} className="group">
