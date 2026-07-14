@@ -4,7 +4,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Eye, ListChecks, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users } from "lucide-react";
+import { Eye, Home, ListChecks, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -105,6 +105,12 @@ export function AdminShell({
                 target={isPublished ? "_blank" : undefined}
               >
                 {isPublished ? "View public site" : "Preview draft site"}
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" className="w-full justify-start">
+              <Link href="/">
+                <Home className="h-4 w-4" />
+                Back to home
               </Link>
             </Button>
             <form action={logoutAction}>
