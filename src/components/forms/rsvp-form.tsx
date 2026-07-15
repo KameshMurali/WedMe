@@ -11,22 +11,28 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-const clientRsvpSchema = z.object({
-  guestName: z.string().min(2),
-  guestEmail: z.string().email().optional().or(z.literal("")),
-  inviteCode: z.string().optional().or(z.literal("")),
-  status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
-  attendeeCount: z.number().min(1).max(10),
-  mealPreference: z.string().optional(),
-  accommodationNeeds: z.string().optional(),
-  travelNotes: z.string().optional(),
-  specialRequests: z.string().optional(),
-  accessibilityNeeds: z.string().optional(),
-  noteToCouple: z.string().optional(),
-  selectedEventIds: z.array(z.string()).min(1, "Choose at least one event."),
-});
+// The event minimum only applies when the site actually has events —
+// sites published without events still accept a general RSVP.
+function buildClientRsvpSchema(hasEvents: boolean) {
+  return z.object({
+    guestName: z.string().min(2),
+    guestEmail: z.string().email().optional().or(z.literal("")),
+    inviteCode: z.string().optional().or(z.literal("")),
+    status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
+    attendeeCount: z.number().min(1).max(10),
+    mealPreference: z.string().optional(),
+    accommodationNeeds: z.string().optional(),
+    travelNotes: z.string().optional(),
+    specialRequests: z.string().optional(),
+    accessibilityNeeds: z.string().optional(),
+    noteToCouple: z.string().optional(),
+    selectedEventIds: hasEvents
+      ? z.array(z.string()).min(1, "Choose at least one event.")
+      : z.array(z.string()),
+  });
+}
 
-type ClientRsvpValues = z.infer<typeof clientRsvpSchema>;
+type ClientRsvpValues = z.infer<ReturnType<typeof buildClientRsvpSchema>>;
 
 export function RsvpForm({
   slug,
@@ -39,20 +45,17 @@ export function RsvpForm({
 }) {
   const {
     register,
-    watch,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ClientRsvpValues>({
-    resolver: zodResolver(clientRsvpSchema),
+    resolver: zodResolver(buildClientRsvpSchema(events.length > 0)),
     defaultValues: {
       status: "ATTENDING",
       attendeeCount: 1,
       selectedEventIds: events.map((event) => event.id),
     },
   });
-
-  const selectedEventIds = watch("selectedEventIds");
 
   const onSubmit = handleSubmit(async (values) => {
     const payload = {
@@ -91,6 +94,10 @@ export function RsvpForm({
 
     toast.success(data.success ?? "Your RSVP has been submitted.");
     reset();
+  }, () => {
+    // Surface validation failures as a toast too — field errors alone can sit
+    // off-screen on mobile, making a failed submit look like a dead button.
+    toast.error("Please review the highlighted fields and try again.");
   });
 
   if (!isOpen) {
@@ -153,30 +160,32 @@ export function RsvpForm({
         </div>
       </div>
 
-      <Card className="space-y-4">
-        <h3 className="text-lg font-semibold text-[color:var(--text)]">Select your events</h3>
-        <div className="grid gap-3 md:grid-cols-2">
-          {events.map((event) => (
-            <label
-              key={event.id}
-              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-black/8 bg-white/70 px-4 py-3 text-sm"
-            >
-              <input
-                type="checkbox"
-                value={event.id}
-                {...register("selectedEventIds")}
-              />
-              <span>
-                <span className="font-medium text-[color:var(--text)]">{event.title}</span>
-                <span className="block text-xs text-[color:var(--muted)]">{event.dayLabel}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-        {errors.selectedEventIds ? (
-          <p className="text-sm text-rose-600">{errors.selectedEventIds.message}</p>
-        ) : null}
-      </Card>
+      {events.length > 0 ? (
+        <Card className="space-y-4">
+          <h3 className="text-lg font-semibold text-[color:var(--text)]">Select your events</h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            {events.map((event) => (
+              <label
+                key={event.id}
+                className="flex cursor-pointer items-center gap-3 rounded-2xl border border-black/8 bg-white/70 px-4 py-3 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  value={event.id}
+                  {...register("selectedEventIds")}
+                />
+                <span>
+                  <span className="font-medium text-[color:var(--text)]">{event.title}</span>
+                  <span className="block text-xs text-[color:var(--muted)]">{event.dayLabel}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          {errors.selectedEventIds ? (
+            <p className="text-sm text-rose-600">{errors.selectedEventIds.message}</p>
+          ) : null}
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>

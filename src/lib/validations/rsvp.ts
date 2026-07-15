@@ -13,12 +13,12 @@ export const rsvpSchema = z.object({
   specialRequests: z.string().max(300).optional().or(z.literal("")),
   accessibilityNeeds: z.string().max(300).optional().or(z.literal("")),
   noteToCouple: z.string().max(500).optional().or(z.literal("")),
-  selectedEvents: z
-    .array(
-      z.object({
-        eventId: z.string().min(1),
-        status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
-      }),
-    )
-    .min(1),
+  // Sites published without events send an empty list; the route already
+  // persists a general RSVP when no event selections exist.
+  selectedEvents: z.array(
+    z.object({
+      eventId: z.string().min(1),
+      status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
+    }),
+  ),
 });
