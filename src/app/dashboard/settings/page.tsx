@@ -2,8 +2,9 @@ import { DashboardUnavailableState } from "@/components/admin/dashboard-unavaila
 import { PublishSettingsForm } from "@/components/admin/publish-settings-form";
 import { SiteBasicsForm } from "@/components/admin/site-basics-form";
 import { Card } from "@/components/ui/card";
+import { getPublishBlockers } from "@/lib/readiness";
 import { requireUser } from "@/server/auth/session";
-import { getSettingsSiteForUser } from "@/server/repositories/wedding-site";
+import { getReadinessInputForUser, getSettingsSiteForUser } from "@/server/repositories/wedding-site";
 import {
   directBlobUploadsEnabled,
   storageUploadsConfigurationMessage,
@@ -12,7 +13,11 @@ import {
 
 export default async function DashboardSettingsPage() {
   const user = await requireUser();
-  const site = await getSettingsSiteForUser(user.id);
+  const [site, readinessInput] = await Promise.all([
+    getSettingsSiteForUser(user.id),
+    getReadinessInputForUser(user.id),
+  ]);
+  const publishBlockers = readinessInput ? getPublishBlockers(readinessInput) : [];
   if (!site || !site.publishSettings) {
     return (
       <DashboardUnavailableState
@@ -63,6 +68,7 @@ export default async function DashboardSettingsPage() {
             isUploadsOpen: site.publishSettings.isUploadsOpen,
             isMessagesOpen: site.publishSettings.isMessagesOpen,
           }}
+          publishBlockers={publishBlockers}
         />
       </Card>
     </div>

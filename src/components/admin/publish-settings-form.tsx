@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 import { publishSiteAction, updatePublishSettingsAction } from "@/actions/dashboard";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export function PublishSettingsForm({
   defaultValues,
+  publishBlockers = [],
 }: {
   defaultValues: {
     visibility: "PUBLIC" | "PASSWORD_PROTECTED" | "INVITE_ONLY";
@@ -18,9 +20,26 @@ export function PublishSettingsForm({
     isUploadsOpen: boolean;
     isMessagesOpen: boolean;
   };
+  // Unmet critical readiness checks (computed server-side). When non-empty,
+  // publishing asks for confirmation instead of firing immediately.
+  publishBlockers?: string[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [showPublishWarning, setShowPublishWarning] = useState(false);
+
+  function runPublish() {
+    setShowPublishWarning(false);
+    startTransition(async () => {
+      const result = await publishSiteAction();
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(result.success ?? "Published");
+      router.refresh();
+    });
+  }
 
   return (
     <form
@@ -84,6 +103,31 @@ export function PublishSettingsForm({
           </label>
         ))}
       </div>
+      {showPublishWarning ? (
+        <div
+          role="alertdialog"
+          aria-label="Publish warning"
+          className="rounded-3xl border border-amber-200 bg-amber-50/95 px-5 py-4"
+        >
+          <p className="flex items-center gap-2 font-semibold text-amber-950">
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+            Hold on — guests will hit problems:
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-9 text-sm leading-6 text-amber-950">
+            {publishBlockers.map((blocker) => (
+              <li key={blocker}>{blocker}</li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button type="button" variant="outline" disabled={isPending} onClick={runPublish}>
+              Publish anyway
+            </Button>
+            <Button type="button" disabled={isPending} onClick={() => setShowPublishWarning(false)}>
+              Review first
+            </Button>
+          </div>
+        </div>
+      ) : null}
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save publish settings"}
@@ -92,17 +136,13 @@ export function PublishSettingsForm({
           type="button"
           variant="outline"
           disabled={isPending}
-          onClick={() =>
-            startTransition(async () => {
-              const result = await publishSiteAction();
-              if (result.error) {
-                toast.error(result.error);
-                return;
-              }
-              toast.success(result.success ?? "Published");
-              router.refresh();
-            })
-          }
+          onClick={() => {
+            if (publishBlockers.length > 0) {
+              setShowPublishWarning(true);
+              return;
+            }
+            runPublish();
+          }}
         >
           Publish current draft
         </Button>

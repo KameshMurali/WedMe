@@ -4,9 +4,10 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Eye, Home, ListChecks, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users } from "lucide-react";
+import { Eye, Home, Inbox, ListChecks, LogOut, Palette, PenSquare, Settings, Sparkles, UploadCloud, Users } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth";
+import { FeedbackDialog } from "@/components/admin/feedback-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { dashboardRoutes, workspaceResumeCookieName } from "@/lib/constants";
@@ -42,7 +43,11 @@ export function AdminShell({
 
   // Admin-only nav additions, appended after the standard couple navigation.
   const navItems = isAdmin
-    ? [...navigation, { href: "/dashboard/waitlist" as Route, label: "Waitlist", icon: ListChecks }]
+    ? [
+        ...navigation,
+        { href: "/dashboard/waitlist" as Route, label: "Waitlist", icon: ListChecks },
+        { href: "/dashboard/feedback" as Route, label: "Feedback", icon: Inbox },
+      ]
     : navigation;
 
   useEffect(() => {
@@ -113,6 +118,7 @@ export function AdminShell({
                 Back to home
               </Link>
             </Button>
+            <FeedbackDialog />
             <form action={logoutAction}>
               <Button type="submit" variant="ghost" className="w-full justify-start">
                 <LogOut className="h-4 w-4" />

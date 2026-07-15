@@ -2,13 +2,16 @@ import type { Route } from "next";
 import Link from "next/link";
 
 import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
+import { ReadinessCard } from "@/components/admin/readiness-card";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
+import { computeReadiness } from "@/lib/readiness";
 import { requireUser } from "@/server/auth/session";
 import {
   ensureWeddingSiteForUser,
   getDashboardOverviewForUser,
   getDashboardSummary,
+  getReadinessInputForUser,
 } from "@/server/repositories/wedding-site";
 
 export default async function DashboardHomePage() {
@@ -30,14 +33,17 @@ export default async function DashboardHomePage() {
     return unavailable;
   }
 
-  const [site, summary] = await Promise.all([
+  const [site, summary, readinessInput] = await Promise.all([
     getDashboardOverviewForUser(user.id),
     getDashboardSummary(siteId),
+    getReadinessInputForUser(user.id),
   ]);
 
   if (!site) {
     return unavailable;
   }
+
+  const readiness = readinessInput ? computeReadiness(readinessInput) : null;
 
   return (
     <div className="space-y-6">
@@ -48,6 +54,7 @@ export default async function DashboardHomePage() {
           Track activity, review responses, and keep your draft moving toward publish.
         </p>
       </div>
+      {readiness ? <ReadinessCard readiness={readiness} /> : null}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
         <StatCard label="RSVP responses" value={summary.rsvpCount} />
         <StatCard label="Attending guests" value={summary.attendingCount} />

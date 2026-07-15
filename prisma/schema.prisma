@@ -536,3 +536,18 @@ model WaitlistSignup {
   @@unique([email, planKey])
   @@index([planKey])
 }
+
+// Product feedback submitted by couples from their workspace. Email and slug
+// are denormalized at submit time so the admin inbox needs no joins.
+model WorkspaceFeedback {
+  id        String   @id @default(cuid())
+  userId    String
+  userEmail String
+  siteSlug  String
+  category  String
+  rating    Int?
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
