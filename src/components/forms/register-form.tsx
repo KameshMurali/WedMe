@@ -36,7 +36,7 @@ function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.Re
 type RegisterFieldName = keyof RegisterFormValues;
 
 // Order matters: used to scroll the FIRST invalid field into view on submit.
-const fieldOrder: RegisterFieldName[] = [
+const fieldOrder: string[] = [
   "partnerOneName",
   "partnerTwoName",
   "brandName",
