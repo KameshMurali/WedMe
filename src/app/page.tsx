@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
+import { Reveal } from "@/components/marketing/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
@@ -128,23 +129,35 @@ const faqSchema = {
 
 const featureHighlights = [
   {
-    title: "Elegant public wedding websites",
+    title: "Every ceremony gets its stage",
     description:
-      "Deliver a cinematic, mobile-first guest experience with story timelines, event guidance, schedules, galleries, RSVPs, videos, and post-event memories.",
+      "Haldi at home, Sangeet in a ballroom, ceremony at dawn — each event carries its own timing, venue map, dress code, and guest list. Nothing gets squeezed into a single \"wedding day\".",
     icon: HeartHandshake,
   },
   {
-    title: "Couple dashboard and builder",
+    title: "RSVPs that understand Indian weddings",
     description:
-      "Give couples a polished admin area with secure login, content editing, template switching, theme tuning, analytics, moderation, and publishing controls.",
+      "Guests reply once and choose exactly the functions they'll attend. You see per-event headcounts, meal preferences, and travel notes in one calm dashboard — no spreadsheets, no chasing.",
     icon: LayoutDashboard,
   },
   {
-    title: "Reusable SaaS architecture",
+    title: "Five designs, zero rebuilds",
     description:
-      "Scale from one wedding to many with Prisma data models, publish snapshots, storage abstraction, validation, and a theme-driven template system.",
+      "Switch templates any time — your story, events, and photos flow into the new look instantly. Customise the palette until it feels like you, then publish when it's ready.",
     icon: Palette,
   },
+];
+
+// Slow marquee under the hero — grounds the brand in the ceremonies it serves.
+const ceremonyMarquee = [
+  "Mehendi",
+  "Haldi",
+  "Sangeet",
+  "Nikkah",
+  "Muhurtham",
+  "Ceremony",
+  "Reception",
+  "Walima",
 ];
 
 function getResumeLabel(pathname: string) {
@@ -220,42 +233,53 @@ export default async function HomePage() {
 
           <div className="relative mt-8 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-3xl">
-              <Badge>Craft Your Celebration</Badge>
-              <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-6xl">
-                The wedding website builder for Indian celebrations — story, events, RSVPs, and memories in one place.
-              </h1>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-stone-800 sm:text-lg">
-                ToNewBeginning.com is a wedding website platform built for South Asian and Indian
-                couples. Create a beautiful site that covers every ceremony — from Haldi and Sangeet
-                to the reception — with per-event RSVPs, a photo gallery, guest messaging, and a
-                calm couple dashboard.
-              </p>
-              <div className="mt-6 rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
-                  Resume where you left off
-                </p>
-                <p className="mt-2 text-base font-semibold text-[#1f1117]">
-                  {hasWorkspace ? `Continue from ${resumeLabel}` : "Home screen login now resumes your last workspace area."}
-                </p>
-                <p className="mt-2 text-sm leading-7 text-stone-700">
-                  Returning couples can log in from the home screen and jump back into templates,
-                  content, settings, preview, or whichever dashboard area they used last.
-                </p>
+              <div className="animate-fade-up">
+                <Badge>Craft Your Celebration</Badge>
               </div>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <h1
+                className="mt-5 max-w-3xl animate-fade-up font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-6xl"
+                style={{ animationDelay: "120ms" }}
+              >
+                Five ceremonies.
+                <br />
+                Two hundred guests.
+                <br />
+                <span className="text-[color:var(--primary)]">One beautiful link.</span>
+              </h1>
+              <p
+                className="mt-6 max-w-2xl animate-fade-up text-base leading-8 text-stone-800 sm:text-lg"
+                style={{ animationDelay: "240ms" }}
+              >
+                Your family is planning five events across three venues, and every guest has the
+                same ten questions. ToNewBeginning gives everyone one gorgeous answer — an Indian
+                wedding website with your story, schedules, dress codes, per-event RSVPs, photos,
+                and wishes, all at one link you can drop in any WhatsApp group.
+              </p>
+              {hasWorkspace ? (
+                <div
+                  className="mt-6 animate-fade-up rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur"
+                  style={{ animationDelay: "320ms" }}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
+                    Resume where you left off
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-[#1f1117]">Continue from {resumeLabel}</p>
+                </div>
+              ) : null}
+              <div className="mt-8 flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "360ms" }}>
                 <Button asChild>
                   <Link href="/kammonbeginnings">
-                    Open Demo Site <ArrowRight className="h-4 w-4" />
+                    See a real wedding site <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href={workspaceHref}>
+                  <Link href={hasWorkspace ? workspaceHref : "/register"}>
                     {hasWorkspace ? (
                       <>
                         Resume {resumeLabel} <PlayCircle className="h-4 w-4" />
                       </>
                     ) : (
-                      "Log in to resume"
+                      "Start yours free"
                     )}
                   </Link>
                 </Button>
@@ -265,26 +289,52 @@ export default async function HomePage() {
               <HeroShowcaseLazy />
             </div>
           </div>
+
+          {/* Ceremony marquee — quiet motion that says "we know your wedding". */}
+          <div
+            className="relative mt-10 overflow-hidden border-t border-white/60 pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]"
+            aria-hidden="true"
+          >
+            <div className="marquee-track">
+              {[0, 1].map((copy) => (
+                <div key={copy} className="flex items-center">
+                  {ceremonyMarquee.map((ceremony) => (
+                    <span
+                      key={`${copy}-${ceremony}`}
+                      className="flex items-center whitespace-nowrap px-5 font-display text-xl text-stone-500 sm:text-2xl"
+                    >
+                      {ceremony}
+                      <span className="ml-10 h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]/60" />
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="section-shell mt-20">
-        <SectionHeading
-          eyebrow="Product Vision"
-          title="A more flexible, modern, and advanced alternative to the wedding website status quo."
-          description="The product is structured as a true wedding website SaaS: public storytelling, secure admin workflows, and reusable templates all sitting on one shared platform architecture."
-        />
+        <Reveal>
+          <SectionHeading
+            eyebrow="Why couples pick us"
+            title="Built around how Indian weddings actually work."
+            description="Most builders assume one event, one day, one guest list. Yours has never worked that way — so we didn't build it that way."
+          />
+        </Reveal>
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          {featureHighlights.map((feature) => {
+          {featureHighlights.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={feature.title} className="space-y-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--accent)]/10">
-                  <Icon className="h-6 w-6 text-[color:var(--primary)]" />
-                </div>
-                <h3 className="font-display text-3xl text-[color:var(--text)]">{feature.title}</h3>
-                <p className="text-sm leading-7 text-[color:var(--muted)]">{feature.description}</p>
-              </Card>
+              <Reveal key={feature.title} delay={index * 0.12}>
+                <Card className="h-full space-y-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--accent)]/10">
+                    <Icon className="h-6 w-6 text-[color:var(--primary)]" />
+                  </div>
+                  <h3 className="font-display text-3xl text-[color:var(--text)]">{feature.title}</h3>
+                  <p className="text-sm leading-7 text-[color:var(--muted)]">{feature.description}</p>
+                </Card>
+              </Reveal>
             );
           })}
         </div>
@@ -292,22 +342,29 @@ export default async function HomePage() {
 
       <section className="section-shell mt-20">
         <SectionHeading
-          eyebrow="Template System"
-          title="Five premium starting points, one shared content model."
-          description="Each template supports the same sections, data model, and dashboard tooling. Couples can switch themes without rebuilding their site."
+          eyebrow="Five moods, one wedding"
+          title="Pick a feeling. Change your mind whenever."
+          description="Romantic florals or cinematic drama — every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
         <div className="mt-10 grid gap-5 lg:grid-cols-5">
-          {templateRegistry.map((template) => (
-            <Card key={template.key} className="overflow-hidden p-0">
-              <div className="h-40 w-full" style={{ background: template.previewGradient }} />
-              <div className="space-y-3 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-                  {template.mood}
-                </p>
-                <h3 className="font-display text-2xl text-[color:var(--text)]">{template.name}</h3>
-                <p className="text-sm leading-7 text-[color:var(--muted)]">{template.description}</p>
-              </div>
-            </Card>
+          {templateRegistry.map((template, index) => (
+            <Reveal key={template.key} delay={index * 0.08}>
+              <Card className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
+                <div className="h-40 w-full overflow-hidden">
+                  <div
+                    className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-110"
+                    style={{ background: template.previewGradient }}
+                  />
+                </div>
+                <div className="space-y-3 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+                    {template.mood}
+                  </p>
+                  <h3 className="font-display text-2xl text-[color:var(--text)]">{template.name}</h3>
+                  <p className="text-sm leading-7 text-[color:var(--muted)]">{template.description}</p>
+                </div>
+              </Card>
+            </Reveal>
           ))}
         </div>
       </section>

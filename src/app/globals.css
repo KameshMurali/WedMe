@@ -112,3 +112,23 @@ a {
     left: 100%;
   }
 }
+
+/* Slow ceremony marquee on the marketing hero. The track holds two copies of
+   the content; translating -50% loops seamlessly. */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
