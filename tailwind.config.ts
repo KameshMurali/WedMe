@@ -11,7 +11,9 @@ const config: Config = {
       },
       colors: {
         ink: "#1f1724",
-        rose: "#f7d7d0",
+        // NOTE: never name a custom color "rose" (or any other Tailwind
+        // palette name) — it replaces the entire built-in scale, silently
+        // killing every rose-50…rose-900 class used for error states.
         blush: "#f6ece7",
         gold: "#b88c4a",
         mist: "#f5f2ee",
