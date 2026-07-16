@@ -19,13 +19,33 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
 
   return (
-    <p id={id} className="mb-2 text-sm font-medium text-rose-700">
+    <p id={id} className="mt-1.5 text-sm font-medium text-rose-700">
       {message}
     </p>
   );
 }
 
+function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-stone-900">
+      {children} <span aria-hidden="true" className="text-rose-600">*</span>
+    </label>
+  );
+}
+
 type RegisterFieldName = keyof RegisterFormValues;
+
+// Order matters: used to scroll the FIRST invalid field into view on submit.
+const fieldOrder: string[] = [
+  "partnerOneName",
+  "partnerTwoName",
+  "brandName",
+  "email",
+  "slug",
+  "weddingDate",
+  "password",
+  "confirmPassword",
+];
 
 const initialFormValues: RegisterFormValues = {
   partnerOneName: "",
@@ -114,7 +134,17 @@ export function RegisterForm() {
 
     if (!parsed.success) {
       event.preventDefault();
-      setClientErrors(mapRegisterValidationErrors(parsed.error.issues));
+      const nextErrors = mapRegisterValidationErrors(parsed.error.issues);
+      setClientErrors(nextErrors);
+
+      // On mobile the error messages render far above the submit button —
+      // without this, tapping "Create workspace" appears to do nothing.
+      const firstInvalid = fieldOrder.find((name) => nextErrors[name]);
+      if (firstInvalid) {
+        const element = document.querySelector<HTMLElement>(`[name="${firstInvalid}"]`);
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.focus({ preventScroll: true });
+      }
       return;
     }
 
@@ -122,12 +152,15 @@ export function RegisterForm() {
     setClientErrors({});
   }
 
+  const errorCount = Object.keys(fieldErrors).length;
+
   return (
     <form action={formAction} className="space-y-4" noValidate onSubmit={handleSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <FieldError id="partnerOneName-error" message={fieldErrors.partnerOneName} />
+          <FieldLabel htmlFor="register-partner-one">Partner one name</FieldLabel>
           <Input
+            id="register-partner-one"
             aria-describedby={fieldErrors.partnerOneName ? "partnerOneName-error" : undefined}
             aria-invalid={Boolean(fieldErrors.partnerOneName)}
             autoComplete="given-name"
@@ -138,10 +171,12 @@ export function RegisterForm() {
             onChange={(event) => updateField("partnerOneName", event.target.value)}
             onBlur={() => validateSingleField("partnerOneName")}
           />
+          <FieldError id="partnerOneName-error" message={fieldErrors.partnerOneName} />
         </div>
         <div>
-          <FieldError id="partnerTwoName-error" message={fieldErrors.partnerTwoName} />
+          <FieldLabel htmlFor="register-partner-two">Partner two name</FieldLabel>
           <Input
+            id="register-partner-two"
             aria-describedby={fieldErrors.partnerTwoName ? "partnerTwoName-error" : undefined}
             aria-invalid={Boolean(fieldErrors.partnerTwoName)}
             autoComplete="family-name"
@@ -152,56 +187,64 @@ export function RegisterForm() {
             onChange={(event) => updateField("partnerTwoName", event.target.value)}
             onBlur={() => validateSingleField("partnerTwoName")}
           />
+          <FieldError id="partnerTwoName-error" message={fieldErrors.partnerTwoName} />
         </div>
       </div>
       <div>
-        <FieldError id="brandName-error" message={fieldErrors.brandName} />
+        <FieldLabel htmlFor="register-brand">Wedding brand name</FieldLabel>
         <Input
+          id="register-brand"
           aria-describedby={fieldErrors.brandName ? "brandName-error" : undefined}
           aria-invalid={Boolean(fieldErrors.brandName)}
           name="brandName"
-          placeholder="Wedding brand, e.g. KamMonBeginnings"
+          placeholder="e.g. KamMonBeginnings"
           required
           value={formValues.brandName}
           onChange={(event) => updateField("brandName", event.target.value)}
           onBlur={() => validateSingleField("brandName")}
         />
+        <FieldError id="brandName-error" message={fieldErrors.brandName} />
       </div>
       <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">
         <div>
-          <FieldError id="email-error" message={fieldErrors.email} />
+          <FieldLabel htmlFor="register-email">Email address</FieldLabel>
           <Input
+            id="register-email"
             aria-describedby={fieldErrors.email ? "email-error" : undefined}
             aria-invalid={Boolean(fieldErrors.email)}
             autoCapitalize="none"
             autoComplete="email"
             name="email"
             type="email"
-            placeholder="Email address"
+            placeholder="you@example.com"
             required
             value={formValues.email}
             onChange={(event) => updateField("email", event.target.value)}
             onBlur={() => validateSingleField("email")}
           />
+          <FieldError id="email-error" message={fieldErrors.email} />
         </div>
         <div>
-          <FieldError id="slug-error" message={fieldErrors.slug} />
+          <FieldLabel htmlFor="register-slug">Custom URL slug</FieldLabel>
           <Input
+            id="register-slug"
             aria-describedby={fieldErrors.slug ? "slug-error" : undefined}
             aria-invalid={Boolean(fieldErrors.slug)}
             autoCapitalize="none"
             name="slug"
-            placeholder="Custom URL slug"
+            placeholder="yourwedding"
             required
             value={formValues.slug}
             onChange={(event) => updateField("slug", event.target.value)}
             onBlur={() => validateSingleField("slug")}
           />
+          <FieldError id="slug-error" message={fieldErrors.slug} />
         </div>
       </div>
       <div>
-        <FieldError id="weddingDate-error" message={fieldErrors.weddingDate} />
+        <FieldLabel htmlFor="register-wedding-date">Wedding date</FieldLabel>
         <Input
+          id="register-wedding-date"
           aria-describedby={fieldErrors.weddingDate ? "weddingDate-error" : undefined}
           aria-invalid={Boolean(fieldErrors.weddingDate)}
           name="weddingDate"
@@ -211,11 +254,13 @@ export function RegisterForm() {
           onChange={(event) => updateField("weddingDate", event.target.value)}
           onBlur={() => validateSingleField("weddingDate")}
         />
+        <FieldError id="weddingDate-error" message={fieldErrors.weddingDate} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <FieldError id="password-error" message={fieldErrors.password} />
+          <FieldLabel htmlFor="register-password">Create password</FieldLabel>
           <Input
+            id="register-password"
             aria-describedby={fieldErrors.password ? "password-error" : undefined}
             aria-invalid={Boolean(fieldErrors.password)}
             autoComplete="new-password"
@@ -227,14 +272,16 @@ export function RegisterForm() {
             onChange={(event) => updateField("password", event.target.value)}
             onBlur={() => validateSingleField("password")}
           />
+          <FieldError id="password-error" message={fieldErrors.password} />
           <p className="mt-2 text-xs text-stone-500">
             {registerFieldMessages.password.min} Include uppercase, lowercase, a number, and a
             special character like - _ # @.
           </p>
         </div>
         <div>
-          <FieldError id="confirmPassword-error" message={fieldErrors.confirmPassword} />
+          <FieldLabel htmlFor="register-confirm-password">Confirm password</FieldLabel>
           <Input
+            id="register-confirm-password"
             aria-describedby={fieldErrors.confirmPassword ? "confirmPassword-error" : undefined}
             aria-invalid={Boolean(fieldErrors.confirmPassword)}
             autoComplete="new-password"
@@ -246,9 +293,17 @@ export function RegisterForm() {
             onChange={(event) => updateField("confirmPassword", event.target.value)}
             onBlur={() => validateSingleField("confirmPassword")}
           />
+          <FieldError id="confirmPassword-error" message={fieldErrors.confirmPassword} />
         </div>
       </div>
       <FormMessage type="error" message={state.error} />
+      {errorCount > 0 ? (
+        <p role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
+          {errorCount === 1
+            ? "1 field needs attention — it's highlighted in red above."
+            : `${errorCount} fields need attention — they're highlighted in red above.`}
+        </p>
+      ) : null}
       <SubmitButton label="Create workspace" loadingLabel="Creating..." className="w-full" />
       <p className="text-sm text-stone-500">
         Already have an account?{" "}
