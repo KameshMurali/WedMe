@@ -111,7 +111,7 @@ export function PublishSettingsForm({
         >
           <p className="flex items-center gap-2 font-semibold text-amber-950">
             <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-            Hold on — guests will hit problems:
+            Hold on. Guests will hit problems:
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-9 text-sm leading-6 text-amber-950">
             {publishBlockers.map((blocker) => (

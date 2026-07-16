@@ -25,22 +25,22 @@ export default function PrivacyPage() {
             </p>
             <ul>
               <li>
-                <strong>Account information</strong> — name, email address, and password (hashed) when
+                <strong>Account information</strong>: name, email address, and password (hashed) when
                 you register as a couple.
               </li>
               <li>
-                <strong>RSVP responses</strong> — your name, email address, attendance status, meal
+                <strong>RSVP responses</strong>: your name, email address, attendance status, meal
                 preferences, and any notes you submit through a wedding RSVP form.
               </li>
               <li>
-                <strong>Photo uploads</strong> — images you upload to a wedding's guest memory wall.
+                <strong>Photo uploads</strong>: images you upload to a wedding's guest memory wall.
               </li>
               <li>
-                <strong>Guest messages and wishes</strong> — any written messages you leave for the
+                <strong>Guest messages and wishes</strong>: any written messages you leave for the
                 couple.
               </li>
               <li>
-                <strong>Usage data</strong> — anonymised page-view analytics (pages visited, time on
+                <strong>Usage data</strong>: anonymised page-view analytics (pages visited, time on
                 site) to help couples understand guest engagement.
               </li>
             </ul>

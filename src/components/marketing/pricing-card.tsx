@@ -91,7 +91,7 @@ export function PricingCard({
         <p className="mt-1 text-xs text-[color:var(--muted)]">
           <span className="line-through">{strikeLabel}</span>
           <span className="ml-2 font-semibold text-emerald-700">
-            Launch offer — save {plan.launchOfferPct}%
+            Launch offer: save {plan.launchOfferPct}%
           </span>
         </p>
       ) : null}
@@ -118,20 +118,20 @@ export function PricingCard({
           // Pre-launch: capture interest instead of taking payment.
           <>
             <p className="text-xs text-[color:var(--muted)]">
-              Payments for this plan are not yet open. Drop your email and we'll notify you the moment it launches — founding-couple pricing locked in.
+              Payments for this plan are not yet open. Drop your email and we'll notify you the moment it launches. Founding-couple pricing locked in.
             </p>
             <WaitlistForm
               planKey={plan.key}
               planName={plan.name}
               currency={currency}
-              ctaLabel={`Join the waitlist — ${plan.name}`}
+              ctaLabel={`Join the waitlist for ${plan.name}`}
             />
           </>
         )}
         {plan.key === "forever" ? (
           <p className="inline-flex items-center justify-center gap-2 text-xs text-[color:var(--muted)]">
             <Gift className="h-3.5 w-3.5" />
-            Giftable — a family member can buy this for the couple
+            Giftable: a family member can buy this for the couple
           </p>
         ) : null}
       </div>
@@ -149,7 +149,7 @@ export function PricingCard({
 function LaunchOfferCountdown() {
   return (
     <p className="mt-3 text-center text-[11px] uppercase tracking-[0.22em] text-emerald-700">
-      Ends 31 Jul — first 100 couples
+      Ends 31 Jul · first 100 couples
     </p>
   );
 }

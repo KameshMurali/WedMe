@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 
 export const metadata: Metadata = {
-  title: "About ToNewBeginning.com — Indian Wedding Website Builder",
+  title: "About ToNewBeginning.com · Indian Wedding Website Builder",
   description:
     "ToNewBeginning.com is a wedding website platform built for South Asian and Indian couples. Learn who we are, what we believe, and how to reach us.",
   alternates: { canonical: "/about" },
@@ -24,7 +24,7 @@ const orgSchema = {
   },
   sameAs: ["https://tonewbeginning.com"],
   description:
-    "A premium wedding website builder designed for Indian and South Asian couples — multi-day ceremonies, large guest lists, RSVP management, photo galleries, and a calm couple dashboard.",
+    "A premium wedding website builder designed for Indian and South Asian couples: multi-day ceremonies, large guest lists, RSVP management, photo galleries, and a calm couple dashboard.",
 };
 
 export default function AboutPage() {
@@ -44,7 +44,7 @@ export default function AboutPage() {
           </h1>
           <p className="mt-6 text-base leading-8 text-[color:var(--muted)]">
             ToNewBeginning.com is a wedding website platform built specifically for Indian and South
-            Asian couples — celebrations that span multiple days, multiple ceremonies, and hundreds
+            Asian couples: celebrations that span multiple days, multiple ceremonies, and hundreds
             of guests across cities and countries.
           </p>
 
@@ -52,7 +52,7 @@ export default function AboutPage() {
             <section>
               <h2 className="font-display text-3xl text-[color:var(--text)]">What we are</h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                We are a wedding website builder — not a directory, not an agency, not a template
+                We are a wedding website builder. Not a directory, not an agency, not a template
                 seller. Couples use ToNewBeginning.com to create a living digital home for their
                 entire wedding journey: the love story, the event schedule (Haldi, Sangeet, Baraat,
                 reception and more), RSVP workflows, photo galleries, travel guidance, and a
@@ -64,7 +64,7 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl text-[color:var(--text)]">Who we built this for</h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
                 We built ToNewBeginning.com for couples who want a wedding website that reflects
-                their celebration honestly — one that supports five events and five hundred guests
+                their celebration honestly: one that supports five events and five hundred guests
                 as comfortably as it supports two people eloping. The platform was designed with
                 South Asian weddings as the primary use case, but it works equally well for any
                 multi-day, multi-event celebration.
@@ -74,7 +74,7 @@ export default function AboutPage() {
             <section>
               <h2 className="font-display text-3xl text-[color:var(--text)]">Where we are based</h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                Our team is based in India. We are a small, independent product studio — not a
+                Our team is based in India. We are a small, independent product studio, not a
                 venture-backed startup optimising for growth metrics. We care about the quality of
                 the product and the experience of every couple who uses it.
               </p>
@@ -83,7 +83,7 @@ export default function AboutPage() {
             <section>
               <h2 className="font-display text-3xl text-[color:var(--text)]">Get in touch</h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                Questions, feedback, or a couple needing concierge help setting up their site —
+                Questions, feedback, or a couple needing concierge help setting up their site:
                 reach us at{" "}
                 <a
                   href="mailto:hello@tonewbeginning.com"

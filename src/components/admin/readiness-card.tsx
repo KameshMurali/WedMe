@@ -61,7 +61,7 @@ export function ReadinessCard({ readiness }: { readiness: Readiness }) {
                 Your site is guest-ready <PartyPopper className="h-6 w-6 text-[color:var(--primary)]" />
               </h2>
               <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
-                Every readiness check passes. Share your link with confidence — and keep an eye on
+                Every readiness check passes. Share your link with confidence, and keep an eye on
                 RSVPs as they roll in.
               </p>
             </>

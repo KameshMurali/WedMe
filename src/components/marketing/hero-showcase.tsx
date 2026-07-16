@@ -20,7 +20,7 @@ const cards = [
   {
     icon: Palette,
     title: "Template engine",
-    body: "One content model, many premium visual directions — switch any time.",
+    body: "One content model, many premium visual directions. Switch any time.",
     accent: "from-[#e3d6f0] to-[#f7f0fb]",
   },
 ];

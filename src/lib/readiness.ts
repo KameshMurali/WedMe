@@ -80,7 +80,7 @@ export function computeReadiness(input: ReadinessInput): Readiness {
     {
       key: "story",
       label: "Tell your story",
-      description: "Add at least one milestone — it's the most-visited section.",
+      description: "Add at least one milestone. It's the most-visited section.",
       severity: "high",
       href: "/dashboard/content",
       done: input.storyCount > 0,

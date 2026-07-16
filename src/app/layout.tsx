@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(env.APP_URL),
   title: "ToNewBeginning.com",
   description:
-    "ToNewBeginning.com is a wedding website builder for Indian and South Asian couples — multi-event timelines, RSVP management, photo galleries, and a polished guest experience.",
+    "ToNewBeginning.com is a wedding website builder for Indian and South Asian couples: multi-event timelines, RSVP management, photo galleries, and a polished guest experience.",
   alternates: { canonical: "/" },
 };
 

@@ -11,7 +11,7 @@ import { isLaunchOfferActive, launchOffer, plans } from "@/lib/pricing";
 import { getCurrentUser } from "@/server/auth/session";
 
 export const metadata: Metadata = {
-  title: "Pricing — Wedding Website Plans · ToNewBeginning",
+  title: "Wedding Website Pricing & Plans · ToNewBeginning",
   description:
     "ToNewBeginning.com pricing: start free with the Hello plan (2 events, 50 RSVPs), upgrade to Together (₹3,499 / $49 for your wedding year), or choose Forever for lifetime hosting. No subscriptions.",
   alternates: { canonical: "/pricing" },
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const productSchema = {
   "@context": "https://schema.org",
   "@type": "Product",
-  name: "ToNewBeginning.com — Wedding Website Builder",
+  name: "ToNewBeginning.com Wedding Website Builder",
   description:
     "A wedding website platform for Indian and South Asian couples with multi-event support, RSVP management, photo galleries, and a polished couple dashboard.",
   brand: { "@type": "Brand", name: "ToNewBeginning" },
@@ -28,7 +28,7 @@ const productSchema = {
     {
       "@type": "Offer",
       name: "Hello",
-      description: "Free forever — up to 2 wedding events and 50 RSVPs, gallery, story timeline.",
+      description: "Free forever, with up to 2 wedding events and 50 RSVPs, gallery, story timeline.",
       price: "0",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
@@ -38,7 +38,7 @@ const productSchema = {
       "@type": "Offer",
       name: "Together",
       description:
-        "Wedding year plan — AI-assisted content drafting, unlimited events, unlimited RSVPs, no ToNewBeginning branding.",
+        "Wedding year plan: AI-assisted content drafting, unlimited events, unlimited RSVPs, no ToNewBeginning branding.",
       price: "49",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
@@ -48,7 +48,7 @@ const productSchema = {
       "@type": "Offer",
       name: "Forever",
       description:
-        "Lifetime plan — everything in Together plus permanent hosting, anniversary refresh emails, AI content help, and concierge setup.",
+        "Lifetime plan: everything in Together plus permanent hosting, anniversary refresh emails, AI content help, and concierge setup.",
       price: "99",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
@@ -74,7 +74,7 @@ const pricingFaqSchema = {
       name: "Can someone else gift me Forever?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes — a parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt.",
+        text: "Yes. A parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt.",
       },
     },
     {
@@ -90,7 +90,7 @@ const pricingFaqSchema = {
       name: "Do I lose work if I never upgrade?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it — more events, more guests, or AI help drafting your content.",
+        text: "No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it: more events, more guests, or AI help drafting your content.",
       },
     },
   ],
@@ -139,7 +139,7 @@ export default async function PricingPage() {
             wedding gets serious.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-[color:var(--muted)]">
-            Explore the core wedding workspace for free. Pay once for the year your celebration runs —
+            Explore the core wedding workspace for free. Pay once for the year your celebration runs,
             or keep your site as a memory <em>forever</em>. No subscriptions, no surprise renewals.
           </p>
         </div>
@@ -171,16 +171,16 @@ export default async function PricingPage() {
       {/* Reassurance row */}
       <div className="mt-14 grid gap-6 md:grid-cols-3">
         <Reassurance
-          title="Cancel anytime — there's nothing to cancel"
+          title="Cancel anytime? There is nothing to cancel"
           body="No recurring billing. Together is one payment for the wedding year. Forever is one payment, period."
         />
         <Reassurance
           title="Your photos stay yours"
-          body="Export your gallery any time. If you stop using us, we hand back a zipped backup — no hostage data."
+          body="Export your gallery any time. If you stop using us, we hand back a zipped backup. No hostage data."
         />
         <Reassurance
           title="Made with the same care your wedding deserves"
-          body="Designed for South Asian, multi-day, multi-event weddings — and equally happy for two-people elopements."
+          body="Designed for South Asian, multi-day, multi-event weddings, and equally happy for two-people elopements."
         />
       </div>
 
@@ -194,7 +194,7 @@ export default async function PricingPage() {
           />
           <Faq
             q="Can someone else gift me Forever?"
-            a="Yes — a parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt."
+            a="Yes. A parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt."
           />
           <Faq
             q="Why are prices different in different countries?"

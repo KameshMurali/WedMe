@@ -26,12 +26,12 @@ import { getCurrentUser } from "@/server/auth/session";
 import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
 
 export const metadata: Metadata = {
-  title: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+  title: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
   description:
-    "Create a beautiful wedding website for your Indian celebration. ToNewBeginning.com supports multi-day events, Haldi to reception RSVPs, photo galleries, and a calm couple dashboard — free to start.",
+    "Create a beautiful wedding website for your Indian celebration. ToNewBeginning.com supports multi-day events, Haldi to reception RSVPs, photo galleries, and a calm couple dashboard. Free to start.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+    title: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
     description:
       "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard. Designed for South Asian weddings.",
     url: "https://wed.tonewbeginning.com",
@@ -41,14 +41,14 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+        alt: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ToNewBeginning.com — Wedding Website Builder for Indian Couples",
+    title: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
     description:
       "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard. Designed for South Asian weddings.",
     images: ["/og-image.png"],
@@ -63,7 +63,7 @@ const websiteSchema = {
   name: "ToNewBeginning.com",
   url: BASE_URL,
   description:
-    "A wedding website builder for Indian and South Asian couples — multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
+    "A wedding website builder for Indian and South Asian couples: multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
 };
 
 const softwareSchema = {
@@ -76,16 +76,16 @@ const softwareSchema = {
   description:
     "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian celebrations with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
   offers: [
-    { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan — up to 2 wedding events and 50 RSVPs." },
-    { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan — AI-assisted content drafting, unlimited events and RSVPs." },
-    { "@type": "Offer", name: "Forever", price: "99", priceCurrency: "USD", description: "Lifetime plan — everything in Together plus permanent hosting and anniversary emails." },
+    { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan with up to 2 wedding events and 50 RSVPs." },
+    { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan: AI-assisted content drafting, unlimited events and RSVPs." },
+    { "@type": "Offer", name: "Forever", price: "99", priceCurrency: "USD", description: "Lifetime plan: everything in Together plus permanent hosting and anniversary emails." },
   ],
 };
 
 const homepageFaqs = [
   {
     q: "What is ToNewBeginning.com?",
-    a: "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian couples. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard — all in one place.",
+    a: "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian couples. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard, all in one place.",
   },
   {
     q: "Does it support Indian weddings with multiple ceremonies?",
@@ -97,15 +97,15 @@ const homepageFaqs = [
   },
   {
     q: "What happens to my wedding website after the wedding?",
-    a: "On the free Hello plan your site remains as an editable draft indefinitely. On the Together plan it archives for 6 months after your wedding year ends. On the Forever plan your site and gallery stay live permanently — a lasting digital memory of your celebration.",
+    a: "On the free Hello plan your site remains as an editable draft indefinitely. On the Together plan it archives for 6 months after your wedding year ends. On the Forever plan your site and gallery stay live permanently, a lasting digital memory of your celebration.",
   },
   {
     q: "Does ToNewBeginning include AI features?",
-    a: "Yes — on the Together and Forever plans, AI helps you draft your story, FAQs, and guest guidance from a few short answers. Forever additionally includes AI translations so guests can read your site in Tamil, Hindi, and more.",
+    a: "Yes. On the Together and Forever plans, AI helps you draft your story, FAQs, and guest guidance from a few short answers. Forever additionally includes AI translations so guests can read your site in Tamil, Hindi, and more.",
   },
   {
     q: "Can family gift the Forever plan to the couple?",
-    a: "Yes, and it is designed to feel like a real gift. A parent or sibling can purchase Forever and we send a card-style email to the couple — not a billing receipt.",
+    a: "Yes, and it is designed to feel like a real gift. A parent or sibling can purchase Forever and we send a card-style email to the couple, not a billing receipt.",
   },
   {
     q: "How does RSVP work for large Indian wedding guest lists?",
@@ -113,7 +113,7 @@ const homepageFaqs = [
   },
   {
     q: "Is the platform built specifically for Indian weddings?",
-    a: "ToNewBeginning.com is designed with South Asian and Indian weddings as the primary use case — multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
+    a: "ToNewBeginning.com is designed with South Asian and Indian weddings as the primary use case: multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
   },
 ];
 
@@ -131,19 +131,19 @@ const featureHighlights = [
   {
     title: "Every ceremony gets its stage",
     description:
-      "Haldi at home, Sangeet in a ballroom, ceremony at dawn — each event carries its own timing, venue map, dress code, and guest list. Nothing gets squeezed into a single \"wedding day\".",
+      "Haldi at home, Sangeet in a ballroom, ceremony at dawn. Each event carries its own timing, venue map, dress code, and guest list. Nothing gets squeezed into a single \"wedding day\".",
     icon: HeartHandshake,
   },
   {
     title: "RSVPs that understand Indian weddings",
     description:
-      "Guests reply once and choose exactly the functions they'll attend. You see per-event headcounts, meal preferences, and travel notes in one calm dashboard — no spreadsheets, no chasing.",
+      "Guests reply once and choose exactly the functions they'll attend. You see per-event headcounts, meal preferences, and travel notes in one calm dashboard. No spreadsheets, no chasing.",
     icon: LayoutDashboard,
   },
   {
     title: "Five designs, zero rebuilds",
     description:
-      "Switch templates any time — your story, events, and photos flow into the new look instantly. Customise the palette until it feels like you, then publish when it's ready.",
+      "Switch templates any time, and your story, events, and photos flow into the new look instantly. Customise the palette until it feels like you, then publish when it's ready.",
     icon: Palette,
   },
 ];
@@ -251,7 +251,7 @@ export default async function HomePage() {
                 style={{ animationDelay: "240ms" }}
               >
                 Your family is planning five events across three venues, and every guest has the
-                same ten questions. ToNewBeginning gives everyone one gorgeous answer — an Indian
+                same ten questions. ToNewBeginning gives everyone one gorgeous answer: an Indian
                 wedding website with your story, schedules, dress codes, per-event RSVPs, photos,
                 and wishes, all at one link you can drop in any WhatsApp group.
               </p>
@@ -319,7 +319,7 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="Why couples pick us"
             title="Built around how Indian weddings actually work."
-            description="Most builders assume one event, one day, one guest list. Yours has never worked that way — so we didn't build it that way."
+            description="Most builders assume one event, one day, one guest list. Yours has never worked that way, so we didn't build it that way."
           />
         </Reveal>
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
@@ -344,7 +344,7 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="Five moods, one wedding"
           title="Pick a feeling. Change your mind whenever."
-          description="Romantic florals or cinematic drama — every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
+          description="Romantic florals or cinematic drama: every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
         <div className="mt-10 grid gap-5 lg:grid-cols-5">
           {templateRegistry.map((template, index) => (

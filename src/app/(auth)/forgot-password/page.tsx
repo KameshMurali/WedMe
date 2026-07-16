@@ -5,7 +5,7 @@ import { ForgotPasswordForm } from "@/components/forms/forgot-password-form";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Reset your password — ToNewBeginning",
+  title: "Reset your password · ToNewBeginning",
   description: "Enter your email to receive a password reset link for your ToNewBeginning account.",
 };
 

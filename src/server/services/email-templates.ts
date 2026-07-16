@@ -50,7 +50,7 @@ export function buildWelcomeEmail(input: WelcomeEmailInput) {
     "  • Add story milestones, events, and a schedule",
     "  • Open RSVPs when you're ready to share with guests",
     "",
-    "Congratulations again — we're glad you're here.",
+    "Congratulations again. We're glad you're here.",
     "— The ToNewBeginning team",
   ].join("\n");
 

@@ -701,5 +701,5 @@ export async function submitWorkspaceFeedbackAction(
     },
   });
 
-  return { success: "Thank you — your feedback went straight to the team." };
+  return { success: "Thank you! Your feedback went straight to the team." };
 }
