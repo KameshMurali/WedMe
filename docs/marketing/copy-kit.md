@@ -168,3 +168,35 @@ Hook line → 2–3 short lines of pain/benefit → CTA ("Demo link in bio") →
 | **Forever @ 30% launch offer** | **₹5,599** | **$69** | **£55** | **€62** | **AED 251** |
 
 Offer ends **July 31, 2026** (`launchOffer.endsAt`). Update this table if `src/lib/pricing.ts` changes.
+
+---
+
+## 6. Social Media Handles & Profiles
+
+**Rule: one identical handle across Instagram, Facebook, and TikTok.** Claim it before posting anything.
+
+### Handle (in order of preference)
+
+1. `@tonewbeginning` — matches the domain exactly; first choice everywhere
+2. `@wed.tonewbeginning` — mirrors the product URL (IG/TikTok allow dots; use `wedtonewbeginning` on Facebook)
+3. `@tonewbeginningweddings` — adds the search keyword
+4. `@tonewbeginning.hq` — official-account suffix
+
+Avoid underscores and numbers — the brand spreads by word of mouth at weddings and must be easy to say out loud.
+
+### Display names (searchable — keywords go here, not in the handle)
+
+- **Instagram:** `ToNewBeginning | Indian Wedding Websites`
+- **TikTok:** `ToNewBeginning · Wedding Websites`
+- **Facebook Page:** `ToNewBeginning — Wedding Websites for Indian & South Asian Celebrations`
+  (set page username/URL to `facebook.com/tonewbeginning`)
+
+### Bio (same across all three)
+
+```
+Mehendi → Reception, one beautiful website 💍
+Per-event RSVPs · dress codes · guest photos
+Free to start ↓
+```
+
+Link: `wed.tonewbeginning.com/kammonbeginnings` (demo converts better than the homepage; switch to a link-in-bio page later if needed).
