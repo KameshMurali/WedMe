@@ -488,7 +488,7 @@ export function TemplateCustomizer({
         <div className="fixed inset-x-4 bottom-4 z-40 sm:inset-x-auto sm:right-8 sm:w-96">
           <div className="flex items-center justify-between gap-3 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-[0_16px_48px_rgba(43,26,24,0.18)]">
             <p className="text-sm font-medium text-amber-950">
-              Unsaved changes — save to apply.
+              Unsaved changes. Save to apply.
             </p>
             <Button type="submit" size="sm">
               Save now

@@ -34,8 +34,8 @@ export function ComingSoonPage({
           Something lovely is on the way.
         </h1>
         <p className="mt-5 text-base leading-7 text-[color:var(--muted)]">
-          {coupleNames} are putting the finishing touches on their wedding site. Check back here soon —
-          this page will fill with their story, schedule, and the details you&apos;ll need to celebrate together.
+          {coupleNames} are putting the finishing touches on their wedding site. Check back here soon.
+          This page will fill with their story, schedule, and the details you&apos;ll need to celebrate together.
         </p>
         <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/85 px-5 py-3 text-sm text-[color:var(--muted)] ring-1 ring-black/5">
           <CalendarDays className="h-4 w-4" />

@@ -372,7 +372,7 @@ export function StorySection({
       <SectionHeading
         eyebrow="Our Story"
         title="A timeline of moments that shaped the journey."
-        description="From the first hello to the wedding countdown — every chapter of their story, beautifully told."
+        description="From the first hello to the wedding countdown: every chapter of their story, beautifully told."
       />
       <div className="mt-10 grid gap-6">
         {items.map((milestone, index) => (
@@ -553,7 +553,7 @@ export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"
       <SectionHeading
         eyebrow="Itinerary"
         title="A guest-friendly schedule for every day and every event."
-        description="Everything you need to stay in step — from the first event of the day to the final farewell."
+        description="Everything you need to stay in step, from the first event of the day to the final farewell."
       />
       <div className="mt-10 grid gap-6">
         {Object.entries(grouped).map(([day, entries]) => (
@@ -563,7 +563,7 @@ export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"
                 <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--primary)]">Day overview</p>
                 <h3 className="mt-4 font-display text-4xl text-[color:var(--text)]">{day}</h3>
                 <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  {entries.length} scheduled {entries.length === 1 ? "moment" : "moments"} — keep this handy throughout the day.
+                  {entries.length} scheduled {entries.length === 1 ? "moment" : "moments"}. Keep this handy throughout the day.
                 </p>
               </div>
               <div className="space-y-4">
@@ -701,7 +701,7 @@ export function ExperienceSection({
       <SectionHeading
         eyebrow="Guest Experience"
         title="Travel, stay, move around, and feel looked after."
-        description="Everything you need before you arrive — where to stay, how to get around, and what to expect."
+        description="Everything you need before you arrive: where to stay, how to get around, and what to expect."
       />
       <div className="mt-10 grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="space-y-6">

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Sign in — ToNewBeginning",
+  title: "Sign in · ToNewBeginning",
   description: "Sign in to your ToNewBeginning.com account to manage your wedding website, update content, track RSVPs, and control your couple dashboard.",
   alternates: { canonical: "/login" },
 };

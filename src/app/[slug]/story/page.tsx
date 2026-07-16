@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!snapshot) return {};
   return {
     title: `${snapshot.site.coupleNames}'s Love Story | ToNewBeginning`,
-    description: `Follow the love story of ${snapshot.site.coupleNames} — from how they met to their wedding day. Milestones, memories, and the moments that brought them together.`,
+    description: `Follow the love story of ${snapshot.site.coupleNames}, from how they met to their wedding day. Milestones, memories, and the moments that brought them together.`,
     alternates: { canonical: `/${slug}/story` },
   };
 }

@@ -75,7 +75,7 @@ export async function joinWaitlistAction(
         `Thanks for your interest in ToNewBeginning ${planName}.`,
         "",
         "You're on the founding-couple waitlist. When we open paid plans, you'll be",
-        "first to know — and you'll get founding-couple pricing locked in.",
+        "first to know, and you'll get founding-couple pricing locked in.",
         "",
         `In the meantime, you can keep building your free wedding workspace: ${appUrl}/dashboard`,
         "",
@@ -87,7 +87,7 @@ export async function joinWaitlistAction(
           <h1 style="font-size:24px;margin:10px 0 0;">You're on the ${escapeHtml(planName)} list ✨</h1>
           <p style="font-size:15px;color:#6b554f;">
             Thanks for your interest in ToNewBeginning <strong>${escapeHtml(planName)}</strong>.
-            When we open paid plans, you'll be first to know — with founding-couple pricing locked in.
+            When we open paid plans, you'll be first to know, with founding-couple pricing locked in.
           </p>
           <p style="font-size:15px;color:#6b554f;">
             In the meantime, keep building your free wedding workspace:

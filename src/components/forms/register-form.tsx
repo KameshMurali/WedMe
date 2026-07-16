@@ -300,8 +300,8 @@ export function RegisterForm() {
       {errorCount > 0 ? (
         <p role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
           {errorCount === 1
-            ? "1 field needs attention — it's highlighted in red above."
-            : `${errorCount} fields need attention — they're highlighted in red above.`}
+            ? "1 field needs attention. It's highlighted in red above."
+            : `${errorCount} fields need attention. They're highlighted in red above.`}
         </p>
       ) : null}
       <SubmitButton label="Create workspace" loadingLabel="Creating..." className="w-full" />

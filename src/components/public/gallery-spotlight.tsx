@@ -218,7 +218,7 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
                 type="button"
                 role="tab"
                 aria-selected={isActive}
-                aria-label={`Photo ${index + 1}${asset.title ? ` — ${asset.title}` : ""}`}
+                aria-label={`Photo ${index + 1}${asset.title ? `: ${asset.title}` : ""}`}
                 onClick={() => goTo(index)}
                 className={cn(
                   "relative h-20 w-28 flex-none overflow-hidden rounded-2xl border bg-black/[0.04] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:h-24 sm:w-32",

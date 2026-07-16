@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
     title: snapshot.site.seoTitle ?? `${snapshot.site.brandName} | Wedding Website`,
     description:
       snapshot.site.seoDescription ??
-      `${snapshot.site.coupleNames} invite you to celebrate their wedding. View events, RSVP, explore the gallery, and share your wishes — all on their personal wedding website.`,
+      `${snapshot.site.coupleNames} invite you to celebrate their wedding. View events, RSVP, explore the gallery, and share your wishes, all on their personal wedding website.`,
     alternates: {
       canonical: snapshot.site.canonicalUrl ?? `/${slug}`,
     },

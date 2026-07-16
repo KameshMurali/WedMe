@@ -261,7 +261,7 @@ export function SiteAssetUploadField({
             {showingLocalPreview ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/95 px-3 py-1 text-xs font-semibold text-amber-900 shadow-sm ring-1 ring-amber-200">
                 <Eye className="h-3.5 w-3.5" />
-                Preview only — click {kind === "image" ? "Upload image" : "Upload video"} to save
+                Preview only. Click {kind === "image" ? "Upload image" : "Upload video"} to save
               </span>
             ) : justUploaded ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/95 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm ring-1 ring-emerald-200">

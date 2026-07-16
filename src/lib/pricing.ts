@@ -85,7 +85,7 @@ export const plans: Plan[] = [
     name: "Hello",
     tagline: "Start with no commitment",
     pitch:
-      "Build a draft, share your story, see your wedding take shape. Free forever — upgrade only when your celebration gets serious.",
+      "Build a draft, share your story, see your wedding take shape. Free forever. Upgrade only when your celebration gets serious.",
     highlights: [
       "Branded ToNewBeginning subdomain",
       "Up to 2 wedding events",
@@ -107,7 +107,7 @@ export const plans: Plan[] = [
     name: "Together",
     tagline: "For your wedding year",
     pitch:
-      "One payment for the full year of your wedding — 12 months of unlimited everything, plus 6 months of post-wedding archive so guests can revisit.",
+      "One payment for the full year of your wedding: 12 months of unlimited everything, plus 6 months of post-wedding archive so guests can revisit.",
     highlights: [
       "AI-assisted content drafting",
       "Unlimited events, RSVPs, uploads",
@@ -131,14 +131,14 @@ export const plans: Plan[] = [
     name: "Forever",
     tagline: "Your wedding lives on",
     pitch:
-      "Pay once, your site lives forever. Everything in Together — plus anniversary refresh emails, lifetime archive, AI content help, and a real human concierge for setup.",
+      "Pay once, your site lives forever. Everything in Together, plus anniversary refresh emails, lifetime archive, AI content help, and a real human concierge for setup.",
     highlights: [
       "Everything in Together",
       "Lifetime hosting & archive",
       "Anniversary refresh emails",
       "AI-assisted content & translations",
       "1:1 concierge setup call",
-      "Giftable — perfect from family",
+      "Giftable, perfect from family",
     ],
     badge: "Best value",
     ctaLabel: "Choose Forever",
@@ -166,7 +166,7 @@ export const launchOffer = {
   // Bump this date when you re-launch a promo.
   endsAt: new Date("2026-07-31T23:59:59Z"),
   label: "Launch offer",
-  blurb: "First 100 couples — 30% off Forever",
+  blurb: "First 100 couples: 30% off Forever",
 };
 
 export function isLaunchOfferActive(now: Date = new Date()) {
