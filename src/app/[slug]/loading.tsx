@@ -4,6 +4,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function PublicSiteLoading() {
   return (
     <main className="section-shell py-10">
+      <div className="loading-bar mb-6" aria-hidden="true" />
+      <p role="status" className="sr-only">
+        Loading the wedding site…
+      </p>
       {/* Header row */}
       <div className="flex flex-col gap-6 rounded-[2rem] border border-black/5 bg-white/70 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-4">

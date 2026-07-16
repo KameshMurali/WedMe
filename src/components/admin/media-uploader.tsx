@@ -106,34 +106,55 @@ export function AdminMediaUploader({
           {disabledReason}
         </div>
       ) : null}
-      <Select
-        value={category}
-        disabled={!uploadsEnabled}
-        onChange={(event) =>
-          setCategory(event.target.value as "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE")
-        }
-      >
-        <option value="HERO">Hero image</option>
-        <option value="GALLERY">Gallery</option>
-        <option value="STORY">Story</option>
-        <option value="EVENT_BANNER">Event banner</option>
-        <option value="DRESS_CODE">Dress code</option>
-      </Select>
-      <Input
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        disabled={!uploadsEnabled}
-        onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-      />
+      <div>
+        <label htmlFor="media-category" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Media category
+        </label>
+        <Select
+          id="media-category"
+          value={category}
+          disabled={!uploadsEnabled}
+          onChange={(event) =>
+            setCategory(event.target.value as "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE")
+          }
+        >
+          <option value="HERO">Hero image</option>
+          <option value="GALLERY">Gallery</option>
+          <option value="STORY">Story</option>
+          <option value="EVENT_BANNER">Event banner</option>
+          <option value="DRESS_CODE">Dress code</option>
+        </Select>
+      </div>
+      <div>
+        <label htmlFor="media-file" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+          Choose file
+        </label>
+        <Input
+          id="media-file"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          disabled={!uploadsEnabled}
+          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+        />
+      </div>
       {preview ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={preview} alt="Upload preview" className="max-h-80 w-full rounded-[1.4rem] object-cover" />
       ) : null}
       <div className="grid gap-4 md:grid-cols-2">
-        <Input disabled={!uploadsEnabled} placeholder="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        <Input disabled={!uploadsEnabled} placeholder="Alt text" value={altText} onChange={(event) => setAltText(event.target.value)} />
+        <div>
+          <label htmlFor="media-title" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Title</label>
+          <Input id="media-title" disabled={!uploadsEnabled} placeholder="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
+        </div>
+        <div>
+          <label htmlFor="media-alt" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Alt text</label>
+          <Input id="media-alt" disabled={!uploadsEnabled} placeholder="Describe the image for screen readers" value={altText} onChange={(event) => setAltText(event.target.value)} />
+        </div>
       </div>
-      <Input disabled={!uploadsEnabled} placeholder="Caption" value={caption} onChange={(event) => setCaption(event.target.value)} />
+      <div>
+        <label htmlFor="media-caption" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Caption</label>
+        <Input id="media-caption" disabled={!uploadsEnabled} placeholder="Caption" value={caption} onChange={(event) => setCaption(event.target.value)} />
+      </div>
       <Button type="button" onClick={handleUpload} disabled={isUploading || !uploadsEnabled}>
         {isUploading ? "Uploading..." : "Upload image"}
       </Button>

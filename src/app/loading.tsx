@@ -6,7 +6,9 @@ export default function RootLoading() {
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Spinner className="h-8 w-8" />
-        <p className="text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">Loading</p>
+        <p role="status" className="text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
+          Loading
+        </p>
       </div>
     </div>
   );

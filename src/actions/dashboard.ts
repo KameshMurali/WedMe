@@ -18,6 +18,7 @@ import {
   travelGuideInputSchema,
   youtubeVideoSchema,
 } from "@/lib/validations/engagement";
+import { workspaceFeedbackSchema } from "@/lib/validations/feedback";
 import { hashPassword } from "@/server/auth/password";
 import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
@@ -667,4 +668,38 @@ export async function moderateMessageAction(messageId: string, status: "APPROVED
   revalidateDashboardPaths();
   revalidatePublicSitePaths(site.slug);
   return { success: `Message ${status.toLowerCase()}.` };
+}
+
+export async function submitWorkspaceFeedbackAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const site = await getEditableWeddingSiteForUser(user.id);
+  if (!site) return { error: "No wedding site was found for this account." };
+  const readOnlyState = guardEditableSite(site);
+  if (readOnlyState) return readOnlyState;
+
+  const parsed = workspaceFeedbackSchema.safeParse({
+    category: formData.get("category"),
+    rating: formData.get("rating") ?? "",
+    message: formData.get("message"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please review your feedback." };
+  }
+
+  await prisma.workspaceFeedback.create({
+    data: {
+      userId: user.id,
+      userEmail: user.email,
+      siteSlug: site.slug,
+      category: parsed.data.category,
+      rating: typeof parsed.data.rating === "number" ? parsed.data.rating : null,
+      message: parsed.data.message,
+    },
+  });
+
+  return { success: "Thank you — your feedback went straight to the team." };
 }

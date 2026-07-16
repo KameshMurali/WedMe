@@ -6,6 +6,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { initialActionState, type ActionState } from "@/lib/action-state";
+import { env } from "@/lib/env";
 import {
   reservedSlugs,
   resolveWorkspaceResumePath,
@@ -178,7 +179,6 @@ export async function registerAction(
           subtitle: "A joyful celebration filled with family, rituals, music, and beautiful memories.",
           tagline: "Welcome to our wedding website",
           weddingDate: new Date(weddingDate),
-          locationSummary: "Dubai, United Arab Emirates",
           theme: {
             create: template.themeDefaults,
           },
@@ -219,7 +219,7 @@ export async function registerAction(
   }
 
   try {
-    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+    const appUrl = env.APP_URL;
     const welcome = buildWelcomeEmail({
       brandName,
       partnerOneName,
@@ -369,6 +369,25 @@ export async function requestPasswordResetAction(
     return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email address." };
   }
 
+  try {
+    const resetHeaders = await headers();
+    const rateLimit = await consumeRateLimit({
+      action: "password-reset",
+      source: resetHeaders,
+      limit: 3,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [parsed.data.email],
+    });
+
+    if (!rateLimit.ok) {
+      return {
+        error: `Too many requests. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+  } catch (error) {
+    console.error("requestPasswordResetAction rate-limit check failed", error);
+  }
+
   const user = await prisma.user.findUnique({
     where: { email: parsed.data.email },
   });
@@ -386,8 +405,7 @@ export async function requestPasswordResetAction(
         },
       });
 
-      const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-      const resetUrl = `${appUrl}/reset-password/${plainToken}`;
+      const resetUrl = `${env.APP_URL}/reset-password/${plainToken}`;
       await sendEmail({
         to: user.email,
         subject: "Reset your ToNewBeginning.com password",
@@ -405,9 +423,6 @@ export async function requestPasswordResetAction(
         `,
       });
     } catch (error) {
-      // Token creation / email send is best-effort. We deliberately do NOT
-      // surface failures to the caller (avoids leaking whether the account
-      // exists), but we log so delivery issues are debuggable.
       console.error("requestPasswordResetAction failed", error);
     }
   }

@@ -2,6 +2,7 @@ import { type Prisma } from "@prisma/client";
 import { cache } from "react";
 
 import { reservedSlugs, sectionLabels, sectionOrder } from "@/lib/constants";
+import type { ReadinessInput } from "@/lib/readiness";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { slugify } from "@/lib/utils";
 import { prisma } from "@/server/prisma";
@@ -677,6 +678,74 @@ export async function getDashboardOverviewForUser(userId: string) {
     });
   } catch (error) {
     console.error("getDashboardOverviewForUser failed", error);
+    return null;
+  }
+}
+
+// Lightweight counts + flags feeding the readiness score. Kept separate from
+// the overview select so the dashboard card doesn't pull full relations.
+export async function getReadinessInputForUser(userId: string): Promise<ReadinessInput | null> {
+  if (isDemoUserId(userId)) {
+    const publish = demoDashboardSite.publishSettings;
+    return {
+      eventCount: demoDashboardSite.events.length,
+      storyCount: demoDashboardSite.storyMilestones.length,
+      galleryCount: demoDashboardSite.mediaAssets.filter((asset) => asset.category === "GALLERY").length,
+      dressCodeCount: demoDashboardSite.dressCodeGuides.length,
+      hasHeroImage: Boolean(demoDashboardSite.heroImageUrl),
+      status: publish.status,
+      isRsvpOpen: publish.isRsvpOpen,
+      publishedAt: publish.publishedAt,
+      lastDraftSavedAt: publish.lastDraftSavedAt,
+    };
+  }
+
+  const siteId = await ensureWeddingSiteIdForUser(userId);
+  if (!siteId) {
+    return null;
+  }
+
+  try {
+    const site = await prisma.weddingSite.findUnique({
+      where: { id: siteId },
+      select: {
+        heroImageUrl: true,
+        publishSettings: {
+          select: {
+            status: true,
+            isRsvpOpen: true,
+            publishedAt: true,
+            lastDraftSavedAt: true,
+          },
+        },
+        _count: {
+          select: {
+            events: true,
+            storyMilestones: true,
+            dressCodeGuides: true,
+            mediaAssets: { where: { category: "GALLERY" } },
+          },
+        },
+      },
+    });
+
+    if (!site) {
+      return null;
+    }
+
+    return {
+      eventCount: site._count.events,
+      storyCount: site._count.storyMilestones,
+      galleryCount: site._count.mediaAssets,
+      dressCodeCount: site._count.dressCodeGuides,
+      hasHeroImage: Boolean(site.heroImageUrl),
+      status: site.publishSettings?.status ?? "DRAFT",
+      isRsvpOpen: site.publishSettings?.isRsvpOpen ?? false,
+      publishedAt: site.publishSettings?.publishedAt ?? null,
+      lastDraftSavedAt: site.publishSettings?.lastDraftSavedAt ?? null,
+    };
+  } catch (error) {
+    console.error("getReadinessInputForUser failed", error);
     return null;
   }
 }

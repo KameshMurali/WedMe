@@ -15,7 +15,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="token" value={token} />
       <div className="space-y-2">
-        <Input name="password" type="password" placeholder="New password" required minLength={10} />
+        <label htmlFor="reset-password" className="mb-1.5 block text-sm font-medium">
+          New password
+        </label>
+        <Input id="reset-password" name="password" type="password" placeholder="New password" required minLength={10} />
         {/* Surface the password policy up front so users don't hit one
             validation error after another and assume reset is broken. */}
         <ul className="space-y-0.5 pl-1 text-xs leading-5 text-[color:var(--muted)]">
@@ -25,7 +28,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
           <li>• At least one special character (e.g. - _ # @ !)</li>
         </ul>
       </div>
-      <Input name="confirmPassword" type="password" placeholder="Confirm new password" required />
+      <div>
+        <label htmlFor="reset-confirm" className="mb-1.5 block text-sm font-medium">
+          Confirm new password
+        </label>
+        <Input id="reset-confirm" name="confirmPassword" type="password" placeholder="Confirm new password" required />
+      </div>
       <FormMessage type="error" message={state.error} />
       <SubmitButton label="Update password" loadingLabel="Updating..." className="w-full" />
     </form>

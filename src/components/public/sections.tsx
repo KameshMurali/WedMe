@@ -423,6 +423,10 @@ export function EventsSection({
 }) {
   const items = condensed ? events.slice(0, 3) : events;
 
+  if (!items.length) {
+    return <EmptyState title="Events coming soon" description="Event details will be shared here soon." />;
+  }
+
   return (
     <section className="section-shell mt-24">
       <SectionHeading
@@ -538,6 +542,10 @@ export function EventsSection({
 }
 
 export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"] }) {
+  if (!items.length) {
+    return <EmptyState title="Schedule coming soon" description="The day-by-day itinerary will appear here once published." />;
+  }
+
   const grouped = groupBy(items, (item) => item.dayLabel);
 
   return (
@@ -593,6 +601,10 @@ export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"
 }
 
 export function TidbitsSection({ items }: { items: SiteSnapshot["tidbits"] }) {
+  if (!items.length) {
+    return <EmptyState title="Tidbits coming soon" description="Helpful details and couple favourites will appear here soon." />;
+  }
+
   return (
     <section className="section-shell mt-24">
       <SectionHeading
@@ -615,6 +627,10 @@ export function TidbitsSection({ items }: { items: SiteSnapshot["tidbits"] }) {
 }
 
 export function DressCodeSection({ guides }: { guides: SiteSnapshot["dressCodeGuides"] }) {
+  if (!guides.length) {
+    return <EmptyState title="Dress code coming soon" description="Styling guidance for each event will be shared here." />;
+  }
+
   return (
     <section className="section-shell mt-24">
       <SectionHeading
@@ -674,6 +690,10 @@ export function ExperienceSection({
   items: SiteSnapshot["travelGuideItems"];
   faqItems: SiteSnapshot["faqItems"];
 }) {
+  if (!items.length && !faqItems.length) {
+    return <EmptyState title="Guest experience coming soon" description="Travel tips, FAQs, and guest guidance will appear here." />;
+  }
+
   const grouped = groupBy(items, (item) => item.category);
 
   return (

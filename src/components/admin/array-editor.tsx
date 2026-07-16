@@ -127,18 +127,19 @@ export function ArrayEditor({
                 Item {index + 1}
               </p>
               <div className="flex items-center gap-2">
-                <Button type="button" size="sm" variant="ghost" onClick={() => index > 0 && move(index, index - 1)}>
+                <Button type="button" size="sm" variant="ghost" aria-label="Move item up" onClick={() => index > 0 && move(index, index - 1)}>
                   <ArrowUp className="h-4 w-4" />
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="ghost"
+                  aria-label="Move item down"
                   onClick={() => index < rows.length - 1 && move(index, index + 1)}
                 >
                   <ArrowDown className="h-4 w-4" />
                 </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => remove(index)}>
+                <Button type="button" size="sm" variant="ghost" aria-label="Delete item" onClick={() => remove(index)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

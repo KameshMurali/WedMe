@@ -39,7 +39,7 @@ export function formatTimeRange(start: Date | string, end?: Date | string | null
       return null;
     }
 
-    new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
     }).format(resolvedDate);
@@ -56,7 +56,11 @@ export function formatTimeRange(start: Date | string, end?: Date | string | null
 }
 
 export function formatEnumLabel(value: string | null | undefined, fallback = "Details") {
-  return value ? value.replaceAll("_", " ") : fallback;
+  if (!value) return fallback;
+  return value
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function createPublicUrl(path: string) {

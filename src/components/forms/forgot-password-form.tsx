@@ -13,7 +13,12 @@ export function ForgotPasswordForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <Input name="email" type="email" placeholder="Your account email" required />
+      <div>
+        <label htmlFor="forgot-email" className="mb-1.5 block text-sm font-medium">
+          Email address
+        </label>
+        <Input id="forgot-email" name="email" type="email" placeholder="Your account email" required />
+      </div>
       <FormMessage type="error" message={state.error} />
       <FormMessage type="success" message={state.success} />
       <SubmitButton label="Send reset link" loadingLabel="Preparing..." className="w-full" />

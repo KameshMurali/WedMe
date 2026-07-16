@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalendarDays, Sparkles } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -40,6 +41,17 @@ export function ComingSoonPage({
           <CalendarDays className="h-4 w-4" />
           {formatDate(weddingDate)}
         </div>
+        <p className="mt-8 text-sm text-[color:var(--muted)]">
+          Are you the couple?{" "}
+          <Link href="/login" className="font-medium text-[color:var(--text)] hover:underline">
+            Log in to publish your site
+          </Link>
+        </p>
+        <p className="mt-3 text-xs text-[color:var(--muted)]">
+          <Link href="/" className="hover:text-[color:var(--text)]">
+            Crafted with ToNewBeginning.com
+          </Link>
+        </p>
       </Card>
     </main>
   );

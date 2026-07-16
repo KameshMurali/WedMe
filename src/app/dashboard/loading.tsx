@@ -7,6 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function DashboardLoading() {
   return (
     <div className="space-y-6">
+      <div className="loading-bar" aria-hidden="true" />
+      <p role="status" className="sr-only">
+        Loading your workspace…
+      </p>
       <div className="space-y-3">
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-10 w-64" />

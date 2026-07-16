@@ -7,12 +7,13 @@
     "build": "prisma migrate deploy && prisma generate && next build",
     "start": "next start",
     "lint": "eslint . --quiet",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate || true",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "make-admin": "tsx scripts/make-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

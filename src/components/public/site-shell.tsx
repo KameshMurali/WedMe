@@ -4,22 +4,34 @@ import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
 
-const navigationConfig = [
+// Maps route suffix → the SectionType that gates it. "Home" has no gate (always shown).
+const navigationConfig: Array<{ href: string; label: string; sectionType?: string }> = [
   { href: "", label: "Home" },
-  { href: "/story", label: "Story" },
-  { href: "/events", label: "Events" },
-  { href: "/schedule", label: "Schedule" },
-  { href: "/rsvp", label: "RSVP" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/experience", label: "Guest Experience" },
-  { href: "/memories", label: "Memories" },
-  { href: "/wishes", label: "Wishes" },
+  { href: "/story", label: "Story", sectionType: "STORY" },
+  { href: "/events", label: "Events", sectionType: "EVENTS" },
+  { href: "/schedule", label: "Schedule", sectionType: "SCHEDULE" },
+  { href: "/rsvp", label: "RSVP", sectionType: "RSVP" },
+  { href: "/gallery", label: "Gallery", sectionType: "GALLERY" },
+  { href: "/experience", label: "Guest Experience", sectionType: "EXPERIENCE" },
+  { href: "/memories", label: "Memories", sectionType: "MEMORIES" },
+  { href: "/wishes", label: "Wishes", sectionType: "MESSAGES" },
 ];
+
+function filterNavItems(
+  config: typeof navigationConfig,
+  sections: SiteSnapshot["sections"],
+) {
+  const enabledTypes = new Set(
+    sections.filter((s) => s.enabled).map((s) => s.type),
+  );
+  return config.filter((item) => !item.sectionType || enabledTypes.has(item.sectionType));
+}
 
 function getNavLinkClasses(active: boolean, variant: ReturnType<typeof findTemplateByKey>["navigationVariant"]) {
   if (variant === "underline") {
@@ -107,6 +119,7 @@ export function SiteShell({
   const template = findTemplateByKey(snapshot.theme.templateKey);
   const isDark = template.key === "cinematic-modern";
   const showBackToPlatformHome = snapshot.site.slug === "kammonbeginnings";
+  const visibleNavItems = filterNavItems(navigationConfig, snapshot.sections);
 
   return (
     <div
@@ -175,7 +188,7 @@ export function SiteShell({
 
               <nav className="min-w-0 overflow-x-auto">
                 <div className={cn("flex min-w-max items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
-                  {navigationConfig.map((item) => {
+                  {visibleNavItems.map((item) => {
                     const href = `/${snapshot.site.slug}${item.href}` as Route;
                     const active = activeHref === href || (item.href === "" && activeHref === `/${snapshot.site.slug}`);
 
@@ -183,9 +196,13 @@ export function SiteShell({
                       <Link
                         key={item.href || "home"}
                         href={href}
-                        className={getNavLinkClasses(active, template.navigationVariant)}
+                        className={cn(
+                          "inline-flex items-center gap-2",
+                          getNavLinkClasses(active, template.navigationVariant),
+                        )}
                       >
                         {item.label}
+                        <LinkPendingSpinner />
                       </Link>
                     );
                   })}

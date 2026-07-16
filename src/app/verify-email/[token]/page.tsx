@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { prisma } from "@/server/prisma";
+import { setSessionCookie } from "@/server/auth/session";
 import { hashToken } from "@/server/auth/tokens";
+import { prisma } from "@/server/prisma";
+
+export const metadata: Metadata = {
+  title: "Email verified · ToNewBeginning",
+};
 
 export default async function VerifyEmailPage({
   params,
@@ -14,9 +21,8 @@ export default async function VerifyEmailPage({
 
   const verificationToken = await prisma.emailVerificationToken.findUnique({
     where: { tokenHash: hashToken(token) },
+    include: { user: true },
   });
-
-  let verified = false;
 
   if (verificationToken && !verificationToken.usedAt && verificationToken.expiresAt > new Date()) {
     await prisma.$transaction([
@@ -29,23 +35,32 @@ export default async function VerifyEmailPage({
         data: { emailVerifiedAt: new Date() },
       }),
     ]);
-    verified = true;
+
+    // Sign the user in and send them straight to the dashboard.
+    await setSessionCookie({
+      userId: verificationToken.user.id,
+      email: verificationToken.user.email,
+      role: verificationToken.user.role,
+    });
+    redirect("/dashboard");
   }
 
   return (
     <main className="section-shell flex min-h-screen items-center justify-center py-16">
       <Card className="w-full max-w-lg text-center">
-        <h1 className="font-display text-4xl text-[color:var(--text)]">
-          {verified ? "Email verified" : "Verification link expired"}
-        </h1>
+        <h1 className="font-display text-4xl text-[color:var(--text)]">Verification link expired</h1>
         <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-          {verified
-            ? "Your account is verified and ready to keep building."
-            : "This link is no longer valid. You can still log in and request a fresh verification flow later."}
+          This link is no longer valid. You can still log in and request a fresh verification flow
+          later.
         </p>
-        <Button asChild className="mt-8">
-          <Link href="/login">Go to login</Link>
-        </Button>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button asChild>
+            <Link href="/login">Go to login</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/">Back to home</Link>
+          </Button>
+        </div>
       </Card>
     </main>
   );

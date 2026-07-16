@@ -72,6 +72,32 @@ const colorFieldMeta: Array<{
   },
 ];
 
+// Converts any valid CSS color string to a lowercase 6-digit hex string.
+// The canvas trick lets the browser parse rgb(), hsl(), named colors, etc.
+// Falls back to the raw string so a partially-typed value doesn't get wiped.
+function normalizeToHex(raw: string): string {
+  const trimmed = raw.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) return trimmed.toLowerCase();
+  // Expand 3-digit shorthand
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    const [, r, g, b] = trimmed.match(/^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/)!;
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return trimmed;
+    ctx.fillStyle = "#000000";
+    ctx.fillStyle = trimmed;
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  } catch {
+    return trimmed;
+  }
+}
+
 const buttonVariantLabels: Record<string, string> = {
   solid: "Solid button",
   soft: "Soft button",
@@ -119,14 +145,19 @@ function ColorControl({
       <div className="mt-4 flex items-center gap-3">
         <input
           type="color"
-          value={value}
+          // type="color" only understands 6-digit hex; normalise so it never
+          // receives an rgb() string (which would silently show black).
+          value={/^#[0-9a-fA-F]{6}$/i.test(value) ? value : normalizeToHex(value)}
           onChange={(event) => onChange(event.target.value)}
           className="h-12 w-16 cursor-pointer rounded-2xl border border-black/10 bg-white p-1"
           aria-label={label}
         />
         <Input
-          value={value.toUpperCase()}
+          value={value}
           onChange={(event) => onChange(event.target.value)}
+          // Normalise to hex when the user leaves the field so rgb() / hsl() /
+          // named colours get converted before they reach the form state.
+          onBlur={(event) => onChange(normalizeToHex(event.target.value))}
           spellCheck={false}
           autoCapitalize="none"
           placeholder="#000000"
@@ -184,9 +215,14 @@ export function TemplateCustomizer({
     setValue(name, value, { shouldDirty: true, shouldValidate: true });
   }
 
+  const colorFields = new Set<string>(["primaryColor", "accentColor", "backgroundColor", "surfaceColor", "textColor", "mutedColor"]);
+
   const onSubmit = handleSubmit((values) => {
     const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => formData.append(key, String(value)));
+    Object.entries(values).forEach(([key, value]) => {
+      const normalized = colorFields.has(key) ? normalizeToHex(String(value)) : String(value);
+      formData.append(key, normalized);
+    });
 
     startTransition(async () => {
       const result = await updateTemplateThemeAction({}, formData);
@@ -227,16 +263,14 @@ export function TemplateCustomizer({
                     </span>
                   ) : null}
                 </div>
-                <div className="space-y-3 p-5">
-                  <div className="flex flex-wrap items-start gap-3">
-                    <h3 className="min-w-0 flex-1 text-balance font-display text-3xl leading-tight text-[color:var(--text)]">
-                      {template.name}
-                    </h3>
-                    <span className="max-w-full self-start rounded-full bg-black/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)] whitespace-normal break-words leading-5">
-                      {template.mood}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-7 text-[color:var(--muted)]">{template.description}</p>
+                <div className="p-5">
+                  <span className="inline-block rounded-full bg-black/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)]">
+                    {template.mood}
+                  </span>
+                  <h3 className="mt-2 font-display text-2xl leading-snug text-[color:var(--text)]">
+                    {template.name}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">{template.description}</p>
                 </div>
               </Card>
             </button>

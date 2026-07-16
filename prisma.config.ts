@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
 // Prisma migration commands need a session-level connection (advisory locks,

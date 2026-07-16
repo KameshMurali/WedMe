@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 
 import { NavProgress } from "@/components/ui/nav-progress";
 import "@/app/globals.css";
+import { env } from "@/lib/env";
 
 // next/font self-hosts these at build time, generates <link rel="preload">,
 // and applies font-display: swap — replacing the render-blocking @fontsource
@@ -29,7 +30,7 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_URL ?? "https://wed.tonewbeginning.com"),
+  metadataBase: new URL(env.APP_URL),
   title: "ToNewBeginning.com",
   description:
     "ToNewBeginning.com is a wedding website builder for Indian and South Asian couples — multi-event timelines, RSVP management, photo galleries, and a polished guest experience.",
