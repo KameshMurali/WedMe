@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { ForgotPasswordForm } from "@/components/forms/forgot-password-form";
 import { Card } from "@/components/ui/card";
@@ -18,6 +19,14 @@ export default function ForgotPasswordPage() {
         </p>
         <div className="mt-8">
           <ForgotPasswordForm />
+        </div>
+        <div className="mt-6 flex items-center justify-between text-sm text-stone-500">
+          <Link href="/login" className="hover:text-stone-900">
+            Remembered it? Log in
+          </Link>
+          <Link href="/" className="hover:text-stone-900">
+            ← Back to home
+          </Link>
         </div>
       </Card>
     </main>

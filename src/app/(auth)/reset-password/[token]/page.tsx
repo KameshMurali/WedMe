@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { ResetPasswordForm } from "@/components/forms/reset-password-form";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,14 @@ export default async function ResetPasswordPage({
         </p>
         <div className="mt-8">
           <ResetPasswordForm token={token} />
+        </div>
+        <div className="mt-6 flex items-center justify-between text-sm text-stone-500">
+          <Link href="/login" className="hover:text-stone-900">
+            Back to log in
+          </Link>
+          <Link href="/" className="hover:text-stone-900">
+            ← Back to home
+          </Link>
         </div>
       </Card>
     </main>

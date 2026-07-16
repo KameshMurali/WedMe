@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { RegisterForm } from "@/components/forms/register-form";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,11 @@ export default function RegisterPage() {
           </p>
           <div className="mt-8">
             <RegisterForm />
+          </div>
+          <div className="mt-6 text-sm text-stone-500">
+            <Link href="/" className="hover:text-stone-900">
+              ← Back to home
+            </Link>
           </div>
         </Card>
       </div>
