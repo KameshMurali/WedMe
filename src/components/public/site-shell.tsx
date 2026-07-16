@@ -4,6 +4,7 @@ import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
@@ -195,9 +196,13 @@ export function SiteShell({
                       <Link
                         key={item.href || "home"}
                         href={href}
-                        className={getNavLinkClasses(active, template.navigationVariant)}
+                        className={cn(
+                          "inline-flex items-center gap-2",
+                          getNavLinkClasses(active, template.navigationVariant),
+                        )}
                       >
                         {item.label}
+                        <LinkPendingSpinner />
                       </Link>
                     );
                   })}

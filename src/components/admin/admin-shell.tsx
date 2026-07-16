@@ -9,6 +9,7 @@ import { Eye, Home, Inbox, ListChecks, LogOut, Palette, PenSquare, Settings, Spa
 import { logoutAction } from "@/actions/auth";
 import { FeedbackDialog } from "@/components/admin/feedback-dialog";
 import { Button } from "@/components/ui/button";
+import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { Card } from "@/components/ui/card";
 import { dashboardRoutes, workspaceResumeCookieName } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -99,6 +100,7 @@ export function AdminShell({
                 >
                   <Icon className="h-4 w-4" />
                   {item.label}
+                  <LinkPendingSpinner className="ml-auto" />
                 </Link>
               );
             })}
