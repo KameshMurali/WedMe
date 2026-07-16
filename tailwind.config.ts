@@ -5,9 +5,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        body: ["Manrope", "system-ui", "sans-serif"],
-        display: ["Cormorant Garamond", "Georgia", "serif"],
-        luxe: ["Cinzel", "Georgia", "serif"],
+        body: ["var(--font-manrope)", "Manrope", "system-ui", "sans-serif"],
+        display: ["var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
+        luxe: ["var(--font-cinzel)", "Cinzel", "Georgia", "serif"],
       },
       colors: {
         ink: "#1f1724",

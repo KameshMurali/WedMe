@@ -48,14 +48,26 @@ function getResend() {
 }
 
 export async function sendEmail(payload: EmailPayload) {
-  // Treat any mode as console when RESEND_API_KEY is set and mode is "resend".
-  // Order: console (explicit) -> resend (if configured) -> smtp.
-  if (env.EMAIL_DELIVERY_MODE === "console") {
+  // Resolve the effective delivery mode. Safety net: in production, if a
+  // Resend key is configured but the mode somehow resolved to "console"
+  // (e.g. EMAIL_DELIVERY_MODE was left blank/misconfigured), prefer Resend
+  // rather than silently dropping real emails. Local dev keeps console mode.
+  let mode = env.EMAIL_DELIVERY_MODE;
+  if (
+    mode === "console" &&
+    env.RESEND_API_KEY &&
+    (process.env.NODE_ENV === "production" || process.env.VERCEL)
+  ) {
+    console.warn("sendEmail: EMAIL_DELIVERY_MODE was 'console' in production; using Resend instead.");
+    mode = "resend";
+  }
+
+  if (mode === "console") {
     console.info("EMAIL_PREVIEW", payload);
     return { delivered: false, preview: payload };
   }
 
-  if (env.EMAIL_DELIVERY_MODE === "resend") {
+  if (mode === "resend") {
     const resend = getResend();
     const { error } = await resend.emails.send({
       from: env.SMTP_FROM,
@@ -70,6 +82,7 @@ export async function sendEmail(payload: EmailPayload) {
     return { delivered: true };
   }
 
+  // mode === "smtp"
   if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASSWORD) {
     throw new Error("SMTP delivery is enabled, but SMTP_HOST, SMTP_USER, or SMTP_PASSWORD is missing.");
   }

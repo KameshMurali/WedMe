@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RsvpForm } from "@/components/forms/rsvp-form";
@@ -6,12 +7,36 @@ import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const snapshot = await getPublishedSiteSnapshot(slug);
+  if (!snapshot) return {};
+  return {
+    title: `RSVP to ${snapshot.site.coupleNames}'s Wedding | ToNewBeginning`,
+    description: `RSVP to ${snapshot.site.coupleNames}'s wedding celebrations. Confirm attendance for individual events, share meal preferences, and leave travel or accessibility notes.`,
+    alternates: { canonical: `/${slug}/rsvp` },
+  };
+}
+
 export default async function RsvpPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const snapshot = await getPublishedSiteSnapshot(slug);
   if (!snapshot) notFound();
 
+  const base = `https://wed.tonewbeginning.com`;
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: base },
+      { "@type": "ListItem", position: 2, name: snapshot.site.coupleNames, item: `${base}/${slug}` },
+      { "@type": "ListItem", position: 3, name: "RSVP", item: `${base}/${slug}/rsvp` },
+    ],
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
     <SiteShell snapshot={snapshot} activeHref={`/${slug}/rsvp`}>
       <section className="section-shell mt-16">
         <SectionHeading
@@ -45,5 +70,6 @@ export default async function RsvpPage({ params }: { params: Promise<{ slug: str
         </div>
       </section>
     </SiteShell>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { Check, Gift } from "lucide-react";
+import { Check, Clock, Gift } from "lucide-react";
 
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { Button } from "@/components/ui/button";
@@ -70,9 +70,17 @@ export function PricingCard({
         </span>
       ) : null}
 
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
-        {plan.name}
-      </p>
+      <div className="flex items-center gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
+          {plan.name}
+        </p>
+        {!checkoutEnabled && plan.recurrence !== "free" ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700">
+            <Clock className="h-3 w-3" />
+            Coming Soon
+          </span>
+        ) : null}
+      </div>
 
       <div className="mt-5 flex items-baseline gap-3">
         <span className="font-display text-5xl text-[color:var(--text)]">{priceLabel}</span>
@@ -108,12 +116,17 @@ export function PricingCard({
           </Button>
         ) : (
           // Pre-launch: capture interest instead of taking payment.
-          <WaitlistForm
-            planKey={plan.key}
-            planName={plan.name}
-            currency={currency}
-            ctaLabel={`Notify me when ${plan.name} launches`}
-          />
+          <>
+            <p className="text-xs text-[color:var(--muted)]">
+              Payments for this plan are not yet open. Drop your email and we'll notify you the moment it launches — founding-couple pricing locked in.
+            </p>
+            <WaitlistForm
+              planKey={plan.key}
+              planName={plan.name}
+              currency={currency}
+              ctaLabel={`Join the waitlist — ${plan.name}`}
+            />
+          </>
         )}
         {plan.key === "forever" ? (
           <p className="inline-flex items-center justify-center gap-2 text-xs text-[color:var(--muted)]">

@@ -2,16 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { LoginForm } from "@/components/forms/login-form";
+import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Log in · ToNewBeginning",
-  description: "Sign in to your couple dashboard to manage your wedding site, events, and RSVPs.",
+  title: "Sign in — ToNewBeginning",
+  description: "Sign in to your ToNewBeginning.com account to manage your wedding website, update content, track RSVPs, and control your couple dashboard.",
+  alternates: { canonical: "/login" },
 };
 
 export default function LoginPage() {
   return (
+    <>
     <main className="section-shell flex min-h-screen items-center py-16">
       <div className="grid w-full gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="flex items-center">
@@ -38,8 +41,16 @@ export default function LoginPage() {
               ← Back to home
             </Link>
           </div>
+          <p className="mt-6 text-center text-xs text-stone-400">
+            Need help?{" "}
+            <a href="mailto:hello@tonewbeginning.com" className="underline hover:text-stone-600">
+              hello@tonewbeginning.com
+            </a>
+          </p>
         </Card>
       </div>
     </main>
+    <MarketingFooter />
+    </>
   );
 }

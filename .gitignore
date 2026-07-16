@@ -14,3 +14,6 @@ public/uploads/*
 !public/uploads/.gitkeep
 prisma/dev.db
 tmp/
+
+# generated diagram exports
+output/

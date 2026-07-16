@@ -23,6 +23,7 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const thumbnailRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const thumbnailRailRef = useRef<HTMLDivElement>(null);
 
   const goTo = useCallback(
     (index: number) => {
@@ -67,11 +68,20 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [goNext, goPrev, goTo, total]);
 
-  // Keep the active thumbnail centered in the rail (so users don't lose track
-  // of position in long galleries).
+  // Keep the active thumbnail centered in the rail. We scroll the rail div
+  // directly (horizontal only) instead of calling scrollIntoView, because
+  // scrollIntoView with block:"nearest" also scrolls the PAGE vertically when
+  // the thumbnail is below the viewport — causing an unexpected jump to the
+  // bottom of the page whenever the user changes photos.
   useEffect(() => {
+    const rail = thumbnailRailRef.current;
     const target = thumbnailRefs.current[active];
-    target?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    if (!rail || !target) return;
+    const railRect = rail.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const scrollLeft =
+      rail.scrollLeft + targetRect.left - railRect.left - (rail.clientWidth - target.clientWidth) / 2;
+    rail.scrollTo({ left: Math.max(0, scrollLeft), behavior: "smooth" });
   }, [active]);
 
   function handleTouchStart(event: React.TouchEvent<HTMLDivElement>) {
@@ -192,6 +202,7 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
       {/* Thumbnail rail */}
       {total > 1 ? (
         <div
+          ref={thumbnailRailRef}
           className="mt-5 flex gap-2.5 overflow-x-auto pb-1 [scrollbar-width:thin] [-ms-overflow-style:none]"
           role="tablist"
           aria-label="Choose a photo"

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
@@ -10,6 +11,17 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { getApprovedGuestUploadsBySlug } from "@/server/repositories/guest-engagement";
 import { getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
 import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const snapshot = await getPublishedSiteSnapshot(slug);
+  if (!snapshot) return {};
+  return {
+    title: `Guest Memories | ${snapshot.site.coupleNames}'s Wedding`,
+    description: `Share your photos, clips, and moments from ${snapshot.site.coupleNames}'s wedding. Guest uploads are moderated by the couple and displayed in a shared memories wall.`,
+    alternates: { canonical: `/${slug}/memories` },
+  };
+}
 
 export default async function MemoriesPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

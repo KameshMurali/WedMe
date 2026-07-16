@@ -2,6 +2,10 @@
 
 ToNewBeginning.com is a premium wedding website platform for **KamMonBeginnings** built with **Next.js App Router, TypeScript, Tailwind CSS, PostgreSQL, and Prisma**.
 
+Architecture reference:
+
+- `docs/architecture.md` for the as-built system diagram and layer breakdown
+
 This repo is not a single static wedding page. It is structured as a scalable wedding website SaaS starter with:
 
 - a polished public wedding website experience for guests

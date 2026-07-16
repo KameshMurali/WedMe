@@ -5,8 +5,8 @@ import { ForgotPasswordForm } from "@/components/forms/forgot-password-form";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Forgot password · ToNewBeginning",
-  description: "Reset your couple dashboard password by entering your registered email address.",
+  title: "Reset your password — ToNewBeginning",
+  description: "Enter your email to receive a password reset link for your ToNewBeginning account.",
 };
 
 export default function ForgotPasswordPage() {

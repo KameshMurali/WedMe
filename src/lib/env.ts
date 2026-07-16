@@ -16,7 +16,12 @@ const environmentSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().default("ToNewBeginning.com <noreply@tonewbeginning.com>"),
-  EMAIL_DELIVERY_MODE: z.enum(["console", "smtp", "resend"]).default("console"),
+  // Treat an empty string the same as unset so a blank Vercel value falls back
+  // to the default instead of failing the enum parse.
+  EMAIL_DELIVERY_MODE: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.enum(["console", "smtp", "resend"]).default("console"),
+  ),
   RESEND_API_KEY: z.string().optional(),
   // Comma-separated list of emails granted admin access (waitlist viewer, etc.)
   // without needing a DB role change. e.g. "you@example.com,ops@example.com".

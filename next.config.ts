@@ -1,48 +1,43 @@
 import type { NextConfig } from "next";
 
-// Applied to every response. Gives Zscaler / enterprise proxies the signals
-// they need to trust the site, and hardens it against common web attacks.
+// Content-Security-Policy tuned to exactly what this app loads:
+//   • scripts/styles: self + 'unsafe-inline' (Next injects inline hydration
+//     scripts and components use inline styles; a nonce-based CSP would be
+//     stricter but needs per-request middleware — deferred to avoid risking
+//     hydration breakage).
+//   • images: any HTTPS host (couples paste arbitrary image URLs) + data/blob.
+//   • frames: YouTube embeds only.
+//   • connect: same-origin APIs + Vercel Blob client uploads.
+//   • everything else locked down (object-src none, base-uri/form-action self,
+//     frame-ancestors self to prevent clickjacking).
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "media-src 'self' blob: https:",
+  "worker-src 'self' blob:",
+  "connect-src 'self' https://blob.vercel-storage.com https://*.blob.vercel-storage.com",
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "upgrade-insecure-requests",
+].join("; ");
+
 const securityHeaders = [
-  // Prevent MIME-type sniffing — one of the first things scanners check.
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  // Block the site from being framed by a third-party page (clickjacking).
-  { key: "X-Frame-Options", value: "DENY" },
-  // Enforce HTTPS for 2 years, including subdomains, and allow preload submission.
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
+  // Force HTTPS for 2 years; harmless even before preload submission.
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-  // Limit referrer info sent to cross-origin requests.
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  // Disable browser features not needed by a wedding website.
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
   {
-    key: "Content-Security-Policy",
-    value: [
-      // Fonts and API calls must come from this origin.
-      "default-src 'self'",
-      // Next.js requires unsafe-inline for its hydration scripts.
-      "script-src 'self' 'unsafe-inline'",
-      // Tailwind utility classes and theme CSS variables are injected inline.
-      "style-src 'self' 'unsafe-inline'",
-      // Couples paste arbitrary image URLs (Vercel Blob, S3, vendor sites, etc.)
-      // so img-src must allow all HTTPS sources. data: and blob: cover
-      // cropped/previewed uploads before they are persisted.
-      "img-src 'self' data: blob: https:",
-      // Videos follow the same storage pattern as images.
-      "media-src 'self' blob: https:",
-      // Fonts are self-hosted via @fontsource — no external CDN needed.
-      "font-src 'self'",
-      // XHR / fetch targets: own API routes only.
-      "connect-src 'self'",
-      // No plug-ins, no embeds.
-      "object-src 'none'",
-      // YouTube embeds are used in the VideoSection component.
-      "frame-src https://www.youtube.com",
-      // Prevent this page from being embedded anywhere (CSP equivalent of X-Frame-Options).
-      "frame-ancestors 'none'",
-      // Restrict <base> tag to same origin.
-      "base-uri 'self'",
-      // Forms must submit to this origin only.
-      "form-action 'self'",
-    ].join("; "),
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
   },
 ];
 
@@ -51,8 +46,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Apply to every route.
-        source: "/(.*)",
+        // Apply the security headers to every route.
+        source: "/:path*",
         headers: securityHeaders,
       },
     ];

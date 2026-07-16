@@ -1,5 +1,9 @@
-// Suspense fallback for every dashboard route (nearest-ancestor boundary):
-// the sidebar layout stays interactive while the content pane shows this.
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Shown instantly (React Suspense fallback) while any /dashboard/* route
+// fetches its server data — the sidebar from dashboard/layout stays, only the
+// content area shimmers, so navigation never feels frozen.
 export default function DashboardLoading() {
   return (
     <div className="space-y-6">
@@ -7,21 +11,30 @@ export default function DashboardLoading() {
       <p role="status" className="sr-only">
         Loading your workspace…
       </p>
-      <div className="animate-pulse space-y-6">
-        <div className="space-y-3">
-          <div className="h-3 w-24 rounded-full bg-black/8" />
-          <div className="h-10 w-2/3 max-w-md rounded-2xl bg-black/8" />
-          <div className="h-3 w-1/2 max-w-sm rounded-full bg-black/6" />
-        </div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-          {Array.from({ length: 5 }, (_, index) => (
-            <div key={index} className="h-28 rounded-[2rem] border border-black/5 bg-white/60" />
-          ))}
-        </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="h-72 rounded-[2rem] border border-black/5 bg-white/60" />
-          <div className="h-72 rounded-[2rem] border border-black/5 bg-white/60" />
-        </div>
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Card key={i} className="space-y-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-16" />
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i} className="space-y-4">
+            <Skeleton className="h-8 w-40" />
+            {Array.from({ length: 4 }).map((_, j) => (
+              <Skeleton key={j} className="h-14 w-full" />
+            ))}
+          </Card>
+        ))}
       </div>
     </div>
   );

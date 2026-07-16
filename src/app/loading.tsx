@@ -1,14 +1,15 @@
-// Root suspense fallback (homepage, pricing, auth pages).
+import { Spinner } from "@/components/ui/spinner";
+
+// Global fallback for top-level routes (home, pricing, auth) while they load.
 export default function RootLoading() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6">
-      <p className="font-display text-3xl text-stone-900">ToNewBeginning.com</p>
-      <div className="w-full max-w-xs">
-        <div className="loading-bar" aria-hidden="true" />
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Spinner className="h-8 w-8" />
+        <p role="status" className="text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
+          Loading
+        </p>
       </div>
-      <p role="status" className="text-sm text-stone-500">
-        Setting things up…
-      </p>
-    </main>
+    </div>
   );
 }
