@@ -72,7 +72,10 @@ export function AdminShell({
     <main className="section-shell py-4 xl:py-8">
       {/* Compact sticky top bar — mobile & tablet only. Desktop keeps the sidebar. */}
       <div className="sticky top-2 z-30 mb-6 xl:hidden">
-        <div className="overflow-hidden rounded-3xl border border-white/60 bg-white/85 shadow-[0_12px_40px_rgba(43,26,24,0.10)] backdrop-blur-xl">
+        {/* Solid background on purpose: iOS Safari renders backdrop-filter
+            unreliably inside rounded overflow-hidden containers, letting the
+            page text bleed through a translucent bar. */}
+        <div className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[0_12px_40px_rgba(43,26,24,0.16)]">
           <div className="flex items-center justify-between gap-3 px-4 pt-3">
             <div className="flex min-w-0 items-center gap-2.5">
               <p className="truncate font-display text-lg leading-none text-[color:var(--text)]">
