@@ -76,7 +76,7 @@ const softwareSchema = {
     "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian celebrations with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
   offers: [
     { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan — up to 2 wedding events and 50 RSVPs." },
-    { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan — unlimited events, RSVPs, custom domain." },
+    { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan — AI-assisted content drafting, unlimited events and RSVPs." },
     { "@type": "Offer", name: "Forever", price: "99", priceCurrency: "USD", description: "Lifetime plan — everything in Together plus permanent hosting and anniversary emails." },
   ],
 };
@@ -99,8 +99,8 @@ const homepageFaqs = [
     a: "On the free Hello plan your site remains as an editable draft indefinitely. On the Together plan it archives for 6 months after your wedding year ends. On the Forever plan your site and gallery stay live permanently — a lasting digital memory of your celebration.",
   },
   {
-    q: "Is there a custom domain option?",
-    a: "Yes — on the Together and Forever plans you can connect your own domain (e.g. kammonbeginnings.com) so guests see a personal URL rather than the ToNewBeginning subdomain.",
+    q: "Does ToNewBeginning include AI features?",
+    a: "Yes — on the Together and Forever plans, AI helps you draft your story, FAQs, and guest guidance from a few short answers. Forever additionally includes AI translations so guests can read your site in Tamil, Hindi, and more.",
   },
   {
     q: "Can family gift the Forever plan to the couple?",
