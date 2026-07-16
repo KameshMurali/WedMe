@@ -53,9 +53,14 @@ export default async function VerifyEmailPage({
           This link is no longer valid. You can still log in and request a fresh verification flow
           later.
         </p>
-        <Button asChild className="mt-8">
-          <Link href="/login">Go to login</Link>
-        </Button>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button asChild>
+            <Link href="/login">Go to login</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/">Back to home</Link>
+          </Button>
+        </div>
       </Card>
     </main>
   );

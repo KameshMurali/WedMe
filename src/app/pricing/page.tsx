@@ -25,14 +25,22 @@ export default async function PricingPage() {
     <main className="section-shell relative pb-24 pt-16 sm:pt-20">
       <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-[color:var(--accent)]/14 to-transparent" />
 
-      {/* Top row — launch offer pill + currency switcher */}
+      {/* Top row — back link + launch offer pill + currency switcher */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {isLaunchOfferActive() ? (
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/85 px-4 py-1.5 text-xs font-semibold text-[color:var(--text)] shadow-sm ring-1 ring-black/5">
-            <Sparkles className="h-3.5 w-3.5 text-[color:var(--primary)]" />
-            {launchOffer.label} · {launchOffer.blurb}
-          </span>
-        ) : <span />}
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--muted)] transition hover:text-[color:var(--text)]"
+          >
+            ← Back to home
+          </Link>
+          {isLaunchOfferActive() ? (
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/85 px-4 py-1.5 text-xs font-semibold text-[color:var(--text)] shadow-sm ring-1 ring-black/5">
+              <Sparkles className="h-3.5 w-3.5 text-[color:var(--primary)]" />
+              {launchOffer.label} · {launchOffer.blurb}
+            </span>
+          ) : null}
+        </div>
         <CurrencySwitcher current={currency} />
       </div>
 
