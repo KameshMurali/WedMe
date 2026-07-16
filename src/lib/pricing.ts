@@ -109,9 +109,9 @@ export const plans: Plan[] = [
     pitch:
       "One payment for the full year of your wedding — 12 months of unlimited everything, plus 6 months of post-wedding archive so guests can revisit.",
     highlights: [
-      "Custom domain (yourwedding.com)",
-      "No ToNewBeginning branding",
+      "AI-assisted content drafting",
       "Unlimited events, RSVPs, uploads",
+      "No ToNewBeginning branding",
       "Password protection + invite codes",
       "Priority email support",
     ],

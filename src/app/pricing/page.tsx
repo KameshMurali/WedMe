@@ -38,7 +38,7 @@ const productSchema = {
       "@type": "Offer",
       name: "Together",
       description:
-        "Wedding year plan — unlimited events, unlimited RSVPs, custom domain, no ToNewBeginning branding.",
+        "Wedding year plan — AI-assisted content drafting, unlimited events, unlimited RSVPs, no ToNewBeginning branding.",
       price: "49",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
@@ -90,7 +90,7 @@ const pricingFaqSchema = {
       name: "Do I lose work if I never upgrade?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it — more events, more guests, or a custom domain.",
+        text: "No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it — more events, more guests, or AI help drafting your content.",
       },
     },
   ],
@@ -202,7 +202,7 @@ export default async function PricingPage() {
           />
           <Faq
             q="Do I lose work if I never upgrade?"
-            a="No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it (more events, more guests, custom domain)."
+            a="No. Hello is free forever for drafts and small celebrations. You only need to upgrade when you outgrow it (more events, more guests, AI help drafting your content)."
           />
         </div>
       </div>
