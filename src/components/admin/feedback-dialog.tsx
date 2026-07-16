@@ -17,7 +17,7 @@ const categoryLabels: Record<(typeof feedbackCategories)[number], string> = {
   OTHER: "Anything else",
 };
 
-export function FeedbackDialog() {
+export function FeedbackDialog({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -39,10 +39,21 @@ export function FeedbackDialog() {
 
   return (
     <>
-      <Button type="button" variant="ghost" className="w-full justify-start" onClick={() => setOpen(true)}>
-        <MessageSquareHeart className="h-4 w-4" />
-        Share feedback
-      </Button>
+      {compact ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Share feedback"
+          className="rounded-full p-2 text-[color:var(--muted)] transition hover:bg-black/5 hover:text-[color:var(--text)]"
+        >
+          <MessageSquareHeart className="h-5 w-5" />
+        </button>
+      ) : (
+        <Button type="button" variant="ghost" className="w-full justify-start" onClick={() => setOpen(true)}>
+          <MessageSquareHeart className="h-4 w-4" />
+          Share feedback
+        </Button>
+      )}
 
       {open ? (
         <div
