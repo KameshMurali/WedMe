@@ -1,4 +1,4 @@
-# ToNewBeginning — Copy Kit
+# ToNewBeginning Copy Kit
 
 Paste-ready marketing assets. All prices verified against `src/lib/pricing.ts`; offer deadline matches `launchOffer.endsAt` (July 31, 2026).
 
@@ -11,13 +11,13 @@ Paste-ready marketing assets. All prices verified against `src/lib/pricing.ts`; 
 
 ## 1. WhatsApp Messages
 
-### Variant A — General (the flagship forward)
+### Variant A: General (the flagship forward)
 
 ```
 Planning a wedding with 4 events, 200 guests, and questions flooding
 in from every direction?
 
-We built *ToNewBeginning* — a wedding platform that gives you and your
+We built *ToNewBeginning*, a wedding platform that gives you and your
 guests one beautiful place for everything.
 
 Your story. Event details. RSVPs per function. Dress codes. Photo
@@ -36,20 +36,20 @@ See a live wedding site → wed.tonewbeginning.com/kammonbeginnings
 Create yours → wed.tonewbeginning.com/register
 ```
 
-### Variant B — Short (status / broadcast list)
+### Variant B: Short (status / broadcast list)
 
 ```
-One website for your whole wedding — Mehendi to Reception. 💍
+One website for your whole wedding, Mehendi to Reception. 💍
 Per-event RSVPs, dress codes, guest photos, wishes wall.
 Free to start → wed.tonewbeginning.com
 ```
 
-### Variant C — Family-forward (for parents/relatives to share)
+### Variant C: Family-forward (for parents/relatives to share)
 
 ```
 Beta/Beti getting married? 💛
 
-ToNewBeginning makes one elegant website for the whole wedding —
+ToNewBeginning makes one elegant website for the whole wedding:
 every ceremony, every detail, in one link you can share with the
 entire family.
 
@@ -59,7 +59,7 @@ entire family.
 • Works beautifully on every phone
 
 It's free to try, and the *Forever* plan can even be gifted to the
-couple — a modern shagun. 🎁
+couple. A modern shagun. 🎁
 
 See an example → wed.tonewbeginning.com/kammonbeginnings
 ```
@@ -87,7 +87,7 @@ Link: `wed.tonewbeginning.com/kammonbeginnings` (demo converts better than homep
 | 3 | Reel | "Zola thinks your wedding is one day. We know better." | Fast cuts: Mehendi card → Haldi → Sangeet → Ceremony → Reception |
 | 4 | Static + caption | "What guests see vs. what you manage" | Split: elegant public site / calm dashboard |
 | 5 | Reel (template tour) | "5 themes. Same content. Switch anytime." | Cycle the 5 templates on one site |
-| 6 | Carousel | "How to explain a Haldi to your non-desi coworkers" | Educational; ends with tidbits-section screenshot — pure value, soft brand |
+| 6 | Carousel | "How to explain a Haldi to your non-desi coworkers" | Educational; ends with tidbits-section screenshot. Pure value, soft brand |
 | 7 | Reel | "The RSVP spreadsheet is dead" | Messy spreadsheet → RSVP dashboard with per-event counts |
 | 8 | Static | "Founding 100: 30% off Forever ends July 31" | Launch offer creative, price anchored (₹7,999 → ₹5,599 / $99 → $69) |
 | 9 | Reel (UGC style) | "Building my entire wedding website during one chai ☕" | Real-time speedrun: register → template → publish |
@@ -99,10 +99,10 @@ Hook line → 2–3 short lines of pain/benefit → CTA ("Demo link in bio") →
 ### Launch-offer countdown posts (July campaign)
 
 **10 days left:**
-> 90 founding spots left. The Forever plan — lifetime hosting, concierge setup, giftable — is 30% off until July 31. After that, it never is again. Link in bio.
+> 90 founding spots left. The Forever plan (lifetime hosting, concierge setup, giftable) is 30% off until July 31. After that, it never is again. Link in bio.
 
 **5 days left:**
-> 5 days. One payment, your wedding site lives forever — ₹5,599 / $69 instead of ₹7,999 / $99. Founding couples only. Link in bio.
+> 5 days. One payment, your wedding site lives forever: ₹5,599 / $69 instead of ₹7,999 / $99. Founding couples only. Link in bio.
 
 **2 days left:**
 > Closing Thursday night. If your wedding is in the next year, this is the cheapest Forever will ever be.
@@ -116,7 +116,7 @@ Hook line → 2–3 short lines of pain/benefit → CTA ("Demo link in bio") →
 
 **Rule: 10 helpful comments for every 1 mention. Never post a bare link.**
 
-### Value post (no link — builds karma/trust)
+### Value post (no link; builds karma/trust)
 
 > **How we organised RSVPs for a 4-event wedding without losing our minds**
 >
@@ -124,13 +124,13 @@ Hook line → 2–3 short lines of pain/benefit → CTA ("Demo link in bio") →
 
 ### Soft-mention post (max 1/month per community, only where self-promo is allowed)
 
-> **I built a wedding website tool for multi-event desi weddings — looking for honest feedback**
+> **I built a wedding website tool for multi-event desi weddings. Looking for honest feedback**
 >
-> My partner and I couldn't find a wedding site builder that understood that our wedding was five events, not one — different guest lists, dress codes, and venues per function. So we built one: per-event RSVPs, dress code boards, guest photo uploads after each ceremony. There's a free plan and a live demo (no signup needed to look). Genuinely want feedback from people planning right now — what's missing? [demo link]
+> My partner and I couldn't find a wedding site builder that understood that our wedding was five events, not one: different guest lists, dress codes, and venues per function. So we built one: per-event RSVPs, dress code boards, guest photo uploads after each ceremony. There's a free plan and a live demo (no signup needed to look). Genuinely want feedback from people planning right now. What's missing? [demo link]
 
 ### Helpful-comment pattern (whenever someone asks "best wedding website for Indian wedding?")
 
-> Most of the big ones (Zola/Joy/Knot) are built around one-day Western weddings — you end up hacking events into "activities". If yours is multi-event, look for per-event RSVP support specifically. I'm building ToNewBeginning for exactly this (free tier, demo at the link) but honestly whatever you pick, test the RSVP flow with a cousin before sending it to 200 guests.
+> Most of the big ones (Zola/Joy/Knot) are built around one-day Western weddings, so you end up hacking events into "activities". If yours is multi-event, look for per-event RSVP support specifically. I'm building ToNewBeginning for exactly this (free tier, demo at the link) but honestly whatever you pick, test the RSVP flow with a cousin before sending it to 200 guests.
 
 ---
 
@@ -140,12 +140,12 @@ Hook line → 2–3 short lines of pain/benefit → CTA ("Demo link in bio") →
 
 > Hi {{name}},
 >
-> You're on the founding-couple list for ToNewBeginning — thank you for believing in this early.
+> You're on the founding-couple list for ToNewBeginning. Thank you for believing in this early.
 >
 > What that means:
 > - You'll get first access to paid plans when checkout opens (soon!)
 > - Your founding price is locked: 30% off Forever, honoured even if the launch window has passed by the time we email you
-> - Your feedback shapes the roadmap — reply to this email anytime, a real founder reads it
+> - Your feedback shapes the roadmap. Reply to this email anytime, a real founder reads it
 >
 > While you wait, your free workspace is fully open: build your site, pick a theme, add your events, and share the draft with family. Nothing is locked behind the wait.
 >
@@ -177,18 +177,18 @@ Offer ends **July 31, 2026** (`launchOffer.endsAt`). Update this table if `src/l
 
 ### Handle (in order of preference)
 
-1. `@tonewbeginning` — matches the domain exactly; first choice everywhere
-2. `@wed.tonewbeginning` — mirrors the product URL (IG/TikTok allow dots; use `wedtonewbeginning` on Facebook)
-3. `@tonewbeginningweddings` — adds the search keyword
-4. `@tonewbeginning.hq` — official-account suffix
+1. `@tonewbeginning`: matches the domain exactly; first choice everywhere
+2. `@wed.tonewbeginning`: mirrors the product URL (IG/TikTok allow dots; use `wedtonewbeginning` on Facebook)
+3. `@tonewbeginningweddings`: adds the search keyword
+4. `@tonewbeginning.hq`: official-account suffix
 
-Avoid underscores and numbers — the brand spreads by word of mouth at weddings and must be easy to say out loud.
+Avoid underscores and numbers. The brand spreads by word of mouth at weddings and must be easy to say out loud.
 
-### Display names (searchable — keywords go here, not in the handle)
+### Display names (searchable: keywords go here, not in the handle)
 
 - **Instagram:** `ToNewBeginning | Indian Wedding Websites`
 - **TikTok:** `ToNewBeginning · Wedding Websites`
-- **Facebook Page:** `ToNewBeginning — Wedding Websites for Indian & South Asian Celebrations`
+- **Facebook Page:** `ToNewBeginning · Wedding Websites for Indian & South Asian Celebrations`
   (set page username/URL to `facebook.com/tonewbeginning`)
 
 ### Bio (same across all three)
