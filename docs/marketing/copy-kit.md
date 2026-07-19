@@ -173,30 +173,31 @@ Offer ends **July 31, 2026** (`launchOffer.endsAt`). Update this table if `src/l
 
 ## 6. Social Media Handles & Profiles
 
-**Rule: one identical handle across Instagram, Facebook, and TikTok.** Claim it before posting anything.
+**The handle everywhere: `@wed.tonewbeginning`** (`@tonewbeginning` was already taken on Instagram; this fallback mirrors the product URL exactly, which is even better for recall).
 
-### Handle (in order of preference)
+### Status
 
-1. `@tonewbeginning`: matches the domain exactly; first choice everywhere
-2. `@wed.tonewbeginning`: mirrors the product URL (IG/TikTok allow dots; use `wedtonewbeginning` on Facebook)
-3. `@tonewbeginningweddings`: adds the search keyword
-4. `@tonewbeginning.hq`: official-account suffix
-
-Avoid underscores and numbers. The brand spreads by word of mouth at weddings and must be easy to say out loud.
+- **Instagram:** ✅ claimed `@wed.tonewbeginning` (July 2026), profile photo + bio live
+- **TikTok:** claim `@wed.tonewbeginning`
+- **Facebook Page:** create, then set username so the URL is `facebook.com/wed.tonewbeginning`
 
 ### Display names (searchable: keywords go here, not in the handle)
 
-- **Instagram:** `ToNewBeginning | Indian Wedding Websites`
-- **TikTok:** `ToNewBeginning · Wedding Websites`
-- **Facebook Page:** `ToNewBeginning · Wedding Websites for Indian & South Asian Celebrations`
-  (set page username/URL to `facebook.com/tonewbeginning`)
+Brand voice is inclusive: lead with the multi-event format, keep ceremonies as examples rather than boundaries.
 
-### Bio (same across all three)
+- **Instagram:** `ToNewBeginning | Wedding Websites`
+- **TikTok:** `ToNewBeginning · Wedding Websites`
+- **Facebook Page:** `ToNewBeginning · Wedding Websites for Multi-Event Celebrations`
+
+### Bio (same across all three, fits Instagram's 150 chars)
 
 ```
-Mehendi → Reception, one beautiful website 💍
+One beautiful website for your whole wedding 💍
 Per-event RSVPs · dress codes · guest photos
+Made for multi-event celebrations
 Free to start ↓
 ```
 
 Link: `wed.tonewbeginning.com/kammonbeginnings` (demo converts better than the homepage; switch to a link-in-bio page later if needed).
+
+**Positioning note:** the social brand voice is culture-inclusive ("multi-event celebrations"), while the website keeps its niche SEO keywords ("indian wedding website") for search ranking. Voice and SEO serve different jobs; revisit unifying them after launch.
