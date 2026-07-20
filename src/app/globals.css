@@ -132,3 +132,30 @@ a {
     transform: translateX(-50%);
   }
 }
+
+/* Normalize native date/time inputs. iOS Safari renders type="datetime-local"
+   with its own appearance: it centers the value and adds heavier internal
+   padding, so those fields look bigger and misaligned next to text inputs.
+   Strip the native chrome and left-align the displayed value so they match. */
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="datetime-local"]::-webkit-date-and-time-value,
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+
+/* iOS shrinks the clear/spinner affordances oddly on stripped inputs; hide the
+   inner spin button so the field reads as a clean text input. */
+input[type="datetime-local"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-inner-spin-button,
+input[type="time"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  display: none;
+}
