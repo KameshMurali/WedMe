@@ -159,3 +159,14 @@ input[type="time"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   display: none;
 }
+
+/* Hide the scrollbar on horizontally-scrollable rails (nav pills, etc.) while
+   keeping them scrollable/swipeable. A visible scrollbar in these strips reads
+   as dated. Cross-browser: Firefox, IE/Edge legacy, and WebKit/Blink. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -134,11 +134,18 @@ export function SiteShell({
           "--radius": snapshot.theme.borderRadius,
         } as React.CSSProperties
       }
-      className="relative min-h-screen overflow-hidden bg-[color:var(--background)]"
+      className="relative min-h-screen bg-[color:var(--background)]"
     >
-      <div className={cn("pointer-events-none absolute inset-0", getShellBackdropClasses(template.key))} />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-gradient-to-b from-white/25 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 top-20 h-px bg-gradient-to-r from-transparent via-[color:var(--accent)]/30 to-transparent" />
+      {/* Decorations live in their own overflow-hidden layer that is a SIBLING
+          of the sticky header, not an ancestor. An overflow-hidden ancestor
+          silently disables position: sticky, which was why the header didn't
+          stay pinned on scroll. This clips the gradients without trapping the
+          header. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className={cn("absolute inset-0", getShellBackdropClasses(template.key))} />
+        <div className="absolute inset-x-0 top-0 h-[32rem] bg-gradient-to-b from-white/25 to-transparent" />
+        <div className="absolute inset-x-0 top-20 h-px bg-gradient-to-r from-transparent via-[color:var(--accent)]/30 to-transparent" />
+      </div>
       <SiteActivityTracker slug={snapshot.site.slug} />
 
       <header className="sticky top-0 z-30 px-4 pt-4 sm:px-6 lg:px-8">
@@ -161,62 +168,70 @@ export function SiteShell({
                 </Link>
               </div>
             ) : null}
-            <div className="relative flex flex-col gap-5 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[1.3rem] bg-[color:var(--accent)]/16 text-[color:var(--primary)]">
-                  <Sparkles className="h-5 w-5" />
+            <div className="relative flex flex-col gap-5 px-5 py-4 sm:px-6">
+              {/* Top row: brand identity + primary action */}
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[1.3rem] bg-[color:var(--accent)]/16 text-[color:var(--primary)]">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge>{snapshot.site.brandName}</Badge>
+                      <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        {formatDate(snapshot.site.weddingDate)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-display text-3xl leading-none text-[color:var(--text)] sm:text-4xl">
+                        {snapshot.site.coupleNames}
+                      </p>
+                      <p className="mt-2 inline-flex items-center gap-2 text-sm text-[color:var(--muted)]">
+                        <MapPin className="h-4 w-4" />
+                        {snapshot.site.locationSummary ?? "A beautifully planned celebration awaits."}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge>{snapshot.site.brandName}</Badge>
-                    <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      {formatDate(snapshot.site.weddingDate)}
-                    </span>
+
+                <div className="flex shrink-0 items-center gap-3">
+                  <div className="hidden rounded-full border border-[color:var(--accent)]/18 bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
+                    {formatEnumLabel(snapshot.publish.visibility, "PUBLIC")}
                   </div>
-                  <div>
-                    <p className="font-display text-3xl leading-none text-[color:var(--text)] sm:text-4xl">
-                      {snapshot.site.coupleNames}
-                    </p>
-                    <p className="mt-2 inline-flex items-center gap-2 text-sm text-[color:var(--muted)]">
-                      <MapPin className="h-4 w-4" />
-                      {snapshot.site.locationSummary ?? "A beautifully planned celebration awaits."}
-                    </p>
-                  </div>
+                  <Button asChild size="sm">
+                    <Link href={`/${snapshot.site.slug}/rsvp` as Route}>Reply to Invite</Link>
+                  </Button>
                 </div>
               </div>
 
-              <nav className="min-w-0 overflow-x-auto">
-                <div className={cn("flex min-w-max items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
-                  {visibleNavItems.map((item) => {
-                    const href = `/${snapshot.site.slug}${item.href}` as Route;
-                    const active = activeHref === href || (item.href === "" && activeHref === `/${snapshot.site.slug}`);
+              {/* Nav row: full width so all sections show. The pill rail centers
+                  on desktop and swipe-scrolls on mobile with the scrollbar
+                  hidden (no cramped middle slot, no outdated scrollbar). */}
+              <nav aria-label="Wedding site sections" className="no-scrollbar overflow-x-auto">
+                <div className="flex min-w-max justify-center">
+                  <div className={cn("flex items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
+                    {visibleNavItems.map((item) => {
+                      const href = `/${snapshot.site.slug}${item.href}` as Route;
+                      const active = activeHref === href || (item.href === "" && activeHref === `/${snapshot.site.slug}`);
 
-                    return (
-                      <Link
-                        key={item.href || "home"}
-                        href={href}
-                        className={cn(
-                          "inline-flex items-center gap-2",
-                          getNavLinkClasses(active, template.navigationVariant),
-                        )}
-                      >
-                        {item.label}
-                        <LinkPendingSpinner />
-                      </Link>
-                    );
-                  })}
+                      return (
+                        <Link
+                          key={item.href || "home"}
+                          href={href}
+                          className={cn(
+                            "inline-flex items-center gap-2",
+                            getNavLinkClasses(active, template.navigationVariant),
+                          )}
+                        >
+                          {item.label}
+                          <LinkPendingSpinner />
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </nav>
-
-              <div className="flex shrink-0 items-center gap-3">
-                <div className="hidden rounded-full border border-[color:var(--accent)]/18 bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
-                  {formatEnumLabel(snapshot.publish.visibility, "PUBLIC")}
-                </div>
-                <Button asChild size="sm">
-                  <Link href={`/${snapshot.site.slug}/rsvp` as Route}>Reply to Invite</Link>
-                </Button>
-              </div>
             </div>
           </div>
         </div>
