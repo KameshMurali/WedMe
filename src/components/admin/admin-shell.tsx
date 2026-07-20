@@ -218,7 +218,11 @@ export function AdminShell({
             </form>
           </Card>
         </aside>
-        <section>{children}</section>
+        {/* min-w-0 lets this grid item shrink to the viewport so wide content
+            (e.g. the waitlist table) scrolls inside its own overflow-x-auto
+            container instead of stretching the whole page and breaking the
+            sticky top bar's width on mobile. */}
+        <section className="min-w-0">{children}</section>
       </div>
     </main>
   );
