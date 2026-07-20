@@ -118,7 +118,7 @@ export function AdminShell({
               </form>
             </div>
           </div>
-          <nav aria-label="Dashboard sections" className="overflow-x-auto px-3 pb-3 pt-2 [scrollbar-width:none]">
+          <nav aria-label="Dashboard sections" className="no-scrollbar overflow-x-auto px-3 pb-3 pt-2">
             <div className="flex min-w-max items-center gap-1.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
