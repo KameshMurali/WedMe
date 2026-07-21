@@ -15,14 +15,18 @@ const orgSchema = {
   "@type": "Organization",
   name: "ToNewBeginning.com",
   url: "https://wed.tonewbeginning.com",
-  logo: "https://wed.tonewbeginning.com/og-image.png",
+  logo: "https://wed.tonewbeginning.com/icon.png",
+  image: "https://wed.tonewbeginning.com/og-image.png",
   foundingLocation: { "@type": "Place", name: "India" },
   contactPoint: {
     "@type": "ContactPoint",
     email: "hello@tonewbeginning.com",
     contactType: "customer support",
   },
-  sameAs: ["https://tonewbeginning.com"],
+  sameAs: [
+    "https://tonewbeginning.com",
+    "https://www.instagram.com/wed.tonewbeginning",
+  ],
   description:
     "A premium wedding website builder designed for Indian and South Asian couples: multi-day ceremonies, large guest lists, RSVP management, photo galleries, and a calm couple dashboard.",
 };
