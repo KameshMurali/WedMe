@@ -38,7 +38,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           // outline (which doesn't follow rounded-full geometry and reads as a
           // ghost second pill, especially while disabled) is replaced with a
           // clean ring that matches the design system.
-          "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-60",
+          // -webkit-tap-highlight-color:transparent + select-none stop iOS
+          // Safari from leaving a stuck grey/gold tap-highlight "ghost" shape
+          // when a button becomes disabled during the same tap (e.g. entering a
+          // "Saving…" state on submit).
+          "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition duration-200 outline-none [-webkit-tap-highlight-color:transparent] focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-60",
           variants[variant],
           sizes[size],
           className,
