@@ -1,13 +1,7 @@
-import type { Route } from "next";
-import Link from "next/link";
-import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
+import { SiteHeader } from "@/components/public/site-header";
 import { findTemplateByKey } from "@/lib/template-registry";
-import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
 
 // Maps route suffix → the SectionType that gates it. "Home" has no gate (always shown).
@@ -33,33 +27,6 @@ function filterNavItems(
   return config.filter((item) => !item.sectionType || enabledTypes.has(item.sectionType));
 }
 
-function getNavLinkClasses(active: boolean, variant: ReturnType<typeof findTemplateByKey>["navigationVariant"]) {
-  if (variant === "underline") {
-    return cn(
-      "rounded-full px-4 py-2.5 text-sm transition",
-      active
-        ? "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-[color:var(--accent)]/20"
-        : "text-[color:var(--muted)] hover:text-[color:var(--text)]",
-    );
-  }
-
-  if (variant === "ghost") {
-    return cn(
-      "rounded-full px-4 py-2.5 text-sm transition",
-      active
-        ? "bg-[color:var(--text)] text-[color:var(--background)]"
-        : "text-[color:var(--muted)] hover:bg-black/5 hover:text-[color:var(--text)]",
-    );
-  }
-
-  return cn(
-    "rounded-full px-4 py-2.5 text-sm transition",
-    active
-      ? "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-black/5"
-      : "text-[color:var(--muted)] hover:bg-white/70 hover:text-[color:var(--text)]",
-  );
-}
-
 function getShellBackdropClasses(templateKey: string) {
   switch (templateKey) {
     case "floral-romantic":
@@ -75,19 +42,6 @@ function getShellBackdropClasses(templateKey: string) {
   }
 }
 
-function getHeaderPanelClasses(templateKey: string) {
-  switch (templateKey) {
-    case "cinematic-modern":
-      return "border-white/10 bg-[color:var(--surface)]/78 text-[color:var(--text)] shadow-[0_24px_80px_rgba(7,5,12,0.45)]";
-    case "minimal-luxury":
-      return "border-black/8 bg-white/88 text-[color:var(--text)] shadow-[0_18px_60px_rgba(31,26,23,0.08)]";
-    case "traditional-celebration":
-      return "border-[color:var(--accent)]/28 bg-[color:var(--surface)]/92 text-[color:var(--text)] shadow-[0_24px_80px_rgba(135,73,28,0.14)]";
-    default:
-      return "border-white/60 bg-[color:var(--surface)]/82 text-[color:var(--text)] shadow-[0_24px_80px_rgba(46,22,24,0.10)]";
-  }
-}
-
 function getFooterPanelClasses(templateKey: string) {
   switch (templateKey) {
     case "cinematic-modern":
@@ -99,12 +53,6 @@ function getFooterPanelClasses(templateKey: string) {
     default:
       return "border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(255,248,244,0.88))]";
   }
-}
-
-function getNavRailClasses(isDark: boolean) {
-  return isDark
-    ? "bg-white/8 ring-1 ring-white/10 backdrop-blur"
-    : "bg-white/76 ring-1 ring-black/5 shadow-sm backdrop-blur";
 }
 
 export function SiteShell({
@@ -148,94 +96,19 @@ export function SiteShell({
       </div>
       <SiteActivityTracker slug={snapshot.site.slug} />
 
-      <header className="sticky top-0 z-30 px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-[calc(var(--radius)+0.9rem)] border backdrop-blur-xl",
-              getHeaderPanelClasses(template.key),
-            )}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-[color:var(--accent)]/10" />
-            {showBackToPlatformHome ? (
-              <div className="relative border-b border-black/6 px-5 py-3 sm:px-6">
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/20 bg-white/70 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:bg-white"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Home
-                </Link>
-              </div>
-            ) : null}
-            <div className="relative flex flex-col gap-5 px-5 py-4 sm:px-6">
-              {/* Top row: brand identity + primary action */}
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[1.3rem] bg-[color:var(--accent)]/16 text-[color:var(--primary)]">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Badge>{snapshot.site.brandName}</Badge>
-                      <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                        <CalendarDays className="h-3.5 w-3.5" />
-                        {formatDate(snapshot.site.weddingDate)}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-display text-3xl leading-none text-[color:var(--text)] sm:text-4xl">
-                        {snapshot.site.coupleNames}
-                      </p>
-                      <p className="mt-2 inline-flex items-center gap-2 text-sm text-[color:var(--muted)]">
-                        <MapPin className="h-4 w-4" />
-                        {snapshot.site.locationSummary ?? "A beautifully planned celebration awaits."}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-3">
-                  <div className="hidden rounded-full border border-[color:var(--accent)]/18 bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
-                    {formatEnumLabel(snapshot.publish.visibility, "PUBLIC")}
-                  </div>
-                  <Button asChild size="sm">
-                    <Link href={`/${snapshot.site.slug}/rsvp` as Route}>Reply to Invite</Link>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Nav row: full width so all sections show. The pill rail centers
-                  on desktop and swipe-scrolls on mobile with the scrollbar
-                  hidden (no cramped middle slot, no outdated scrollbar). */}
-              <nav aria-label="Wedding site sections" className="no-scrollbar overflow-x-auto">
-                <div className="flex min-w-max justify-center">
-                  <div className={cn("flex items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
-                    {visibleNavItems.map((item) => {
-                      const href = `/${snapshot.site.slug}${item.href}` as Route;
-                      const active = activeHref === href || (item.href === "" && activeHref === `/${snapshot.site.slug}`);
-
-                      return (
-                        <Link
-                          key={item.href || "home"}
-                          href={href}
-                          className={cn(
-                            "inline-flex items-center gap-2",
-                            getNavLinkClasses(active, template.navigationVariant),
-                          )}
-                        >
-                          {item.label}
-                          <LinkPendingSpinner />
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SiteHeader
+        templateKey={template.key}
+        brandName={snapshot.site.brandName}
+        coupleNames={snapshot.site.coupleNames}
+        weddingDate={snapshot.site.weddingDate}
+        locationSummary={snapshot.site.locationSummary ?? null}
+        slug={snapshot.site.slug}
+        visibility={snapshot.publish.visibility}
+        visibleNavItems={visibleNavItems}
+        activeHref={activeHref}
+        showBackToPlatformHome={showBackToPlatformHome}
+        isDark={isDark}
+      />
 
       <div className="relative z-10 pb-24">{children}</div>
       {snapshot.ownerPreview ? (
