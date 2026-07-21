@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 
+import { siteUrl } from "@/lib/constants";
+
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.APP_URL ?? "https://wed.tonewbeginning.com";
+  const base = siteUrl;
   return {
     rules: [
       {

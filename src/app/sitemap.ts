@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 
+import { siteUrl } from "@/lib/constants";
 import { prisma } from "@/server/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.APP_URL ?? "https://wed.tonewbeginning.com";
+  const base = siteUrl;
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
