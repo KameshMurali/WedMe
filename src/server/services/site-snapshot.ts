@@ -417,7 +417,10 @@ const loadPublishedSiteSnapshot = cache(async (slug: string) => {
 });
 
 export async function getPublishedSiteSnapshot(slug: string) {
-  return loadPublishedSiteSnapshot(slug);
+  // Normalize casing so /KAMMON resolves the same published site as /kammon
+  // (slugs are stored lowercase). Normalizing here also dedups the request
+  // cache across casings and feeds the demo-slug fallbacks a canonical value.
+  return loadPublishedSiteSnapshot(slug.trim().toLowerCase());
 }
 
 const loadDraftSiteSnapshotForUser = cache(async (userId: string) => {
@@ -484,7 +487,7 @@ const loadPublicSiteStatus = cache(async (slug: string): Promise<PublicSiteStatu
 });
 
 export async function getPublicSiteStatus(slug: string) {
-  return loadPublicSiteStatus(slug);
+  return loadPublicSiteStatus(slug.trim().toLowerCase());
 }
 
 export function buildPublishSnapshot(record: WeddingSiteRecord) {

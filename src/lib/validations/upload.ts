@@ -56,7 +56,10 @@ export const uploadTokenPayloadSchema = z.discriminatedUnion("scope", [
   }),
   z.object({
     scope: z.literal("guest"),
-    slug: z.string().min(3, "A wedding slug is required for guest uploads."),
+    slug: z
+      .string()
+      .min(3, "A wedding slug is required for guest uploads.")
+      .transform((value) => value.trim().toLowerCase()),
   }),
 ]);
 

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/server/prisma";
 
 const analyticsSchema = z.object({
-  slug: z.string().min(3),
+  slug: z.string().min(3).transform((value) => value.trim().toLowerCase()),
   type: z.enum(["PAGE_VIEW", "CTA_CLICK", "RSVP_SUBMITTED", "MESSAGE_SUBMITTED", "UPLOAD_SUBMITTED"]),
   path: z.string().optional(),
   metadata: z.unknown().optional(),
