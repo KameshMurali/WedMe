@@ -533,22 +533,38 @@ export function TemplateCustomizer({
             Templates apply the moment you pick one — this saves your color &amp; typography tweaks.
           </span>
         </p>
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Save theme changes"}
+        <Button type="submit" disabled={isPending} className="min-w-[184px]">
+          {isPending ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
+              Saving…
+            </>
+          ) : (
+            "Save theme changes"
+          )}
         </Button>
       </div>
 
       {/* Floating unsaved-changes bar. The template itself now applies on click;
           this only appears for color/typography edits, which still need an
-          explicit save. */}
-      {isDirty && !isPending ? (
+          explicit save. Stays mounted through the save (disabled + "Saving…")
+          instead of unmounting the instant it's tapped, so the button doesn't
+          vanish out from under the user's finger. */}
+      {isDirty ? (
         <div className="fixed inset-x-4 bottom-4 z-40 sm:inset-x-auto sm:right-8 sm:w-96">
           <div className="flex items-center justify-between gap-3 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-[0_16px_48px_rgba(43,26,24,0.18)]">
             <p className="text-sm font-medium text-amber-950">
-              Unsaved color changes. Save to apply.
+              {isPending ? "Saving your changes…" : "Unsaved color changes. Save to apply."}
             </p>
-            <Button type="submit" size="sm">
-              Save now
+            <Button type="submit" size="sm" disabled={isPending} className="min-w-[104px]">
+              {isPending ? (
+                <>
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
+                  Saving…
+                </>
+              ) : (
+                "Save now"
+              )}
             </Button>
           </div>
         </div>
