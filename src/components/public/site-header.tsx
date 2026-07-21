@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
@@ -85,6 +85,19 @@ export function SiteHeader({
   isDark: boolean;
 }) {
   const template = findTemplateByKey(templateKey);
+
+  // Keep the active section's pill centered in the swipe-scrolled nav rail so
+  // guests always land on where they are (and see there's more to scroll),
+  // instead of a random slice of the tail. Mirrors the dashboard mobile nav.
+  const pillRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  useEffect(() => {
+    if (!activeHref) return;
+    pillRefs.current[activeHref]?.scrollIntoView({
+      inline: "center",
+      block: "nearest",
+      behavior: "auto",
+    });
+  }, [activeHref]);
 
   // On mobile the full header is tall; once the guest scrolls past it we
   // collapse to a slim pinned bar (compact name + nav) so it stops covering
@@ -171,7 +184,10 @@ export function SiteHeader({
             {/* Nav row: full width so all sections show. Centered on desktop,
                 swipe-scrolls on mobile with the scrollbar hidden. Visible in
                 both the full and collapsed states. */}
-            <nav aria-label="Wedding site sections" className="no-scrollbar overflow-x-auto">
+            <nav
+              aria-label="Wedding site sections"
+              className="no-scrollbar overflow-x-auto px-1 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] [-webkit-mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]"
+            >
               <div className="flex min-w-max justify-center">
                 <div className={cn("flex items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
                   {visibleNavItems.map((item) => {
@@ -181,6 +197,9 @@ export function SiteHeader({
                     return (
                       <Link
                         key={item.href || "home"}
+                        ref={(el) => {
+                          pillRefs.current[href] = el;
+                        }}
                         href={href}
                         className={cn("inline-flex items-center gap-2", getNavLinkClasses(active, template.navigationVariant))}
                       >
