@@ -600,16 +600,20 @@ async function ensureWeddingSiteIdForUser(userId: string) {
 }
 
 export async function getWeddingSiteBySlug(slug: string) {
+  // Slugs are always stored lowercase (see slugify()), but guests may open a
+  // shared/typed URL with different casing (e.g. /KAMMON). Normalize so the
+  // lookup is case-insensitive instead of dead-ending on a 404.
+  const normalizedSlug = slug.trim().toLowerCase();
   try {
     const site = await prisma.weddingSite.findUnique({
-      where: { slug },
+      where: { slug: normalizedSlug },
       include: publicWeddingSiteInclude,
     });
 
-    return site ?? (isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as PublicWeddingSiteRecord) : null);
+    return site ?? (isDemoSiteSlug(normalizedSlug) ? (demoDashboardSite as unknown as PublicWeddingSiteRecord) : null);
   } catch (error) {
     console.error("getWeddingSiteBySlug failed", error);
-    return isDemoSiteSlug(slug) ? (demoDashboardSite as unknown as PublicWeddingSiteRecord) : null;
+    return isDemoSiteSlug(normalizedSlug) ? (demoDashboardSite as unknown as PublicWeddingSiteRecord) : null;
   }
 }
 

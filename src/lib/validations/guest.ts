@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const guestMessageSchema = z.object({
-  slug: z.string().min(3),
+  slug: z.string().min(3).transform((value) => value.trim().toLowerCase()),
   authorName: z.string().min(2).max(100),
   email: z.string().email().optional().or(z.literal("")),
   message: z.string().min(10).max(500),
@@ -10,7 +10,7 @@ export const guestMessageSchema = z.object({
 });
 
 export const guestUploadSchema = z.object({
-  slug: z.string().min(3),
+  slug: z.string().min(3).transform((value) => value.trim().toLowerCase()),
   submitterName: z.string().min(2).max(100),
   caption: z.string().max(180).optional().or(z.literal("")),
   message: z.string().max(280).optional().or(z.literal("")),
