@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -98,6 +98,29 @@ function normalizeToHex(raw: string): string {
   }
 }
 
+// The six theme fields that hold CSS colors — normalized to hex before they
+// reach the server action (rgb()/hsl()/named colors get converted first).
+const colorFieldNames = new Set<string>([
+  "primaryColor",
+  "accentColor",
+  "backgroundColor",
+  "surfaceColor",
+  "textColor",
+  "mutedColor",
+]);
+
+// Serialize the full template+theme form into FormData for
+// updateTemplateThemeAction, normalizing color fields on the way out. Shared by
+// the apply-on-click path and the explicit "Save" (color/typography) path.
+function buildTemplateFormData(values: TemplateValues) {
+  const formData = new FormData();
+  Object.entries(values).forEach(([key, value]) => {
+    const normalized = colorFieldNames.has(key) ? normalizeToHex(String(value)) : String(value);
+    formData.append(key, normalized);
+  });
+  return formData;
+}
+
 const buttonVariantLabels: Record<string, string> = {
   solid: "Solid button",
   soft: "Soft button",
@@ -176,6 +199,9 @@ export function TemplateCustomizer({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  // The template card currently being persisted (null when idle). Drives the
+  // per-card "Applying…" state and blocks other card clicks mid-save.
+  const [pendingTemplateKey, setPendingTemplateKey] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -211,10 +237,38 @@ export function TemplateCustomizer({
   const bodyFontKey = watch("bodyFontKey");
   const paletteKey = watch("paletteKey");
 
+  // Picking a template now APPLIES it immediately: we optimistically move the
+  // selection (so the ring/badge/live preview update instantly) and persist the
+  // template + its palette to the draft in the same click, so Preview reflects
+  // it without hunting for a Save button. Color/typography edits keep their own
+  // explicit Save below.
   function applyTemplate(template: TemplateOption) {
-    setValue("templateKey", template.key, { shouldDirty: true });
+    if (pendingTemplateKey) return; // a save is already in flight
+    // Re-clicking the current template with no pending color edits is a no-op,
+    // so browsing/comparing doesn't fire redundant writes.
+    if (template.key === selectedTemplateKey && !isDirty) return;
+
+    const values: TemplateValues = { templateKey: template.key, ...template.themeDefaults };
+
+    // shouldDirty:false — the template itself is being saved right now, so it
+    // must NOT trip the "unsaved changes" bar (that's for later color tweaks).
+    setValue("templateKey", template.key, { shouldDirty: false });
     Object.entries(template.themeDefaults).forEach(([key, value]) => {
-      setValue(key as keyof Omit<TemplateValues, "templateKey">, value, { shouldDirty: true });
+      setValue(key as keyof Omit<TemplateValues, "templateKey">, value, { shouldDirty: false });
+    });
+
+    setPendingTemplateKey(template.key);
+    startTransition(async () => {
+      const result = await updateTemplateThemeAction({}, buildTemplateFormData(values));
+      setPendingTemplateKey(null);
+      if (result.error) {
+        toast.error(result.error);
+        reset(defaultValues); // revert the optimistic selection
+        return;
+      }
+
+      toast.success("Template applied — open Preview to see it");
+      router.refresh();
     });
   }
 
@@ -222,23 +276,15 @@ export function TemplateCustomizer({
     setValue(name, value, { shouldDirty: true, shouldValidate: true });
   }
 
-  const colorFields = new Set<string>(["primaryColor", "accentColor", "backgroundColor", "surfaceColor", "textColor", "mutedColor"]);
-
   const onSubmit = handleSubmit((values) => {
-    const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      const normalized = colorFields.has(key) ? normalizeToHex(String(value)) : String(value);
-      formData.append(key, normalized);
-    });
-
     startTransition(async () => {
-      const result = await updateTemplateThemeAction({}, formData);
+      const result = await updateTemplateThemeAction({}, buildTemplateFormData(values));
       if (result.error) {
         toast.error(result.error);
         return;
       }
 
-      toast.success(result.success ?? "Template updated");
+      toast.success(result.success ?? "Theme updated");
       router.refresh();
     });
   });
@@ -248,22 +294,31 @@ export function TemplateCustomizer({
       <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-3">
         {templates.map((template) => {
           const isSelected = template.key === selectedTemplateKey;
+          const isApplying = pendingTemplateKey === template.key;
+          const disabled = pendingTemplateKey !== null;
 
           return (
             <button
               key={template.key}
               type="button"
               onClick={() => applyTemplate(template)}
-              className="text-left"
+              disabled={disabled}
+              className={cn("text-left", disabled && !isApplying && "opacity-60")}
             >
               <Card
                 className={cn(
-                  "h-full cursor-pointer overflow-hidden p-0 transition duration-200 hover:-translate-y-0.5",
+                  "h-full overflow-hidden p-0 transition duration-200",
+                  disabled ? "cursor-wait" : "cursor-pointer hover:-translate-y-0.5",
                   isSelected && "ring-2 ring-[color:var(--accent)] ring-offset-2 ring-offset-white",
                 )}
               >
                 <div className="relative h-36 w-full" style={{ background: template.previewGradient }}>
-                  {isSelected ? (
+                  {isApplying ? (
+                    <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[color:var(--text)] shadow-sm">
+                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
+                      Applying…
+                    </span>
+                  ) : isSelected ? (
                     <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[color:var(--text)] shadow-sm">
                       <CheckCircle2 className="h-4 w-4 text-[color:var(--accent)]" />
                       Applied
@@ -474,21 +529,23 @@ export function TemplateCustomizer({
         <p className="text-sm text-[color:var(--muted)]">
           Selected template:{" "}
           <span className="font-semibold text-[color:var(--text)]">{selectedTemplate?.name}</span>
+          <span className="ml-2 text-xs text-[color:var(--muted)]">
+            Templates apply the moment you pick one — this saves your color &amp; typography tweaks.
+          </span>
         </p>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Save template settings"}
+          {isPending ? "Saving..." : "Save theme changes"}
         </Button>
       </div>
 
-      {/* Floating unsaved-changes bar. Picking a template only updates local
-          form state — without this, mobile users tap a card, see it highlight,
-          and leave assuming it applied. Surfaces the save action wherever
-          they are on the page. */}
+      {/* Floating unsaved-changes bar. The template itself now applies on click;
+          this only appears for color/typography edits, which still need an
+          explicit save. */}
       {isDirty && !isPending ? (
         <div className="fixed inset-x-4 bottom-4 z-40 sm:inset-x-auto sm:right-8 sm:w-96">
           <div className="flex items-center justify-between gap-3 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-[0_16px_48px_rgba(43,26,24,0.18)]">
             <p className="text-sm font-medium text-amber-950">
-              Unsaved changes. Save to apply.
+              Unsaved color changes. Save to apply.
             </p>
             <Button type="submit" size="sm">
               Save now
