@@ -26,6 +26,13 @@ const environmentSchema = z.object({
   // Comma-separated list of emails granted admin access (waitlist viewer, etc.)
   // without needing a DB role change. e.g. "you@example.com,ops@example.com".
   ADMIN_EMAILS: z.string().optional(),
+  // Google Search Console HTML-tag verification token. When set, the root
+  // layout emits <meta name="google-site-verification">. Optional — leave unset
+  // if verifying via DNS instead. Empty string is treated as unset.
+  GOOGLE_SITE_VERIFICATION: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().optional(),
+  ),
 });
 
 export const env = environmentSchema.parse({
@@ -47,4 +54,5 @@ export const env = environmentSchema.parse({
   EMAIL_DELIVERY_MODE: process.env.EMAIL_DELIVERY_MODE,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+  GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
 });

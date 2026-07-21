@@ -1,3 +1,9 @@
+// Canonical public origin for absolute URLs (metadataBase, canonicals, OG,
+// robots, sitemap). Falls back to the production domain so a missing APP_URL in
+// prod never leaks a `http://localhost:3000` canonical to search engines; dev
+// still honors a localhost APP_URL from .env.local.
+export const siteUrl = process.env.APP_URL ?? "https://wed.tonewbeginning.com";
+
 export const sectionLabels = {
   HERO: "Hero",
   STORY: "Our Story",
