@@ -13,7 +13,11 @@ import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
 
 type NavItem = { href: string; label: string; sectionType?: string };
 
-function getNavLinkClasses(active: boolean, variant: ReturnType<typeof findTemplateByKey>["navigationVariant"]) {
+function getNavLinkClasses(
+  active: boolean,
+  variant: ReturnType<typeof findTemplateByKey>["navigationVariant"],
+  isDark: boolean,
+) {
   if (variant === "underline") {
     return cn(
       "rounded-full px-4 py-2.5 text-sm transition",
@@ -35,7 +39,13 @@ function getNavLinkClasses(active: boolean, variant: ReturnType<typeof findTempl
   return cn(
     "rounded-full px-4 py-2.5 text-sm transition",
     active
-      ? "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-black/5"
+      // The active pill background is solid white in both themes. On dark
+      // templates --text is near-white, so pairing it with a white pill makes
+      // the label invisible (~1:1 contrast) — use the dark --background as ink
+      // there instead so the current section stays readable.
+      ? isDark
+        ? "bg-white text-[color:var(--background)] shadow-sm ring-1 ring-black/5"
+        : "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-black/5"
       : "text-[color:var(--muted)] hover:bg-white/70 hover:text-[color:var(--text)]",
   );
 }
@@ -201,7 +211,7 @@ export function SiteHeader({
                           pillRefs.current[href] = el;
                         }}
                         href={href}
-                        className={cn("inline-flex items-center gap-2", getNavLinkClasses(active, template.navigationVariant))}
+                        className={cn("inline-flex items-center gap-2", getNavLinkClasses(active, template.navigationVariant, isDark))}
                       >
                         {item.label}
                         <LinkPendingSpinner />
