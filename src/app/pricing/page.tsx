@@ -22,7 +22,7 @@ const productSchema = {
   "@type": "Product",
   name: "ToNewBeginning.com Wedding Website Builder",
   description:
-    "A wedding website platform for Indian and South Asian couples with multi-event support, RSVP management, photo galleries, and a polished couple dashboard.",
+    "A multi-event wedding website platform for every celebration — Indian, South Asian, fusion, and Western multi-day weddings — with multi-event support, RSVP management, photo galleries, and a polished couple dashboard.",
   brand: { "@type": "Brand", name: "ToNewBeginning" },
   offers: [
     {
@@ -180,7 +180,7 @@ export default async function PricingPage() {
         />
         <Reassurance
           title="Made with the same care your wedding deserves"
-          body="Designed for South Asian, multi-day, multi-event weddings, and equally happy for two-people elopements."
+          body="Designed for multi-day, multi-event weddings of every kind — Indian, South Asian, fusion, and Western — and equally happy for two-people elopements."
         />
       </div>
 

@@ -31,7 +31,7 @@ const cinzel = Cinzel({
 });
 
 const siteDescription =
-  "ToNewBeginning.com is a wedding website builder for Indian and South Asian couples: multi-event timelines, RSVP management, photo galleries, and a polished guest experience.";
+  "ToNewBeginning.com is a multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings: multi-event timelines, RSVP management, photo galleries, and a polished guest experience.";
 
 export const metadata: Metadata = {
   // Use the shared siteUrl (prod fallback) rather than env.APP_URL, which

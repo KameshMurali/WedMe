@@ -26,14 +26,14 @@ import { getCurrentUser } from "@/server/auth/session";
 import { getWorkspaceShellForUser } from "@/server/repositories/wedding-site";
 
 export const metadata: Metadata = {
-  title: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
+  title: "ToNewBeginning.com · Multi-Event Wedding Website Builder",
   description:
-    "Create a beautiful wedding website for your Indian celebration. ToNewBeginning.com supports multi-day events, Haldi to reception RSVPs, photo galleries, and a calm couple dashboard. Free to start.",
+    "Create a beautiful wedding website for your whole celebration. ToNewBeginning.com supports multi-day events, Haldi to reception RSVPs, photo galleries, and a calm couple dashboard. Free to start.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
+    title: "ToNewBeginning.com · Multi-Event Wedding Website Builder",
     description:
-      "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard. Designed for South Asian weddings.",
+      "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard.",
     url: "https://wed.tonewbeginning.com",
     siteName: "ToNewBeginning.com",
     images: [
@@ -41,16 +41,16 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
+        alt: "ToNewBeginning.com · Multi-Event Wedding Website Builder",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ToNewBeginning.com · Wedding Website Builder for Indian Couples",
+    title: "ToNewBeginning.com · Multi-Event Wedding Website Builder",
     description:
-      "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard. Designed for South Asian weddings.",
+      "Build a cinematic, guest-first wedding website with multi-event timelines, RSVP management, photo galleries, and a polished couple dashboard.",
     images: ["/og-image.png"],
   },
 };
@@ -61,9 +61,10 @@ const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "ToNewBeginning.com",
+  alternateName: ["To New Beginning", "ToNewBeginning", "wed.tonewbeginning", "wed.tonewbeginning.com"],
   url: BASE_URL,
   description:
-    "A wedding website builder for Indian and South Asian couples: multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
+    "A multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings: multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
 };
 
 const softwareSchema = {
@@ -74,7 +75,7 @@ const softwareSchema = {
   operatingSystem: "Web",
   url: BASE_URL,
   description:
-    "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian celebrations with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
+    "ToNewBeginning.com is a multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings — with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
   offers: [
     { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan with up to 2 wedding events and 50 RSVPs." },
     { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan: AI-assisted content drafting, unlimited events and RSVPs." },
@@ -85,10 +86,10 @@ const softwareSchema = {
 const homepageFaqs = [
   {
     q: "What is ToNewBeginning.com?",
-    a: "ToNewBeginning.com is a wedding website builder designed for Indian and South Asian couples. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard, all in one place.",
+    a: "ToNewBeginning.com is a multi-event wedding website builder for couples planning weddings with more than one celebration — Indian, South Asian, fusion, and Western multi-day weddings alike. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard, all in one place.",
   },
   {
-    q: "Does it support Indian weddings with multiple ceremonies?",
+    q: "Does it support weddings with multiple ceremonies?",
     a: "Yes. The platform is built specifically for multi-event celebrations. Each ceremony can have its own date, venue, dress code, timing, and independent RSVP settings. Guests can accept or decline individual events separately.",
   },
   {
@@ -108,12 +109,12 @@ const homepageFaqs = [
     a: "Yes, and it is designed to feel like a real gift. A parent or sibling can purchase Forever and we send a card-style email to the couple, not a billing receipt.",
   },
   {
-    q: "How does RSVP work for large Indian wedding guest lists?",
+    q: "How does RSVP work for large wedding guest lists?",
     a: "RSVPs can be submitted by any guest without an account. Together and Forever plans allow unlimited responses. You can also create invite groups with access codes to restrict who can view private site content.",
   },
   {
-    q: "Is the platform built specifically for Indian weddings?",
-    a: "ToNewBeginning.com is designed with South Asian and Indian weddings as the primary use case: multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
+    q: "Is the platform only for a specific kind of wedding?",
+    a: "ToNewBeginning.com is built for multi-event weddings of every kind — Indian, South Asian, fusion, and Western multi-day celebrations: multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
   },
 ];
 
@@ -135,7 +136,7 @@ const featureHighlights = [
     icon: HeartHandshake,
   },
   {
-    title: "RSVPs that understand Indian weddings",
+    title: "RSVPs that understand multi-event weddings",
     description:
       "Guests reply once and choose exactly the functions they'll attend. You see per-event headcounts, meal preferences, and travel notes in one calm dashboard. No spreadsheets, no chasing.",
     icon: LayoutDashboard,
@@ -251,9 +252,9 @@ export default async function HomePage() {
                 style={{ animationDelay: "240ms" }}
               >
                 Your family is planning five events across three venues, and every guest has the
-                same ten questions. ToNewBeginning gives everyone one gorgeous answer: an Indian
-                wedding website with your story, schedules, dress codes, per-event RSVPs, photos,
-                and wishes, all at one link you can drop in any WhatsApp group.
+                same ten questions. ToNewBeginning gives everyone one gorgeous answer: a website
+                for your whole wedding with your story, schedules, dress codes, per-event RSVPs,
+                photos, and wishes, all at one link you can drop in any WhatsApp group.
               </p>
               {hasWorkspace ? (
                 <div
@@ -318,7 +319,7 @@ export default async function HomePage() {
         <Reveal>
           <SectionHeading
             eyebrow="Why couples pick us"
-            title="Built around how Indian weddings actually work."
+            title="Built around how multi-event weddings actually work."
             description="Most builders assume one event, one day, one guest list. Yours has never worked that way, so we didn't build it that way."
           />
         </Reveal>
@@ -409,7 +410,7 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="Common questions"
           title="Everything couples ask before choosing a wedding website builder."
-          description="Answers to the questions we hear most from couples planning Indian and South Asian weddings."
+          description="Answers to the questions we hear most from couples planning multi-event weddings — Indian, South Asian, fusion, and Western multi-day celebrations alike."
         />
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {homepageFaqs.map(({ q, a }) => (

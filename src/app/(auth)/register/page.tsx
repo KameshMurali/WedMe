@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Create your free wedding website · ToNewBeginning",
-  description: "Create your free Indian wedding website on ToNewBeginning.com. Set up multi-event timelines, RSVP forms, and a photo gallery in minutes. No credit card required.",
+  description: "Create your free wedding website on ToNewBeginning.com. Set up multi-event timelines, RSVP forms, and a photo gallery in minutes. No credit card required.",
   alternates: { canonical: "/register" },
 };
 
