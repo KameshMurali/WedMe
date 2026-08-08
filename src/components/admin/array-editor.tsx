@@ -7,6 +7,8 @@ import { ArrowDown, ArrowUp, CheckCircle2, MapPin, Plus, Trash2, Upload } from "
 import { toast } from "sonner";
 
 import { uploadFileWithSignedUrl } from "@/lib/uploads/client";
+import type { AiDraftKind } from "@/lib/validations/ai";
+import { AiDraftButton } from "@/components/admin/ai-draft-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -36,6 +38,11 @@ type FieldConfig = {
   uploadFolder?: string;
   useSignedUploads?: boolean;
   uploadCategory?: "HERO" | "STORY" | "EVENT_BANNER" | "GALLERY" | "DRESS_CODE";
+  // For textarea: opt into the "Draft with AI" assistant. `contextFromField`
+  // names a sibling field in the same row whose value is sent as context
+  // (e.g. the FAQ question for an answer). Rendered only when the editor's
+  // `aiEnabled` prop is true.
+  aiAssist?: { kind: AiDraftKind; contextFromField?: string };
 };
 
 type ActionResult = { error?: string; success?: string };
@@ -49,6 +56,9 @@ export function ArrayEditor({
   onSave,
   maxItems,
   maxItemsNote,
+  aiEnabled = false,
+  aiRemainingToday = 0,
+  aiRemainingLifetime = null,
 }: {
   title: string;
   description: string;
@@ -60,10 +70,16 @@ export function ArrayEditor({
   // and an upgrade note is shown. The server still enforces this authoritatively.
   maxItems?: number;
   maxItemsNote?: string;
+  // AI drafting: passed from the server page (hidden when no ANTHROPIC_API_KEY).
+  aiEnabled?: boolean;
+  aiRemainingToday?: number;
+  aiRemainingLifetime?: number | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const { control, register, handleSubmit } = useForm<{ items: Array<Record<string, unknown>> }>({
+  const { control, register, handleSubmit, getValues, setValue } = useForm<{
+    items: Array<Record<string, unknown>>;
+  }>({
     defaultValues: { items },
   });
   const { fields: rows, append, remove, move } = useFieldArray({
@@ -149,11 +165,38 @@ export function ArrayEditor({
                 const fieldName = `items.${index}.${field.name}` as const;
 
                 if (field.type === "textarea") {
+                  const aiAssist = field.aiAssist;
+                  // Rendered as a div (not a label): a <button> inside a <label>
+                  // becomes the label's activation target, so clicking the field
+                  // caption would fire the AI draft.
                   return (
-                    <label key={field.name} className="space-y-2 md:col-span-2">
-                      <span className="text-sm text-[color:var(--muted)]">{field.label}</span>
+                    <div key={field.name} className="space-y-2 md:col-span-2">
+                      <span className="flex flex-wrap items-end justify-between gap-2">
+                        <span className="text-sm text-[color:var(--muted)]">{field.label}</span>
+                        {aiEnabled && aiAssist ? (
+                          <AiDraftButton
+                            kind={aiAssist.kind}
+                            getHint={() => String(getValues(fieldName as never) ?? "")}
+                            getContext={() => {
+                              if (!aiAssist.contextFromField) return undefined;
+                              const value = String(
+                                getValues(`items.${index}.${aiAssist.contextFromField}` as never) ?? "",
+                              ).trim();
+                              if (!value) return undefined;
+                              return aiAssist.kind === "faq_answer"
+                                ? { question: value.slice(0, 200) }
+                                : { title: value.slice(0, 160) };
+                            }}
+                            onDraft={(text) =>
+                              setValue(fieldName as never, text as never, { shouldDirty: true })
+                            }
+                            initialRemainingToday={aiRemainingToday}
+                            initialRemainingLifetime={aiRemainingLifetime}
+                          />
+                        ) : null}
+                      </span>
                       <Textarea placeholder={field.placeholder} {...register(fieldName as never)} />
-                    </label>
+                    </div>
                   );
                 }
 

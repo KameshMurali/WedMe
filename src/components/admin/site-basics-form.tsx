@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { updateSiteBasicsAction } from "@/actions/dashboard";
+import { AiDraftButton } from "@/components/admin/ai-draft-button";
 import { SiteAssetUploadField } from "@/components/admin/site-asset-upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,18 +23,27 @@ function Field({
   error,
   children,
   className,
+  action,
 }: {
   label: string;
   error?: string;
   children: React.ReactNode;
   className?: string;
+  // Optional trailing control (e.g. the AI draft button). When present the
+  // wrapper is a div, not a label — a button inside a label becomes the
+  // label's activation target, so caption clicks would trigger it.
+  action?: React.ReactNode;
 }) {
+  const Wrapper = action ? "div" : "label";
   return (
-    <label className={cn("space-y-2", className)}>
-      <span className="text-sm font-medium text-[color:var(--text)]">{label}</span>
+    <Wrapper className={cn("space-y-2", className)}>
+      <span className="flex flex-wrap items-end justify-between gap-2">
+        <span className="text-sm font-medium text-[color:var(--text)]">{label}</span>
+        {action ?? null}
+      </span>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       {children}
-    </label>
+    </Wrapper>
   );
 }
 
@@ -42,11 +52,17 @@ export function SiteBasicsForm({
   useSignedUploads,
   uploadsEnabled,
   disabledReason,
+  aiEnabled = false,
+  aiRemainingToday = 0,
+  aiRemainingLifetime = null,
 }: {
   defaultValues: SiteBasicsValues;
   useSignedUploads: boolean;
   uploadsEnabled: boolean;
   disabledReason?: string | null;
+  aiEnabled?: boolean;
+  aiRemainingToday?: number;
+  aiRemainingLifetime?: number | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -55,6 +71,7 @@ export function SiteBasicsForm({
     register,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     formState: { errors },
   } = useForm<SiteBasicsValues>({
@@ -123,12 +140,44 @@ export function SiteBasicsForm({
         <Textarea aria-invalid={Boolean(errors.headline)} placeholder="Headline" {...register("headline")} />
       </Field>
 
-      <Field label="Subtitle" error={errors.subtitle?.message}>
+      <Field
+        label="Subtitle"
+        error={errors.subtitle?.message}
+        action={
+          aiEnabled ? (
+            <AiDraftButton
+              kind="welcome_hero"
+              getHint={() => String(getValues("subtitle") ?? "")}
+              onDraft={(text) =>
+                setValue("subtitle", text, { shouldDirty: true, shouldValidate: true })
+              }
+              initialRemainingToday={aiRemainingToday}
+              initialRemainingLifetime={aiRemainingLifetime}
+            />
+          ) : undefined
+        }
+      >
         <Textarea aria-invalid={Boolean(errors.subtitle)} placeholder="Subtitle" {...register("subtitle")} />
       </Field>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Tagline" error={errors.tagline?.message}>
+        <Field
+          label="Tagline"
+          error={errors.tagline?.message}
+          action={
+            aiEnabled ? (
+              <AiDraftButton
+                kind="welcome_hero"
+                getHint={() => String(getValues("tagline") ?? "")}
+                onDraft={(text) =>
+                  setValue("tagline", text, { shouldDirty: true, shouldValidate: true })
+                }
+                initialRemainingToday={aiRemainingToday}
+                initialRemainingLifetime={aiRemainingLifetime}
+              />
+            ) : undefined
+          }
+        >
           <Input aria-invalid={Boolean(errors.tagline)} placeholder="Tagline" {...register("tagline")} />
         </Field>
         <Field label="Wedding date" error={errors.weddingDate?.message}>

@@ -4,6 +4,7 @@ import { DashboardUnavailableState } from "@/components/admin/dashboard-unavaila
 import { requireUser } from "@/server/auth/session";
 import { getEventsEditorSiteForUser } from "@/server/repositories/wedding-site";
 import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
+import { getAiDraftAvailability } from "@/server/services/ai/availability";
 import { effectiveEventCap, getEffectivePlanForUser, getPlanLimits } from "@/server/services/plan";
 
 function toDateTimeLocal(date: Date) {
@@ -27,7 +28,10 @@ export default async function DashboardEventsPage() {
   // Plan-driven event cap (null = unlimited), grandfathered to the site's
   // current event count so existing over-limit sites can still edit. Mirrors
   // the server enforcement in replaceEventsAction.
-  const planKey = await getEffectivePlanForUser(user.email, site.id);
+  const [planKey, ai] = await Promise.all([
+    getEffectivePlanForUser(user.email, site.id),
+    getAiDraftAvailability(user),
+  ]);
   const baseEventLimit = getPlanLimits(planKey).maxEvents;
   const eventLimit = effectiveEventCap(planKey, site.events.length);
 
@@ -79,7 +83,12 @@ export default async function DashboardEventsPage() {
         fields={[
           { name: "title", label: "Title", type: "text" },
           { name: "subtitle", label: "Subtitle", type: "text" },
-          { name: "description", label: "Description", type: "textarea" },
+          {
+            name: "description",
+            label: "Description",
+            type: "textarea",
+            aiAssist: { kind: "event_description", contextFromField: "title" },
+          },
           { name: "startDateTime", label: "Starts", type: "datetime-local" },
           { name: "endDateTime", label: "Ends", type: "datetime-local", minFromField: "startDateTime" },
           { name: "dayLabel", label: "Day label", type: "text" },
@@ -116,6 +125,9 @@ export default async function DashboardEventsPage() {
           { name: "rsvpRequired", label: "RSVP required", type: "checkbox" },
         ]}
         onSave={replaceEventsAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
         maxItems={eventLimit ?? undefined}
         maxItemsNote={
           eventLimit

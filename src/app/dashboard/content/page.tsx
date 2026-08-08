@@ -12,6 +12,7 @@ import { AdminMediaUploader } from "@/components/admin/media-uploader";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
 import { getContentEditorSiteForUser } from "@/server/repositories/wedding-site";
+import { getAiDraftAvailability } from "@/server/services/ai/availability";
 import {
   directBlobUploadsEnabled,
   storageUploadsConfigurationMessage,
@@ -20,7 +21,10 @@ import {
 
 export default async function DashboardContentPage() {
   const user = await requireUser();
-  const site = await getContentEditorSiteForUser(user.id);
+  const [site, ai] = await Promise.all([
+    getContentEditorSiteForUser(user.id),
+    getAiDraftAvailability(user),
+  ]);
   if (!site) {
     return (
       <DashboardUnavailableState
@@ -64,10 +68,18 @@ export default async function DashboardContentPage() {
           { name: "title", label: "Title", type: "text" },
           { name: "shortLabel", label: "Short label", type: "text" },
           { name: "eventDateLabel", label: "Date label", type: "text" },
-          { name: "description", label: "Description", type: "textarea" },
+          {
+            name: "description",
+            label: "Description",
+            type: "textarea",
+            aiAssist: { kind: "story_milestone", contextFromField: "title" },
+          },
           { name: "imageUrl", label: "Image URL", type: "url" },
         ]}
         onSave={replaceStoryMilestonesAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="Tidbits"
@@ -82,10 +94,18 @@ export default async function DashboardContentPage() {
         fields={[
           { name: "title", label: "Title", type: "text" },
           { name: "category", label: "Category", type: "text" },
-          { name: "body", label: "Body", type: "textarea" },
+          {
+            name: "body",
+            label: "Body",
+            type: "textarea",
+            aiAssist: { kind: "tidbit", contextFromField: "title" },
+          },
           { name: "iconKey", label: "Icon key", type: "text" },
         ]}
         onSave={replaceTidbitsAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="FAQs"
@@ -99,9 +119,17 @@ export default async function DashboardContentPage() {
         fields={[
           { name: "question", label: "Question", type: "text" },
           { name: "category", label: "Category", type: "text" },
-          { name: "answer", label: "Answer", type: "textarea" },
+          {
+            name: "answer",
+            label: "Answer",
+            type: "textarea",
+            aiAssist: { kind: "faq_answer", contextFromField: "question" },
+          },
         ]}
         onSave={replaceFaqItemsAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="Guest experience"
@@ -167,11 +195,19 @@ export default async function DashboardContentPage() {
             ),
           },
           { name: "title", label: "Title", type: "text" },
-          { name: "guidance", label: "Guidance", type: "textarea" },
+          {
+            name: "guidance",
+            label: "Guidance",
+            type: "textarea",
+            aiAssist: { kind: "dress_code", contextFromField: "title" },
+          },
           { name: "inspirationImage", label: "Inspiration image URL", type: "url" },
           { name: "palette", label: "Palette colors (comma separated)", type: "array-text" },
         ]}
         onSave={replaceDressCodesAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="Embedded videos"

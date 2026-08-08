@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { getPublishBlockers } from "@/lib/readiness";
 import { requireUser } from "@/server/auth/session";
 import { getReadinessInputForUser, getSettingsSiteForUser } from "@/server/repositories/wedding-site";
+import { getAiDraftAvailability } from "@/server/services/ai/availability";
 import {
   directBlobUploadsEnabled,
   storageUploadsConfigurationMessage,
@@ -13,9 +14,10 @@ import {
 
 export default async function DashboardSettingsPage() {
   const user = await requireUser();
-  const [site, readinessInput] = await Promise.all([
+  const [site, readinessInput, ai] = await Promise.all([
     getSettingsSiteForUser(user.id),
     getReadinessInputForUser(user.id),
+    getAiDraftAvailability(user),
   ]);
   const publishBlockers = readinessInput ? getPublishBlockers(readinessInput) : [];
   if (!site || !site.publishSettings) {
@@ -56,6 +58,9 @@ export default async function DashboardSettingsPage() {
           useSignedUploads={directBlobUploadsEnabled}
           uploadsEnabled={storageUploadsConfigured}
           disabledReason={storageUploadsConfigurationMessage}
+          aiEnabled={ai.enabled}
+          aiRemainingToday={ai.remainingToday}
+          aiRemainingLifetime={ai.remainingLifetime}
         />
       </Card>
       <Card>

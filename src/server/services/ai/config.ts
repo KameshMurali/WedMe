@@ -9,6 +9,14 @@ import { env } from "@/lib/env";
 // a friendly error — nothing ever throws at import time.
 export const aiDraftingEnabled = Boolean(env.ANTHROPIC_API_KEY);
 
+// Burst abuse guard (per user, per minute) — deliberately hardcoded; the
+// owner-tunable knob is the daily cap (env.AI_DRAFT_DAILY_LIMIT).
+export const AI_DRAFT_BURST_LIMIT = 8;
+export const AI_DRAFT_BURST_WINDOW_MS = 60_000;
+export const AI_DRAFT_DAILY_WINDOW_MS = 86_400_000;
+export const AI_DRAFT_DAILY_ACTION = "ai_draft_daily";
+export const AI_DRAFT_BURST_ACTION = "ai_draft_burst";
+
 // Lazily instantiate the client (mirrors the getResend() pattern in
 // email.ts) so a missing key never breaks module import in dev.
 let anthropicClient: Anthropic | null = null;
