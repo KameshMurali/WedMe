@@ -33,6 +33,23 @@ const environmentSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.string().optional(),
   ),
+  // AI drafting (Together/Forever). All optional with safe defaults so a
+  // missing or blank value can never fail the parse and brick a deploy —
+  // no ANTHROPIC_API_KEY simply hides the AI buttons.
+  ANTHROPIC_API_KEY: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().optional(),
+  ),
+  AI_DRAFT_MODEL: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().default("claude-haiku-4-5"),
+  ),
+  // Per-user daily cap on AI draft attempts (paid abuse guard + free-tier
+  // daily ceiling). Owner-tunable without a deploy.
+  AI_DRAFT_DAILY_LIMIT: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.coerce.number().int().positive().default(20),
+  ),
 });
 
 export const env = environmentSchema.parse({
@@ -55,4 +72,7 @@ export const env = environmentSchema.parse({
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS,
   GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  AI_DRAFT_MODEL: process.env.AI_DRAFT_MODEL,
+  AI_DRAFT_DAILY_LIMIT: process.env.AI_DRAFT_DAILY_LIMIT,
 });

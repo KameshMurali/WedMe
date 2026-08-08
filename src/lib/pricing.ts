@@ -71,12 +71,16 @@ export type Plan = {
 export type PlanLimits = {
   maxEvents: number | null;
   maxRsvps: number | null;
+  maxRegistryLinks: number | null;
+  // Lifetime free-tier AI drafting teaser (persistent Couple.aiDraftCount).
+  // Paid tiers are "unlimited" behind invisible abuse caps (burst + daily).
+  aiLifetimeDrafts: number | null;
 };
 
 export const planLimits: Record<PlanKey, PlanLimits> = {
-  hello: { maxEvents: 2, maxRsvps: 50 },
-  together: { maxEvents: null, maxRsvps: null },
-  forever: { maxEvents: null, maxRsvps: null },
+  hello: { maxEvents: 2, maxRsvps: 50, maxRegistryLinks: 4, aiLifetimeDrafts: 10 },
+  together: { maxEvents: null, maxRsvps: null, maxRegistryLinks: null, aiLifetimeDrafts: null },
+  forever: { maxEvents: null, maxRsvps: null, maxRegistryLinks: null, aiLifetimeDrafts: null },
 };
 
 export const plans: Plan[] = [

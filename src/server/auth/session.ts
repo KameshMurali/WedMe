@@ -108,16 +108,20 @@ export async function requireUser() {
 
 // Admin = DB role ADMIN, or email present in the ADMIN_EMAILS allowlist.
 // The allowlist lets you grant access via an env var without a DB write.
+export function isAdminEmail(email: string): boolean {
+  const allow = (env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  return allow.includes(email.trim().toLowerCase());
+}
+
 export function isAdminUser(
   user: { role: UserRole; email: string } | null | undefined,
 ): boolean {
   if (!user) return false;
   if (user.role === "ADMIN") return true;
-  const allow = (env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-  return allow.includes(user.email.toLowerCase());
+  return isAdminEmail(user.email);
 }
 
 export async function requireAdmin() {

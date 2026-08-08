@@ -24,7 +24,7 @@ import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getEditableWeddingSiteForUser, getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
-import { effectiveEventCap, getPlanLimits, getWorkspacePlanKey } from "@/server/services/plan";
+import { effectiveEventCap, getEffectivePlanForUser, getPlanLimits } from "@/server/services/plan";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
 import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
@@ -203,6 +203,26 @@ export async function updatePublishSettingsAction(
     return { error: parsed.error.issues[0]?.message ?? "Please review the publish settings." };
   }
 
+  // Password protection + invite codes are a paid (Together/Forever) promise.
+  // Only gate the *change into* a protected visibility — a site whose stored
+  // visibility is already protected keeps working (grandfathered) so a plan
+  // expiry never bricks an existing settings save.
+  if (parsed.data.visibility !== "PUBLIC") {
+    const [planKey, currentSettings] = await Promise.all([
+      getEffectivePlanForUser(user.email, site.id),
+      prisma.publishSettings.findUnique({
+        where: { weddingSiteId: site.id },
+        select: { visibility: true },
+      }),
+    ]);
+    if (planKey === "hello" && currentSettings?.visibility !== parsed.data.visibility) {
+      return {
+        error:
+          "Password protection and invite-only access are part of the Together plan. Upgrade to protect your site.",
+      };
+    }
+  }
+
   await prisma.publishSettings.update({
     where: { weddingSiteId: site.id },
     data: {
@@ -374,7 +394,7 @@ export async function replaceEventsAction(
     // Enforce the plan's event quota (authoritative — the UI guard is
     // convenience only). Grandfathered: sites already over the limit keep
     // their current count and can edit/reduce, but can't add beyond it.
-    const planKey = getWorkspacePlanKey();
+    const planKey = await getEffectivePlanForUser(user.email, site.id);
     const currentCount = await prisma.event.count({ where: { weddingSiteId: site.id } });
     const cap = effectiveEventCap(planKey, currentCount);
     if (cap !== null && items.length > cap) {

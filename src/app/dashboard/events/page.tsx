@@ -4,7 +4,7 @@ import { DashboardUnavailableState } from "@/components/admin/dashboard-unavaila
 import { requireUser } from "@/server/auth/session";
 import { getEventsEditorSiteForUser } from "@/server/repositories/wedding-site";
 import { directBlobUploadsEnabled } from "@/server/storage/upload-config";
-import { effectiveEventCap, getPlanLimits, getWorkspacePlanKey } from "@/server/services/plan";
+import { effectiveEventCap, getEffectivePlanForUser, getPlanLimits } from "@/server/services/plan";
 
 function toDateTimeLocal(date: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -27,7 +27,7 @@ export default async function DashboardEventsPage() {
   // Plan-driven event cap (null = unlimited), grandfathered to the site's
   // current event count so existing over-limit sites can still edit. Mirrors
   // the server enforcement in replaceEventsAction.
-  const planKey = getWorkspacePlanKey();
+  const planKey = await getEffectivePlanForUser(user.email, site.id);
   const baseEventLimit = getPlanLimits(planKey).maxEvents;
   const eventLimit = effectiveEventCap(planKey, site.events.length);
 

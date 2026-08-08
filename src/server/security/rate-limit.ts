@@ -14,6 +14,10 @@ export type RateLimitConfig = {
   limit: number;
   windowMs: number;
   keyParts?: Array<string | number | null | undefined>;
+  // When true the bucket key is derived from keyParts ONLY (no IP/UA mixing),
+  // so a limit stays stable for a user across devices and networks. Use for
+  // per-account quotas (e.g. the AI daily cap); leave off for abuse buckets.
+  keyByPartsOnly?: boolean;
 };
 
 export type RateLimitResult = {
@@ -33,14 +37,26 @@ function hashIdentifier(input: string) {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
-function buildKey(source: HeaderSource, keyParts: RateLimitConfig["keyParts"]) {
-  const parts = [
-    getClientIp(source),
-    getRequestUserAgent(source),
-    ...(keyParts ?? []).map((part) => String(part ?? "").trim().toLowerCase()),
-  ].filter(Boolean);
+function normalizeKeyParts(keyParts: RateLimitConfig["keyParts"]) {
+  return (keyParts ?? []).map((part) => String(part ?? "").trim().toLowerCase());
+}
+
+function buildKey(
+  source: HeaderSource,
+  keyParts: RateLimitConfig["keyParts"],
+  keyByPartsOnly?: boolean,
+) {
+  const parts = (
+    keyByPartsOnly
+      ? normalizeKeyParts(keyParts)
+      : [getClientIp(source), getRequestUserAgent(source), ...normalizeKeyParts(keyParts)]
+  ).filter(Boolean);
 
   return hashIdentifier(parts.join(":"));
+}
+
+function buildPartsOnlyKey(keyParts: RateLimitConfig["keyParts"]) {
+  return hashIdentifier(normalizeKeyParts(keyParts).filter(Boolean).join(":"));
 }
 
 function getWindowStart(now: Date, windowMs: number) {
@@ -84,6 +100,7 @@ export async function consumeRateLimit({
   limit,
   windowMs,
   keyParts,
+  keyByPartsOnly,
 }: RateLimitConfig): Promise<RateLimitResult> {
   try {
     await ensureRateLimitTable();
@@ -92,7 +109,7 @@ export async function consumeRateLimit({
     const windowStart = getWindowStart(now, windowMs);
     const windowEnd = new Date(windowStart.getTime() + windowMs);
     const expiresAt = new Date(windowEnd.getTime() + windowMs);
-    const keyHash = buildKey(source, keyParts);
+    const keyHash = buildKey(source, keyParts, keyByPartsOnly);
 
     const [bucket] = await prisma.$queryRawUnsafe<RateLimitRow[]>(
       `
@@ -128,6 +145,64 @@ export async function consumeRateLimit({
     };
   } catch (error) {
     console.error("consumeRateLimit failed; allowing request", { action, error });
+
+    return {
+      ok: true,
+      limit,
+      remaining: limit,
+      retryAfterSeconds: 0,
+    };
+  }
+}
+
+export type RateLimitPeekConfig = {
+  action: string;
+  limit: number;
+  windowMs: number;
+  // Peek keys are always derived from keyParts only (no request headers), so a
+  // peek can run from a server component without a Request and still match a
+  // consume call made with `keyByPartsOnly: true` and identical keyParts.
+  keyParts: Array<string | number | null | undefined>;
+};
+
+// Non-consuming read of a parts-only bucket: how many attempts remain in the
+// current window WITHOUT spending one. Used to render "You can attempt N more
+// times today" in the dashboard. Fails open (full remaining) on DB error,
+// consistent with consumeRateLimit.
+export async function peekRateLimit({
+  action,
+  limit,
+  windowMs,
+  keyParts,
+}: RateLimitPeekConfig): Promise<RateLimitResult> {
+  try {
+    await ensureRateLimitTable();
+
+    const now = new Date();
+    const windowStart = getWindowStart(now, windowMs);
+    const windowEnd = new Date(windowStart.getTime() + windowMs);
+    const keyHash = buildPartsOnlyKey(keyParts);
+
+    const [bucket] = await prisma.$queryRawUnsafe<RateLimitRow[]>(
+      `
+        SELECT "count" FROM "RateLimitBucket"
+        WHERE "action" = $1 AND "keyHash" = $2 AND "windowStart" = $3
+        LIMIT 1;
+      `,
+      action,
+      keyHash,
+      windowStart,
+    );
+
+    const count = bucket?.count ?? 0;
+    return {
+      ok: count < limit,
+      limit,
+      remaining: Math.max(0, limit - count),
+      retryAfterSeconds: Math.max(1, Math.ceil((windowEnd.getTime() - now.getTime()) / 1000)),
+    };
+  } catch (error) {
+    console.error("peekRateLimit failed; reporting full allowance", { action, error });
 
     return {
       ok: true,
