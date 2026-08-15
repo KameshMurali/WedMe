@@ -42,7 +42,7 @@ const environmentSchema = z.object({
   ),
   AI_DRAFT_MODEL: z.preprocess(
     (value) => (value === "" ? undefined : value),
-    z.string().default("claude-haiku-4-5"),
+    z.string().default("claude-haiku-4-5-20251001"),
   ),
   // Per-user daily cap on AI draft attempts (paid abuse guard + free-tier
   // daily ceiling). Owner-tunable without a deploy.
