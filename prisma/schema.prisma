@@ -567,6 +567,23 @@ model RateLimitBucket {
 // Founding-couple waitlist: captures interest in paid plans before Checkout
 // goes live. One row per (email, plan) so the same person can register
 // interest in multiple tiers without duplicate spam.
+// Every Paddle webhook we accept, stored before it is acted on. The unique
+// paddleEventId is the idempotency key: Paddle retries on any non-2xx, and a
+// replayed event must never grant a plan twice. Payload is kept verbatim for
+// reconciliation and support.
+model PaymentEvent {
+  id            String   @id @default(cuid())
+  paddleEventId String   @unique
+  eventType     String
+  status        String   @default("received") // "received" | "applied" | "unmapped" | "ignored"
+  userId        String?
+  planKey       String?
+  payload       Json
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model WaitlistSignup {
   id        String   @id @default(cuid())
   email     String

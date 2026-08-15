@@ -164,6 +164,7 @@ export default async function PricingPage() {
             currency={currency}
             registerHref={registerHref}
             emphasis={plan.key === "together"}
+            user={user ? { id: user.id, email: user.email } : null}
           />
         ))}
       </div>

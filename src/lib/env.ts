@@ -50,6 +50,21 @@ const environmentSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.coerce.number().int().positive().default(20),
   ),
+  // Paddle (Merchant of Record) checkout. Server-only secrets; the public
+  // client token and price IDs are read straight from process.env.NEXT_PUBLIC_*
+  // in src/lib/pricing.ts, which is imported by client components.
+  // All optional: with nothing configured, checkoutEnabled stays false and the
+  // pricing page keeps showing the waitlist capture.
+  PADDLE_API_KEY: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().optional(),
+  ),
+  // Signing secret for webhook signature verification. Without it the webhook
+  // rejects every request rather than trusting unverified payloads.
+  PADDLE_WEBHOOK_SECRET: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().optional(),
+  ),
 });
 
 export const env = environmentSchema.parse({
@@ -75,4 +90,6 @@ export const env = environmentSchema.parse({
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   AI_DRAFT_MODEL: process.env.AI_DRAFT_MODEL,
   AI_DRAFT_DAILY_LIMIT: process.env.AI_DRAFT_DAILY_LIMIT,
+  PADDLE_API_KEY: process.env.PADDLE_API_KEY,
+  PADDLE_WEBHOOK_SECRET: process.env.PADDLE_WEBHOOK_SECRET,
 });

@@ -9,11 +9,30 @@ export type CurrencyCode = "INR" | "USD" | "GBP" | "EUR" | "AED";
 // geo.ts depends on next/headers and can't enter the client bundle.
 export const CURRENCY_COOKIE_NAME = "tnb-currency";
 
-// Master switch for monetization rollout.
-//   false → paid tiers show a "Notify me — founding-couple pricing" waitlist
-//           capture (validate demand before payments exist).
-//   true  → paid tiers link to real Checkout (flip this when Stripe is wired).
-export const checkoutEnabled = false;
+// Paddle checkout configuration. Only NEXT_PUBLIC_* values may live in this
+// module — it is imported by client components, so server secrets must never
+// be referenced here (PADDLE_API_KEY / PADDLE_WEBHOOK_SECRET stay in env.ts).
+export const paddleConfig = {
+  clientToken: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ?? "",
+  environment: process.env.NEXT_PUBLIC_PADDLE_ENV === "production" ? "production" : "sandbox",
+  priceIds: {
+    together: process.env.NEXT_PUBLIC_PADDLE_PRICE_TOGETHER ?? "",
+    forever: process.env.NEXT_PUBLIC_PADDLE_PRICE_FOREVER ?? "",
+  } as Record<string, string>,
+  // Paddle discount applied at checkout while the launch offer is running.
+  // Without this the struck-through price would be a lie — see applyLaunchOffer.
+  launchDiscountId: process.env.NEXT_PUBLIC_PADDLE_DISCOUNT_LAUNCH ?? "",
+};
+
+// Master switch for monetization rollout — DERIVED, not hand-flipped.
+//   unconfigured → paid tiers show the "Notify me — founding-couple pricing"
+//                  waitlist capture (validate demand before payments exist).
+//   configured   → paid tiers open real Paddle checkout.
+// Deriving it means checkout turns on by setting Vercel env vars, and a
+// half-configured deploy can never take money it can't fulfil.
+export const checkoutEnabled = Boolean(
+  paddleConfig.clientToken && paddleConfig.priceIds.together && paddleConfig.priceIds.forever,
+);
 
 export type PriceAmount = {
   amount: number; // integer in MAJOR units (we don't need cents for these prices)
@@ -166,8 +185,9 @@ export function findPlan(key: PlanKey) {
 // Launch offer: real, date-bounded. When the window closes, the badge and
 // discount disappear automatically — no manual cleanup needed.
 export const launchOffer = {
-  // Bump this date when you re-launch a promo.
-  endsAt: new Date("2026-07-31T23:59:59Z"),
+  // Bump this date when you re-launch a promo. Re-opened for the paid launch;
+  // the matching Paddle discount must be live or the strike-through misleads.
+  endsAt: new Date("2026-09-30T23:59:59Z"),
   label: "Launch offer",
   blurb: "First 100 couples: 30% off Forever",
 };
