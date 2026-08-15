@@ -118,6 +118,17 @@ model Couple {
   brandName       String
   storyBlurb      String?
   weddingDate     DateTime?
+  // Plan entitlements. Stored as a String (not a Prisma enum) so
+  // src/lib/pricing.ts `PlanKey` stays the single source of truth and adding a
+  // tier never requires a DB enum migration. Unknown/expired values resolve to
+  // "hello" in src/server/services/plan.ts.
+  planKey         String      @default("hello") // "hello" | "together" | "forever"
+  planActivatedAt DateTime?
+  planExpiresAt   DateTime? // null = never expires (hello, forever)
+  planSource      String? // "admin_grant" | "founding_offer" | "stripe" (future)
+  // Lifetime counter backing the free-tier AI drafting teaser. Persistent on
+  // purpose — RateLimitBucket rows expire, so they can't hold a lifetime quota.
+  aiDraftCount    Int         @default(0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   primaryUser     User        @relation("PrimaryOwner", fields: [primaryUserId], references: [id], onDelete: Cascade)
@@ -171,6 +182,7 @@ model WeddingSite {
   dressCodeGuides  DressCodeGuide[]
   mediaAssets      MediaAsset[]
   embeddedVideos   EmbeddedVideo[]
+  registryLinks    RegistryLink[]
   inviteGroups     InviteGroup[]
   rsvpResponses    RSVPResponse[]
   guestUploads     GuestUpload[]
@@ -299,6 +311,22 @@ model Tidbit {
   body          String
   category      String
   iconKey       String?
+  sortOrder     Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+// Gift registry as a link aggregator: couples point guests at registries they
+// already set up elsewhere. Deliberately stores no money-movement data — see
+// the registry section of the build spec for why cash funds are out of scope.
+model RegistryLink {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  label         String
+  url           String
+  category      String // "REGISTRY" | "EXPERIENCE" | "CHARITY" | "OTHER"
+  note          String?
   sortOrder     Int
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

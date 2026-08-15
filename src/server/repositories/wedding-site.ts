@@ -56,6 +56,9 @@ export const publicWeddingSiteInclude = {
   embeddedVideos: {
     orderBy: { sortOrder: "asc" },
   },
+  registryLinks: {
+    orderBy: { sortOrder: "asc" },
+  },
 } satisfies Prisma.WeddingSiteInclude;
 
 // Full include for dashboard/admin contexts that need RSVP, upload, and analytics data.
@@ -256,9 +259,21 @@ const contentEditorSelect = {
       sortOrder: "asc",
     },
   },
+  registryLinks: {
+    select: {
+      label: true,
+      url: true,
+      category: true,
+      note: true,
+    },
+    orderBy: {
+      sortOrder: "asc",
+    },
+  },
 } satisfies Prisma.WeddingSiteSelect;
 
 const eventsEditorSelect = {
+  id: true,
   slug: true,
   events: {
     select: {

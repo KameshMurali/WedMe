@@ -1,6 +1,7 @@
 import {
   replaceDressCodesAction,
   replaceFaqItemsAction,
+  replaceRegistryLinksAction,
   replaceStoryMilestonesAction,
   replaceTidbitsAction,
   replaceTravelGuideItemsAction,
@@ -12,6 +13,8 @@ import { AdminMediaUploader } from "@/components/admin/media-uploader";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
 import { getContentEditorSiteForUser } from "@/server/repositories/wedding-site";
+import { getAiDraftAvailability } from "@/server/services/ai/availability";
+import { getEffectivePlanForUserId, getPlanLimits } from "@/server/services/plan";
 import {
   directBlobUploadsEnabled,
   storageUploadsConfigurationMessage,
@@ -20,7 +23,13 @@ import {
 
 export default async function DashboardContentPage() {
   const user = await requireUser();
-  const site = await getContentEditorSiteForUser(user.id);
+  const [site, ai, planKey] = await Promise.all([
+    getContentEditorSiteForUser(user.id),
+    getAiDraftAvailability(user),
+    getEffectivePlanForUserId(user),
+  ]);
+  // null = unlimited. The server action enforces this authoritatively.
+  const registryCap = getPlanLimits(planKey).maxRegistryLinks;
   if (!site) {
     return (
       <DashboardUnavailableState
@@ -64,10 +73,18 @@ export default async function DashboardContentPage() {
           { name: "title", label: "Title", type: "text" },
           { name: "shortLabel", label: "Short label", type: "text" },
           { name: "eventDateLabel", label: "Date label", type: "text" },
-          { name: "description", label: "Description", type: "textarea" },
+          {
+            name: "description",
+            label: "Description",
+            type: "textarea",
+            aiAssist: { kind: "story_milestone", contextFromField: "title" },
+          },
           { name: "imageUrl", label: "Image URL", type: "url" },
         ]}
         onSave={replaceStoryMilestonesAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="Tidbits"
@@ -82,10 +99,18 @@ export default async function DashboardContentPage() {
         fields={[
           { name: "title", label: "Title", type: "text" },
           { name: "category", label: "Category", type: "text" },
-          { name: "body", label: "Body", type: "textarea" },
+          {
+            name: "body",
+            label: "Body",
+            type: "textarea",
+            aiAssist: { kind: "tidbit", contextFromField: "title" },
+          },
           { name: "iconKey", label: "Icon key", type: "text" },
         ]}
         onSave={replaceTidbitsAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="FAQs"
@@ -99,9 +124,59 @@ export default async function DashboardContentPage() {
         fields={[
           { name: "question", label: "Question", type: "text" },
           { name: "category", label: "Category", type: "text" },
-          { name: "answer", label: "Answer", type: "textarea" },
+          {
+            name: "answer",
+            label: "Answer",
+            type: "textarea",
+            aiAssist: { kind: "faq_answer", contextFromField: "question" },
+          },
         ]}
         onSave={replaceFaqItemsAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
+      />
+      <ArrayEditor
+        title="Gift registry"
+        description="Link the registries, experience funds, or charities you've already set up elsewhere. Guests open them in a new tab — nothing is paid through this site."
+        items={site.registryLinks.map((item) => ({
+          label: item.label,
+          url: item.url,
+          category: item.category,
+          note: item.note ?? "",
+        }))}
+        emptyItem={{ label: "", url: "", category: "REGISTRY", note: "" }}
+        fields={[
+          { name: "label", label: "Label", type: "text", placeholder: "Our home wishlist" },
+          { name: "url", label: "Link", type: "url", placeholder: "https://..." },
+          {
+            name: "category",
+            label: "Type",
+            type: "select",
+            options: [
+              { value: "REGISTRY", label: "Registry" },
+              { value: "EXPERIENCE", label: "Experience" },
+              { value: "CHARITY", label: "Charity" },
+              { value: "OTHER", label: "Other" },
+            ],
+          },
+          {
+            name: "note",
+            label: "Note for guests",
+            type: "textarea",
+            aiAssist: { kind: "registry_note", contextFromField: "label" },
+          },
+        ]}
+        onSave={replaceRegistryLinksAction}
+        maxItems={registryCap ?? undefined}
+        maxItemsNote={
+          registryCap === null
+            ? undefined
+            : `Your plan includes up to ${registryCap} registry links. Upgrade to Together for unlimited links.`
+        }
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="Guest experience"
@@ -167,11 +242,19 @@ export default async function DashboardContentPage() {
             ),
           },
           { name: "title", label: "Title", type: "text" },
-          { name: "guidance", label: "Guidance", type: "textarea" },
+          {
+            name: "guidance",
+            label: "Guidance",
+            type: "textarea",
+            aiAssist: { kind: "dress_code", contextFromField: "title" },
+          },
           { name: "inspirationImage", label: "Inspiration image URL", type: "url" },
           { name: "palette", label: "Palette colors (comma separated)", type: "array-text" },
         ]}
         onSave={replaceDressCodesAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
       />
       <ArrayEditor
         title="Embedded videos"

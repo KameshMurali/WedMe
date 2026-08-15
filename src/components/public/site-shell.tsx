@@ -13,6 +13,7 @@ const navigationConfig: Array<{ href: string; label: string; sectionType?: strin
   { href: "/rsvp", label: "RSVP", sectionType: "RSVP" },
   { href: "/gallery", label: "Gallery", sectionType: "GALLERY" },
   { href: "/experience", label: "Guest Experience", sectionType: "EXPERIENCE" },
+  { href: "/registry", label: "Registry", sectionType: "REGISTRY" },
   { href: "/memories", label: "Memories", sectionType: "MEMORIES" },
   { href: "/wishes", label: "Wishes", sectionType: "MESSAGES" },
 ];

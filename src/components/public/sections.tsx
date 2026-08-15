@@ -1,7 +1,7 @@
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, Clock3, Heart, MapPin, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Clock3, Gift, Heart, MapPin, PlayCircle, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -797,6 +797,71 @@ export function GallerySection({
             altText: asset.altText,
           }))}
         />
+      </div>
+    </section>
+  );
+}
+
+const registryCategoryLabels: Record<string, string> = {
+  REGISTRY: "Registry",
+  EXPERIENCE: "Experience",
+  CHARITY: "Charity",
+  OTHER: "Gift",
+};
+
+export function RegistrySection({
+  links,
+  condensed = false,
+}: {
+  links: SiteSnapshot["registryLinks"];
+  condensed?: boolean;
+}) {
+  if (!links.length) {
+    // On the homepage stay silent when there's nothing to show — a "registry
+    // coming soon" placeholder solicits gifts the couple can't yet receive.
+    if (condensed) return null;
+    return (
+      <EmptyState
+        title="Registry coming soon"
+        description="The couple will share their gift registry links here soon."
+      />
+    );
+  }
+
+  return (
+    <section className="section-shell mt-24">
+      <SectionHeading
+        eyebrow="Registry"
+        title="A few places the couple would love a gift from."
+        description="Your presence is the real gift. If you'd still like to mark the occasion, these are the couple's chosen registries."
+      />
+      <div className="mt-10 grid gap-5 md:grid-cols-2">
+        {links.map((link) => (
+          <Card key={link.id} className="flex flex-col gap-4 p-6 sm:p-7">
+            <div className="flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 text-[color:var(--primary)]">
+                <Gift className="h-4 w-4" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em]">
+                  {registryCategoryLabels[link.category] ?? "Gift"}
+                </span>
+              </span>
+            </div>
+            <h3 className="font-display text-3xl leading-snug text-[color:var(--text)]">{link.label}</h3>
+            {link.note ? (
+              <p className="text-sm leading-7 text-[color:var(--muted)]">{link.note}</p>
+            ) : null}
+            <a
+              href={link.url}
+              target="_blank"
+              // nofollow: these are outbound commercial links the couple chose.
+              rel="noopener noreferrer nofollow"
+              className="mt-auto inline-flex w-fit items-center gap-1 text-sm font-semibold text-[color:var(--primary)] transition hover:text-[color:var(--accent)]"
+            >
+              Open registry
+              <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </Card>
+        ))}
       </div>
     </section>
   );

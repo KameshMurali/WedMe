@@ -13,12 +13,14 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "seed": "tsx prisma/seed.ts",
-    "make-admin": "tsx scripts/make-admin.ts"
+    "make-admin": "tsx scripts/make-admin.ts",
+    "grant-plan": "tsx scripts/grant-plan.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
     "@fontsource/cinzel": "^5.2.8",
     "@fontsource/cormorant-garamond": "^5.2.11",
     "@fontsource/manrope": "^5.2.8",

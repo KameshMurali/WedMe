@@ -5,11 +5,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { initialActionState, type ActionState } from "@/lib/action-state";
+import { sectionLabels, sectionOrder } from "@/lib/constants";
 import {
   dressCodeInputSchema,
   eventInputSchema,
   faqInputSchema,
   publishSettingsSchema,
+  registryLinkInputSchema,
   scheduleItemInputSchema,
   siteBasicsSchema,
   storyMilestoneInputSchema,
@@ -24,7 +26,7 @@ import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getEditableWeddingSiteForUser, getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
-import { effectiveEventCap, getPlanLimits, getWorkspacePlanKey } from "@/server/services/plan";
+import { effectiveEventCap, getEffectivePlanForUser, getPlanLimits } from "@/server/services/plan";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
 import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
@@ -72,6 +74,7 @@ function revalidatePublicSitePaths(slug: string) {
   revalidatePath(`/${slug}/rsvp`);
   revalidatePath(`/${slug}/memories`);
   revalidatePath(`/${slug}/wishes`);
+  revalidatePath(`/${slug}/registry`);
 }
 
 function readOnlyDemoState(): ActionState {
@@ -201,6 +204,26 @@ export async function updatePublishSettingsAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Please review the publish settings." };
+  }
+
+  // Password protection + invite codes are a paid (Together/Forever) promise.
+  // Only gate the *change into* a protected visibility — a site whose stored
+  // visibility is already protected keeps working (grandfathered) so a plan
+  // expiry never bricks an existing settings save.
+  if (parsed.data.visibility !== "PUBLIC") {
+    const [planKey, currentSettings] = await Promise.all([
+      getEffectivePlanForUser(user.email, site.id),
+      prisma.publishSettings.findUnique({
+        where: { weddingSiteId: site.id },
+        select: { visibility: true },
+      }),
+    ]);
+    if (planKey === "hello" && currentSettings?.visibility !== parsed.data.visibility) {
+      return {
+        error:
+          "Password protection and invite-only access are part of the Together plan. Upgrade to protect your site.",
+      };
+    }
   }
 
   await prisma.publishSettings.update({
@@ -374,7 +397,7 @@ export async function replaceEventsAction(
     // Enforce the plan's event quota (authoritative — the UI guard is
     // convenience only). Grandfathered: sites already over the limit keep
     // their current count and can edit/reduce, but can't add beyond it.
-    const planKey = getWorkspacePlanKey();
+    const planKey = await getEffectivePlanForUser(user.email, site.id);
     const currentCount = await prisma.event.count({ where: { weddingSiteId: site.id } });
     const cap = effectiveEventCap(planKey, currentCount);
     if (cap !== null && items.length > cap) {
@@ -485,6 +508,67 @@ export async function replaceTidbitsAction(
     return { success: "Tidbits saved to draft." };
   } catch (error) {
     return { error: formatDashboardActionError(error, "Unable to save tidbits.") };
+  }
+}
+
+export async function replaceRegistryLinksAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const site = await getEditableWeddingSiteForUser(user.id);
+    if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
+
+    const items = registryLinkInputSchema.array().parse(parseJsonArray(formData, "items"));
+
+    // Plan quota (authoritative — the editor's maxItems is a convenience only).
+    const planKey = await getEffectivePlanForUser(user.email, site.id);
+    const maxRegistryLinks = getPlanLimits(planKey).maxRegistryLinks;
+    if (maxRegistryLinks !== null && items.length > maxRegistryLinks) {
+      return {
+        error: `Your plan includes up to ${maxRegistryLinks} registry links. Upgrade to Together for unlimited links.`,
+      };
+    }
+
+    await replaceCollection(site.id, site.slug, items, async (transaction, links) => {
+      await transaction.registryLink.deleteMany({ where: { weddingSiteId: site.id } });
+      await transaction.registryLink.createMany({
+        data: links.map((item, index) => ({
+          weddingSiteId: site.id,
+          label: item.label,
+          url: item.url,
+          category: item.category,
+          note: item.note || null,
+          sortOrder: index,
+        })),
+      });
+
+      // Sites created before the registry feature existed have no REGISTRY
+      // SectionConfig row (they were bootstrapped from an older sectionOrder).
+      // Upsert it lazily on first save instead of backfilling every site — the
+      // @@unique([weddingSiteId, type]) constraint makes this safe, and nav
+      // stays hidden until the couple actually saves links and republishes.
+      await transaction.sectionConfig.upsert({
+        where: {
+          weddingSiteId_type: { weddingSiteId: site.id, type: "REGISTRY" },
+        },
+        update: {},
+        create: {
+          weddingSiteId: site.id,
+          type: "REGISTRY",
+          enabled: true,
+          position: sectionOrder.indexOf("REGISTRY"),
+          label: sectionLabels.REGISTRY,
+        },
+      });
+    });
+
+    return { success: "Registry links saved to draft." };
+  } catch (error) {
+    return { error: formatDashboardActionError(error, "Unable to save registry links.") };
   }
 }
 
