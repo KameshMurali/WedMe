@@ -19,6 +19,7 @@ export type RsvpRow = {
   id: string;
   guestName: string;
   guestEmail: string | null;
+  guestPhone: string | null;
   status: string;
   attendeeCount: number;
   inviteCode: string | null;
@@ -115,6 +116,7 @@ export function RsvpManager({
         const haystack = [
           response.guestName,
           response.guestEmail,
+          response.guestPhone,
           response.inviteCode,
           response.mealPreference,
           response.accessibilityNeeds,
@@ -265,7 +267,8 @@ export function RsvpManager({
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-[color:var(--muted)]">
-                    {response.attendeeCount} guest(s) · {response.guestEmail ?? "No email"} ·{" "}
+                    {response.attendeeCount} guest(s) · {response.guestEmail ?? "No email"}
+                    {response.guestPhone ? ` · ${response.guestPhone}` : ""} ·{" "}
                     {sideLabel(response.guestSide, partnerOneName, partnerTwoName)}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">

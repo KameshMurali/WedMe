@@ -17,6 +17,7 @@ function buildClientRsvpSchema(hasEvents: boolean) {
   return z.object({
     guestName: z.string().min(2),
     guestEmail: z.string().email().optional().or(z.literal("")),
+    guestPhone: z.string().max(30).optional(),
     inviteCode: z.string().optional().or(z.literal("")),
     status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
     attendeeCount: z.number().min(1).max(10),
@@ -69,6 +70,7 @@ export function RsvpForm({
       slug,
       guestName: values.guestName,
       guestEmail: values.guestEmail,
+      guestPhone: values.guestPhone,
       inviteCode: values.inviteCode,
       status: values.status,
       attendeeCount: values.attendeeCount,
@@ -137,6 +139,12 @@ export function RsvpForm({
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
+        <div>
+          <label htmlFor="rsvp-phone" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Contact number
+          </label>
+          <Input id="rsvp-phone" type="tel" placeholder="Optional" {...register("guestPhone")} />
+        </div>
         <div>
           <label htmlFor="rsvp-code" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
             Invite code

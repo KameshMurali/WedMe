@@ -35,6 +35,7 @@ export async function GET() {
   const header = [
     "Guest name",
     "Email",
+    "Phone",
     "Status",
     "Attendee count",
     "Invite code",
@@ -48,6 +49,7 @@ export async function GET() {
   const rows = site.rsvpResponses.map((response) => [
     response.guestName,
     response.guestEmail,
+    response.guestPhone,
     response.status,
     response.attendeeCount,
     response.inviteCode,

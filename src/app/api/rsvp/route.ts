@@ -1,6 +1,12 @@
 import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import {
+  buildRsvpDedupeKey,
+  normalizeEmail,
+  normalizeName,
+  normalizePhone,
+} from "@/lib/rsvp-identity";
 import { rsvpSchema } from "@/lib/validations/rsvp";
 import { prisma } from "@/server/prisma";
 import { consumeRateLimit } from "@/server/security/rate-limit";
@@ -75,6 +81,33 @@ export async function POST(request: Request) {
       validEventIds.has(event.eventId),
     );
 
+    // One RSVP per guest per wedding, identified by name + email + contact.
+    // Checked in the app so the guest gets a friendly explanation; the unique
+    // index on (weddingSiteId, dedupeKey) below is the race-condition backstop.
+    const dedupeKey = buildRsvpDedupeKey(parsed.data);
+    const duplicateMessage =
+      "It looks like you've already RSVP'd for this wedding. If you need to change your response, please contact the couple directly.";
+
+    // Compare against this site's responses on normalised values, so rows
+    // written before dedupeKey existed are matched too.
+    const candidates = await prisma.rSVPResponse.findMany({
+      where: { weddingSiteId: site.id },
+      select: { guestName: true, guestEmail: true, guestPhone: true },
+    });
+    const normalizedName = normalizeName(parsed.data.guestName);
+    const normalizedEmail = normalizeEmail(parsed.data.guestEmail);
+    const normalizedPhone = normalizePhone(parsed.data.guestPhone);
+    const existing = candidates.some(
+      (candidate) =>
+        normalizeName(candidate.guestName) === normalizedName &&
+        normalizeEmail(candidate.guestEmail) === normalizedEmail &&
+        normalizePhone(candidate.guestPhone) === normalizedPhone,
+    );
+
+    if (existing) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
+
     await prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const response = await transaction.rSVPResponse.create({
         data: {
@@ -82,6 +115,8 @@ export async function POST(request: Request) {
           inviteGroupId: inviteGroup?.id ?? null,
           guestName: parsed.data.guestName,
           guestEmail: parsed.data.guestEmail || null,
+          guestPhone: parsed.data.guestPhone || null,
+          dedupeKey,
           inviteCode: parsed.data.inviteCode || null,
           status: parsed.data.status,
           attendeeCount: parsed.data.attendeeCount,
@@ -117,9 +152,25 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: "Thanks, your RSVP has been saved." });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to save RSVP." },
-      { status: 500 },
-    );
+    // Race backstop: two simultaneous submits pass the check above, then the
+    // unique index rejects the second. Surface the same friendly message
+    // rather than a 500.
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      (error as { code?: string }).code === "P2002"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "It looks like you've already RSVP'd for this wedding. If you need to change your response, please contact the couple directly.",
+        },
+        { status: 409 },
+      );
+    }
+
+    // Never leak raw DB/internal error text to guests.
+    console.error("RSVP submission failed", error);
+    return NextResponse.json({ error: "Unable to save RSVP." }, { status: 500 });
   }
 }

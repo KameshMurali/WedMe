@@ -4,6 +4,7 @@ export const rsvpSchema = z.object({
   slug: z.string().min(3).transform((value) => value.trim().toLowerCase()),
   guestName: z.string().min(2).max(120),
   guestEmail: z.string().email().optional().or(z.literal("")),
+  guestPhone: z.string().max(30).optional().or(z.literal("")),
   inviteCode: z.string().max(40).optional().or(z.literal("")),
   status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
   attendeeCount: z.coerce.number().min(1).max(10),
