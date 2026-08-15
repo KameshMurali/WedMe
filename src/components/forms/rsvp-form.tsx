@@ -16,8 +16,12 @@ import { Textarea } from "@/components/ui/textarea";
 function buildClientRsvpSchema(hasEvents: boolean) {
   return z.object({
     guestName: z.string().min(2),
-    guestEmail: z.string().email().optional().or(z.literal("")),
-    guestPhone: z.string().max(30).optional(),
+    guestEmail: z.string().min(1, "An email address is required.").email("Enter a valid email address."),
+    guestPhone: z
+      .string()
+      .min(1, "A contact number is required.")
+      .max(30)
+      .refine((value) => value.replace(/\D/g, "").length >= 7, "Enter a valid contact number."),
     inviteCode: z.string().optional().or(z.literal("")),
     status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
     attendeeCount: z.number().min(1).max(10),
@@ -133,17 +137,23 @@ export function RsvpForm({
         </div>
         <div>
           <label htmlFor="rsvp-email" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
-            Email address
+            Email address <span aria-hidden="true">*</span>
           </label>
-          <Input id="rsvp-email" placeholder="Optional" type="email" {...register("guestEmail")} />
+          <Input id="rsvp-email" placeholder="you@example.com" type="email" {...register("guestEmail")} />
+          {errors.guestEmail ? (
+            <p className="mt-2 text-sm text-rose-600">{errors.guestEmail.message}</p>
+          ) : null}
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <div>
           <label htmlFor="rsvp-phone" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
-            Contact number
+            Contact number <span aria-hidden="true">*</span>
           </label>
-          <Input id="rsvp-phone" type="tel" placeholder="Optional" {...register("guestPhone")} />
+          <Input id="rsvp-phone" type="tel" placeholder="+971 50 123 4567" {...register("guestPhone")} />
+          {errors.guestPhone ? (
+            <p className="mt-2 text-sm text-rose-600">{errors.guestPhone.message}</p>
+          ) : null}
         </div>
         <div>
           <label htmlFor="rsvp-code" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
