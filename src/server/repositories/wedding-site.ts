@@ -316,6 +316,12 @@ const eventsEditorSelect = {
 
 const rsvpManagerSelect = {
   slug: true,
+  couple: {
+    select: {
+      partnerOneName: true,
+      partnerTwoName: true,
+    },
+  },
   rsvpResponses: {
     select: {
       id: true,
@@ -324,16 +330,21 @@ const rsvpManagerSelect = {
       status: true,
       attendeeCount: true,
       inviteCode: true,
+      guestSide: true,
       mealPreference: true,
       accessibilityNeeds: true,
+      accommodationNeeds: true,
+      specialRequests: true,
       travelNotes: true,
       noteToCouple: true,
+      createdAt: true,
       eventSelections: {
         select: {
           id: true,
           status: true,
           event: {
             select: {
+              id: true,
               title: true,
             },
           },

@@ -444,6 +444,12 @@ model RSVPResponse {
   inviteCode          String?
   status              RSVPStatus
   attendeeCount       Int
+  // Which partner the guest is connected to, for seating/catering splits.
+  // Stored as a neutral key ("PARTNER_ONE" | "PARTNER_TWO" | "BOTH") rather
+  // than bride/groom so the labels can render from the couple's own names and
+  // work for every kind of couple. Nullable: optional for guests, and existing
+  // rows predate the field.
+  guestSide           String?
   mealPreference      String?
   accommodationNeeds  String?
   travelNotes         String?
