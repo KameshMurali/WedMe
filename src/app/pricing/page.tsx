@@ -38,7 +38,7 @@ const productSchema = {
       "@type": "Offer",
       name: "Together",
       description:
-        "Wedding year plan: AI-assisted content drafting, unlimited events, unlimited RSVPs, no ToNewBeginning branding.",
+        "Wedding year plan: AI-assisted content drafting, unlimited events, unlimited RSVPs, password protection and invite codes.",
       price: "49",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
