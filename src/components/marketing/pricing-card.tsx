@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Check, Clock, Gift } from "lucide-react";
 
+import { PaddleCheckoutButton } from "@/components/marketing/paddle-checkout-button";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,11 +37,15 @@ export function PricingCard({
   currency,
   registerHref,
   emphasis = false,
+  user = null,
 }: {
   plan: Plan;
   currency: CurrencyCode;
   registerHref: Route;
   emphasis?: boolean;
+  // Signed-in buyer, threaded through to checkout so the webhook can attribute
+  // the payment. Null when signed out.
+  user?: { id: string; email: string } | null;
 }) {
   const basePrice = plan.prices[currency];
   const discountedAmount = applyLaunchOffer(basePrice.amount, plan);
@@ -108,12 +113,21 @@ export function PricingCard({
       </ul>
 
       <div className="mt-8 flex flex-col gap-3">
-        {plan.recurrence === "free" || checkoutEnabled ? (
-          // Free tier always links to register; paid tiers link to Checkout
-          // once it's live.
+        {plan.recurrence === "free" ? (
           <Button asChild variant={emphasis ? "solid" : "outline"}>
             <Link href={registerHref}>{plan.ctaLabel}</Link>
           </Button>
+        ) : checkoutEnabled ? (
+          // Paid tiers open real Paddle checkout once it's configured.
+          <PaddleCheckoutButton
+            planKey={plan.key}
+            planName={plan.name}
+            ctaLabel={plan.ctaLabel}
+            currency={currency}
+            emphasis={emphasis}
+            user={user}
+            applyLaunchDiscount={plan.key === "forever" && isLaunchOfferActive()}
+          />
         ) : (
           // Pre-launch: capture interest instead of taking payment.
           <>
