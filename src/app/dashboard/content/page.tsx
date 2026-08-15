@@ -79,7 +79,14 @@ export default async function DashboardContentPage() {
             type: "textarea",
             aiAssist: { kind: "story_milestone", contextFromField: "title" },
           },
-          { name: "imageUrl", label: "Image URL", type: "url" },
+          {
+            name: "imageUrl",
+            label: "Photo",
+            type: "image-upload",
+            uploadFolder: site.slug,
+            useSignedUploads: directBlobUploadsEnabled,
+            uploadCategory: "STORY",
+          },
         ]}
         onSave={replaceStoryMilestonesAction}
         aiEnabled={ai.enabled}

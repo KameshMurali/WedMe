@@ -327,6 +327,7 @@ const rsvpManagerSelect = {
       id: true,
       guestName: true,
       guestEmail: true,
+      guestPhone: true,
       status: true,
       attendeeCount: true,
       inviteCode: true,

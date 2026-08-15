@@ -441,6 +441,12 @@ model RSVPResponse {
   inviteGroupId       String?
   guestName           String
   guestEmail          String?
+  guestPhone          String?
+  // Normalised "name|email|phone" identity used to block duplicate RSVPs.
+  // Nullable on purpose: rows created before this field existed stay NULL, and
+  // Postgres treats NULLs as distinct, so the unique index below can be added
+  // to a live table without any chance of colliding with existing data.
+  dedupeKey           String?
   inviteCode          String?
   status              RSVPStatus
   attendeeCount       Int
@@ -462,6 +468,8 @@ model RSVPResponse {
   weddingSite         WeddingSite          @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
   inviteGroup         InviteGroup?         @relation(fields: [inviteGroupId], references: [id], onDelete: SetNull)
   eventSelections     RSVPEventSelection[]
+
+  @@unique([weddingSiteId, dedupeKey])
 }
 
 model RSVPEventSelection {
