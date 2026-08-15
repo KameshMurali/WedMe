@@ -1,7 +1,7 @@
 import "server-only";
 
 import { env } from "@/lib/env";
-import { isAdminEmail } from "@/server/auth/session";
+import { isAdminUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { peekRateLimit } from "@/server/security/rate-limit";
 import {
@@ -10,7 +10,7 @@ import {
   aiDraftingEnabled,
 } from "@/server/services/ai/config";
 import { isDemoUserId } from "@/server/services/demo-site";
-import { getPlanLimits, resolvePlanKey } from "@/server/services/plan";
+import { getPlanLimits, resolvePlanKey, type PlanUser } from "@/server/services/plan";
 
 export type AiDraftAvailability = {
   enabled: boolean;
@@ -29,10 +29,9 @@ const disabledAvailability: AiDraftAvailability = {
 // Server-component helper: initial values for the Draft-with-AI buttons.
 // Non-consuming — reads the daily bucket via peekRateLimit so rendering a
 // dashboard page never spends an attempt.
-export async function getAiDraftAvailability(user: {
-  id: string;
-  email: string;
-}): Promise<AiDraftAvailability> {
+export async function getAiDraftAvailability(
+  user: PlanUser & { id: string },
+): Promise<AiDraftAvailability> {
   // No key ⇒ feature hidden. Demo workspace is read-only, so the buttons are
   // hidden there too rather than dead-ending on the read-only guard.
   if (!aiDraftingEnabled || isDemoUserId(user.id)) {
@@ -46,8 +45,9 @@ export async function getAiDraftAvailability(user: {
     keyParts: [user.id],
   });
 
-  // Admin accounts (ADMIN_EMAILS) see the paid experience — no lifetime teaser.
-  if (isAdminEmail(user.email)) {
+  // Admins see the paid experience — no lifetime teaser. Role OR allowlist,
+  // matching isAdminUser everywhere else.
+  if (isAdminUser(user)) {
     return { enabled: true, remainingToday: daily.remaining, remainingLifetime: null };
   }
 

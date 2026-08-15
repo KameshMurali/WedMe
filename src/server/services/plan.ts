@@ -1,9 +1,13 @@
 import "server-only";
 
 import { planLimits, plans, type PlanKey } from "@/lib/pricing";
-import { isAdminEmail } from "@/server/auth/session";
+import { isAdminUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { isDemoSiteId } from "@/server/services/demo-site";
+
+// Matches whatever shape isAdminUser accepts ({ role, email }) so the paid-tier
+// override always agrees with the rest of the app's admin definition.
+export type PlanUser = Parameters<typeof isAdminUser>[0];
 
 const knownPlanKeys = new Set<PlanKey>(plans.map((plan) => plan.key));
 
@@ -57,15 +61,18 @@ export async function getWorkspacePlanForSite(siteId: string): Promise<PlanKey> 
 }
 
 // User-aware resolver for gates where the requireUser() result is in scope.
-// Admin accounts (ADMIN_EMAILS) get Forever-tier access automatically so the
-// owner can test paid features end-to-end without running grant-plan. Regular
-// users fall through to the stored plan. Demo-workspace read-only guards run
-// BEFORE any plan logic in the actions, so this never unlocks writes there.
+// Admins get Forever-tier access automatically so the owner can test paid
+// features end-to-end without running grant-plan. Uses isAdminUser (DB role
+// ADMIN *or* the ADMIN_EMAILS allowlist) — the same definition that gates the
+// admin pages — so an admin granted via `npm run make-admin` isn't silently
+// left on the free tier. Regular users fall through to the stored plan.
+// Demo-workspace read-only guards run BEFORE any plan logic in the actions,
+// so this never unlocks writes there.
 export async function getEffectivePlanForUser(
-  userEmail: string,
+  user: PlanUser,
   siteId: string,
 ): Promise<PlanKey> {
-  if (isAdminEmail(userEmail)) {
+  if (isAdminUser(user)) {
     return "forever";
   }
   return getWorkspacePlanForSite(siteId);
@@ -74,11 +81,10 @@ export async function getEffectivePlanForUser(
 // Same admin override as getEffectivePlanForUser, but keyed on the user rather
 // than a site id — for dashboard server components that need plan-derived UI
 // caps in parallel with (not after) their site query.
-export async function getEffectivePlanForUserId(user: {
-  id: string;
-  email: string;
-}): Promise<PlanKey> {
-  if (isAdminEmail(user.email)) {
+export async function getEffectivePlanForUserId(
+  user: PlanUser & { id: string },
+): Promise<PlanKey> {
+  if (isAdminUser(user)) {
     return "forever";
   }
 
