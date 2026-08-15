@@ -29,7 +29,7 @@ export default async function DashboardEventsPage() {
   // current event count so existing over-limit sites can still edit. Mirrors
   // the server enforcement in replaceEventsAction.
   const [planKey, ai] = await Promise.all([
-    getEffectivePlanForUser(user.email, site.id),
+    getEffectivePlanForUser(user, site.id),
     getAiDraftAvailability(user),
   ]);
   const baseEventLimit = getPlanLimits(planKey).maxEvents;

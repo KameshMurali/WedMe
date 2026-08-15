@@ -6,7 +6,7 @@ import { env } from "@/lib/env";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { formatDate } from "@/lib/utils";
 import { aiDraftRequestSchema } from "@/lib/validations/ai";
-import { isAdminEmail, requireUser } from "@/server/auth/session";
+import { isAdminUser, requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getEditableWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { consumeRateLimit } from "@/server/security/rate-limit";
@@ -72,8 +72,8 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
     return { error: "No wedding site was found for this account." };
   }
 
-  // Admin accounts (ADMIN_EMAILS) get the paid tier automatically for testing.
-  const planKey = isAdminEmail(user.email)
+  // Admins get the paid tier automatically for testing (role OR allowlist).
+  const planKey = isAdminUser(user)
     ? "forever"
     : resolvePlanKey(record.couple.planKey, record.couple.planExpiresAt);
   const lifetimeLimit = getPlanLimits(planKey).aiLifetimeDrafts;

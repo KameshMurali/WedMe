@@ -212,7 +212,7 @@ export async function updatePublishSettingsAction(
   // expiry never bricks an existing settings save.
   if (parsed.data.visibility !== "PUBLIC") {
     const [planKey, currentSettings] = await Promise.all([
-      getEffectivePlanForUser(user.email, site.id),
+      getEffectivePlanForUser(user, site.id),
       prisma.publishSettings.findUnique({
         where: { weddingSiteId: site.id },
         select: { visibility: true },
@@ -397,7 +397,7 @@ export async function replaceEventsAction(
     // Enforce the plan's event quota (authoritative — the UI guard is
     // convenience only). Grandfathered: sites already over the limit keep
     // their current count and can edit/reduce, but can't add beyond it.
-    const planKey = await getEffectivePlanForUser(user.email, site.id);
+    const planKey = await getEffectivePlanForUser(user, site.id);
     const currentCount = await prisma.event.count({ where: { weddingSiteId: site.id } });
     const cap = effectiveEventCap(planKey, currentCount);
     if (cap !== null && items.length > cap) {
@@ -525,7 +525,7 @@ export async function replaceRegistryLinksAction(
     const items = registryLinkInputSchema.array().parse(parseJsonArray(formData, "items"));
 
     // Plan quota (authoritative — the editor's maxItems is a convenience only).
-    const planKey = await getEffectivePlanForUser(user.email, site.id);
+    const planKey = await getEffectivePlanForUser(user, site.id);
     const maxRegistryLinks = getPlanLimits(planKey).maxRegistryLinks;
     if (maxRegistryLinks !== null && items.length > maxRegistryLinks) {
       return {
