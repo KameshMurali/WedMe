@@ -49,6 +49,79 @@ These must match `src/lib/pricing.ts` **exactly**. The site renders prices from
 that file and Paddle charges from these; any drift means advertising one price
 and charging another.
 
+### Using Paddle's AI-assisted setup
+
+Paddle's onboarding offers an "AI-assisted" tab that takes a prompt. Its example
+is written for monthly/yearly subscriptions — ours are **one-time payments**, so
+the prompt has to say that explicitly or the agent will create recurring prices
+and bill couples every year. Paste this verbatim:
+
+```text
+Create my Paddle catalog for a wedding-website SaaS.
+
+CRITICAL: Every price is a ONE-TIME payment. Do not create any recurring,
+subscription, or monthly/yearly billing cycles. If a billing cycle is required,
+stop and ask me rather than guessing.
+
+Tax category for both products: SaaS / standard taxable digital service.
+Base currency: USD. Add the other currencies as explicit per-currency
+overrides using exactly the amounts below — do not FX-convert or round them.
+
+PRODUCT 1 — "Together"
+Description: One payment covering the couple's wedding year — 12 months of
+unlimited events, RSVPs and uploads, plus a 6-month post-wedding archive.
+One-time price named "Together — wedding year":
+  USD 49.00
+  INR 3499.00
+  GBP 39.00
+  EUR 45.00
+  AED 179.00
+
+PRODUCT 2 — "Forever"
+Description: A single payment that keeps the couple's wedding site online
+permanently, with a lifetime archive.
+One-time price named "Forever — lifetime":
+  USD 99.00
+  INR 7999.00
+  GBP 79.00
+  EUR 89.00
+  AED 359.00
+
+DISCOUNT — create one:
+  Name: "Launch offer — 30% off Forever"
+  Type: percentage, 30%
+  Restricted to the Forever price ONLY. It must not apply to Together.
+  Unlimited uses, no expiry date in Paddle.
+
+Do NOT create a product for the free "Hello" tier. It never touches Paddle.
+
+When finished, report back:
+  1. The price ID (pri_...) for Together and for Forever
+  2. The discount ID (dsc_...)
+  3. Whether AED was accepted as a currency override on both prices. If Paddle
+     rejected AED, say so explicitly — do not substitute another currency.
+```
+
+Three things that prompt is deliberately guarding against:
+
+- **Recurring prices.** The single most costly mistake available here.
+- **A product for the free Hello tier.** It has no payment and must not exist in
+  Paddle.
+- **A Paddle-side expiry on the discount.** The launch offer window lives in
+  `launchOffer.endsAt` in `src/lib/pricing.ts`, and the site only passes the
+  discount ID while it's active. Two expiry dates in two systems will drift. If
+  you want a backstop against a leaked discount ID, set the Paddle expiry to
+  match `2026-09-30` exactly — otherwise leave it open.
+
+**Confirm the tax category.** SaaS is right for a hosted wedding-site builder,
+but it drives the VAT/GST rate Paddle charges buyers, so it's worth a second
+look rather than accepting whatever the agent picks.
+
+Whichever tab you use, **verify in the dashboard afterwards** that both prices
+read as one-time and the amounts match the table above. Answering "Both" on the
+integration question is the right call — the catalog suits the AI path, but the
+webhook and domain-approval steps are dashboard work.
+
 > **Confirm AED appears in the currency dropdown.** Paddle's docs weren't
 > reachable to verify it. If AED isn't offered, Paddle will charge UAE buyers in
 > your base currency while the pricing page still advertises dirhams — a real
