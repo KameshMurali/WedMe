@@ -30,10 +30,10 @@ export function resolvePlanKey(
 
 // Resolves the active plan for a workspace from the persisted Couple record.
 //
-// Checkout isn't wired yet (checkoutEnabled === false), so entitlements only
-// enter the system via `npm run grant-plan` — but every quota check routes
-// through this function, so a future payment webhook only has to write
-// Couple.planKey/planExpiresAt and enforcement updates everywhere at once.
+// Entitlements enter the system either from the Paddle webhook
+// (src/app/api/webhooks/paddle/route.ts) or `npm run grant-plan`. Both only
+// write Couple.planKey/planExpiresAt — every quota check routes through this
+// function, so enforcement updates everywhere at once.
 export async function getWorkspacePlanForSite(siteId: string): Promise<PlanKey> {
   // Demo workspace short-circuits BEFORE any DB access.
   if (isDemoSiteId(siteId)) {
@@ -97,6 +97,35 @@ export async function getEffectivePlanForUserId(
   } catch (error) {
     console.error("getEffectivePlanForUserId failed; defaulting to hello", error);
     return "hello";
+  }
+}
+
+// Same resolution as getEffectivePlanForUserId, but also returns the expiry so
+// the dashboard can show "through <date>" for Together without a second query.
+// expiresAt is null for anything that doesn't expire (hello, forever, admins).
+export async function getPlanSummaryForUserId(
+  user: PlanUser & { id: string },
+): Promise<{ planKey: PlanKey; expiresAt: Date | null }> {
+  if (isAdminUser(user)) {
+    return { planKey: "forever", expiresAt: null };
+  }
+
+  try {
+    const couple = await prisma.couple.findUnique({
+      where: { primaryUserId: user.id },
+      select: { planKey: true, planExpiresAt: true },
+    });
+    const planKey = resolvePlanKey(couple?.planKey, couple?.planExpiresAt);
+    // Only surface an expiry that's still in force — resolvePlanKey has already
+    // demoted an expired plan to "hello", and showing a past date there would
+    // read as though the workspace still had something.
+    return {
+      planKey,
+      expiresAt: planKey === "hello" ? null : (couple?.planExpiresAt ?? null),
+    };
+  } catch (error) {
+    console.error("getPlanSummaryForUserId failed; defaulting to hello", error);
+    return { planKey: "hello", expiresAt: null };
   }
 }
 
