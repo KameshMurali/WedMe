@@ -108,6 +108,19 @@ export const tidbitInputSchema = z.object({
   iconKey: z.string().max(50).optional().or(z.literal("")),
 });
 
+// Gift registry links point at registries the couple already set up elsewhere.
+// URLs are restricted to http(s) so a stored value can never become a
+// javascript:/data: link when rendered as an anchor on the public site.
+export const registryLinkInputSchema = z.object({
+  label: z.string().min(2).max(80),
+  url: z
+    .string()
+    .url()
+    .refine((value) => /^https?:\/\//i.test(value), "Links must start with http:// or https://"),
+  category: z.enum(["REGISTRY", "EXPERIENCE", "CHARITY", "OTHER"]),
+  note: z.string().max(240).optional().or(z.literal("")),
+});
+
 export const faqInputSchema = z.object({
   question: z.string().min(8).max(160),
   answer: z.string().min(10).max(350),

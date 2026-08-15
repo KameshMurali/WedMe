@@ -522,6 +522,29 @@ export const demoSiteSnapshot = {
       thumbnailUrl: "https://img.youtube.com/vi/ysz5S6PUM-U/hqdefault.jpg",
     },
   ],
+  registryLinks: [
+    {
+      id: "registry-home",
+      label: "Our home wishlist",
+      url: "https://www.amazon.in/registries/wedding",
+      category: "REGISTRY",
+      note: "Everyday things for the flat we're setting up in Dubai.",
+    },
+    {
+      id: "registry-honeymoon",
+      label: "Honeymoon experiences",
+      url: "https://www.airbnb.com/wishlists",
+      category: "EXPERIENCE",
+      note: "Help us pick a dinner, a dive, or a long slow morning somewhere warm.",
+    },
+    {
+      id: "registry-charity",
+      label: "Donate instead",
+      url: "https://www.giveindia.org",
+      category: "CHARITY",
+      note: "If you'd rather give it forward, this is the cause closest to our hearts.",
+    },
+  ],
 } satisfies SiteSnapshot;
 
 export const demoGuestUploads: PublicGuestUpload[] = [
@@ -868,6 +891,17 @@ export const demoDashboardSite = {
     youtubeUrl: video.youtubeUrl,
     youtubeId: video.youtubeId,
     thumbnailUrl: video.thumbnailUrl,
+    sortOrder: index,
+    createdAt: seededAt,
+    updatedAt: seededAt,
+  })),
+  registryLinks: demoSiteSnapshot.registryLinks.map((link, index) => ({
+    id: link.id,
+    weddingSiteId: demoSiteId,
+    label: link.label,
+    url: link.url,
+    category: link.category,
+    note: link.note,
     sortOrder: index,
     createdAt: seededAt,
     updatedAt: seededAt,

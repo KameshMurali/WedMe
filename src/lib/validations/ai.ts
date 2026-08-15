@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// The six field kinds the AI drafting assistant can write. Each maps to an
+// The field kinds the AI drafting assistant can write. Each maps to an
 // existing free-text field edited through ArrayEditor or the site-basics form.
 export const aiDraftKinds = [
   "story_milestone",
@@ -9,6 +9,7 @@ export const aiDraftKinds = [
   "faq_answer",
   "dress_code",
   "tidbit",
+  "registry_note",
 ] as const;
 
 export type AiDraftKind = (typeof aiDraftKinds)[number];

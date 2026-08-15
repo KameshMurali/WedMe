@@ -61,6 +61,12 @@ const kindConfigs: Record<AiDraftKind, KindConfig> = {
     lengthRule: "2-3 sentences, max 70 words",
     maxChars: 350,
   },
+  registry_note: {
+    fieldDescription:
+      "a short, warm note next to one gift-registry link explaining what it is and why the couple chose it (never pushy about money)",
+    lengthRule: "1-2 sentences, max 35 words",
+    maxChars: 240,
+  },
 };
 
 const OFF_TOPIC_SENTINEL = "OFF_TOPIC";

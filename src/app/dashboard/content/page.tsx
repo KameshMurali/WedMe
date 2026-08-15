@@ -1,6 +1,7 @@
 import {
   replaceDressCodesAction,
   replaceFaqItemsAction,
+  replaceRegistryLinksAction,
   replaceStoryMilestonesAction,
   replaceTidbitsAction,
   replaceTravelGuideItemsAction,
@@ -13,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/session";
 import { getContentEditorSiteForUser } from "@/server/repositories/wedding-site";
 import { getAiDraftAvailability } from "@/server/services/ai/availability";
+import { getEffectivePlanForUserId, getPlanLimits } from "@/server/services/plan";
 import {
   directBlobUploadsEnabled,
   storageUploadsConfigurationMessage,
@@ -21,10 +23,13 @@ import {
 
 export default async function DashboardContentPage() {
   const user = await requireUser();
-  const [site, ai] = await Promise.all([
+  const [site, ai, planKey] = await Promise.all([
     getContentEditorSiteForUser(user.id),
     getAiDraftAvailability(user),
+    getEffectivePlanForUserId(user),
   ]);
+  // null = unlimited. The server action enforces this authoritatively.
+  const registryCap = getPlanLimits(planKey).maxRegistryLinks;
   if (!site) {
     return (
       <DashboardUnavailableState
@@ -127,6 +132,48 @@ export default async function DashboardContentPage() {
           },
         ]}
         onSave={replaceFaqItemsAction}
+        aiEnabled={ai.enabled}
+        aiRemainingToday={ai.remainingToday}
+        aiRemainingLifetime={ai.remainingLifetime}
+      />
+      <ArrayEditor
+        title="Gift registry"
+        description="Link the registries, experience funds, or charities you've already set up elsewhere. Guests open them in a new tab — nothing is paid through this site."
+        items={site.registryLinks.map((item) => ({
+          label: item.label,
+          url: item.url,
+          category: item.category,
+          note: item.note ?? "",
+        }))}
+        emptyItem={{ label: "", url: "", category: "REGISTRY", note: "" }}
+        fields={[
+          { name: "label", label: "Label", type: "text", placeholder: "Our home wishlist" },
+          { name: "url", label: "Link", type: "url", placeholder: "https://..." },
+          {
+            name: "category",
+            label: "Type",
+            type: "select",
+            options: [
+              { value: "REGISTRY", label: "Registry" },
+              { value: "EXPERIENCE", label: "Experience" },
+              { value: "CHARITY", label: "Charity" },
+              { value: "OTHER", label: "Other" },
+            ],
+          },
+          {
+            name: "note",
+            label: "Note for guests",
+            type: "textarea",
+            aiAssist: { kind: "registry_note", contextFromField: "label" },
+          },
+        ]}
+        onSave={replaceRegistryLinksAction}
+        maxItems={registryCap ?? undefined}
+        maxItemsNote={
+          registryCap === null
+            ? undefined
+            : `Your plan includes up to ${registryCap} registry links. Upgrade to Together for unlimited links.`
+        }
         aiEnabled={ai.enabled}
         aiRemainingToday={ai.remainingToday}
         aiRemainingLifetime={ai.remainingLifetime}

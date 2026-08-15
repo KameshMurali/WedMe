@@ -66,6 +66,7 @@ export const sectionOrder = [
   "EXPERIENCE",
   "GALLERY",
   "VIDEOS",
+  "REGISTRY",
   "RSVP",
   "MEMORIES",
   "MESSAGES",

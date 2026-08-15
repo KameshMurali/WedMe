@@ -71,6 +71,29 @@ export async function getEffectivePlanForUser(
   return getWorkspacePlanForSite(siteId);
 }
 
+// Same admin override as getEffectivePlanForUser, but keyed on the user rather
+// than a site id — for dashboard server components that need plan-derived UI
+// caps in parallel with (not after) their site query.
+export async function getEffectivePlanForUserId(user: {
+  id: string;
+  email: string;
+}): Promise<PlanKey> {
+  if (isAdminEmail(user.email)) {
+    return "forever";
+  }
+
+  try {
+    const couple = await prisma.couple.findUnique({
+      where: { primaryUserId: user.id },
+      select: { planKey: true, planExpiresAt: true },
+    });
+    return resolvePlanKey(couple?.planKey, couple?.planExpiresAt);
+  } catch (error) {
+    console.error("getEffectivePlanForUserId failed; defaulting to hello", error);
+    return "hello";
+  }
+}
+
 export function getPlanLimits(plan: PlanKey) {
   return planLimits[plan];
 }

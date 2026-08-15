@@ -153,6 +153,13 @@ function buildSnapshot(record: PublicWeddingSiteRecord): SiteSnapshot {
       youtubeId: video.youtubeId,
       thumbnailUrl: video.thumbnailUrl,
     })),
+    registryLinks: (record.registryLinks ?? []).map((link) => ({
+      id: link.id,
+      label: link.label,
+      url: link.url,
+      category: link.category,
+      note: link.note,
+    })),
   };
 }
 
@@ -311,6 +318,24 @@ function normalizePublishedSnapshot(record: PublicWeddingSiteRecord, snapshotVal
         .filter((item) => item.youtubeId.length > 0)
     : base.embeddedVideos;
 
+  // DELIBERATE DEVIATION from the `?? base.X` fallback used by every other
+  // array above: snapshots published before the registry feature existed have
+  // no `registryLinks` key, and falling back to `base` (live draft data) would
+  // leak unpublished registry links onto an already-published site. Default to
+  // an empty list instead — old sites render exactly as they did before.
+  const registryLinks = Array.isArray(snapshotValue.registryLinks)
+    ? snapshotValue.registryLinks
+        .filter(isRecord)
+        .map((item, index) => ({
+          id: asString(item.id, `registry-${index}`),
+          label: asString(item.label, "Registry"),
+          url: asString(item.url, ""),
+          category: asString(item.category, "REGISTRY"),
+          note: asNullableString(item.note),
+        }))
+        .filter((item) => /^https?:\/\//i.test(item.url))
+    : [];
+
   const sections = Array.isArray(snapshotValue.sections)
     ? snapshotValue.sections
         .filter(isRecord)
@@ -377,6 +402,7 @@ function normalizePublishedSnapshot(record: PublicWeddingSiteRecord, snapshotVal
     dressCodeGuides,
     mediaAssets,
     embeddedVideos,
+    registryLinks,
   };
 }
 

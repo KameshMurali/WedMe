@@ -7,6 +7,7 @@ import {
   ExperienceSection,
   GallerySection,
   HeroSection,
+  RegistrySection,
   ScheduleSection,
   StorySection,
   TidbitsSection,
@@ -54,6 +55,7 @@ export default async function WeddingHomePage({
         <ExperienceSection items={snapshot.travelGuideItems} faqItems={snapshot.faqItems} />
         <GallerySection assets={snapshot.mediaAssets} condensed />
         <VideoSection videos={snapshot.embeddedVideos} />
+        <RegistrySection links={snapshot.registryLinks} condensed />
       </main>
     </SiteShell>
   );

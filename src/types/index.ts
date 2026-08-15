@@ -129,4 +129,11 @@ export type SiteSnapshot = {
     youtubeId: string;
     thumbnailUrl: string | null;
   }>;
+  registryLinks: Array<{
+    id: string;
+    label: string;
+    url: string;
+    category: string;
+    note: string | null;
+  }>;
 };

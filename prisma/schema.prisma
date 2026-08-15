@@ -182,6 +182,7 @@ model WeddingSite {
   dressCodeGuides  DressCodeGuide[]
   mediaAssets      MediaAsset[]
   embeddedVideos   EmbeddedVideo[]
+  registryLinks    RegistryLink[]
   inviteGroups     InviteGroup[]
   rsvpResponses    RSVPResponse[]
   guestUploads     GuestUpload[]
@@ -310,6 +311,22 @@ model Tidbit {
   body          String
   category      String
   iconKey       String?
+  sortOrder     Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  weddingSite   WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+}
+
+// Gift registry as a link aggregator: couples point guests at registries they
+// already set up elsewhere. Deliberately stores no money-movement data — see
+// the registry section of the build spec for why cash funds are out of scope.
+model RegistryLink {
+  id            String      @id @default(cuid())
+  weddingSiteId String
+  label         String
+  url           String
+  category      String // "REGISTRY" | "EXPERIENCE" | "CHARITY" | "OTHER"
+  note          String?
   sortOrder     Int
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
