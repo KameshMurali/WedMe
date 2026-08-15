@@ -3,10 +3,14 @@ import Link from "next/link";
 
 import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { ReadinessCard } from "@/components/admin/readiness-card";
+import { PlanCard } from "@/components/dashboard/plan-card";
+import { PurchaseConfirmation } from "@/components/dashboard/purchase-confirmation";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
+import { findPlan } from "@/lib/pricing";
 import { computeReadiness } from "@/lib/readiness";
 import { requireUser } from "@/server/auth/session";
+import { getPlanSummaryForUserId } from "@/server/services/plan";
 import {
   ensureWeddingSiteForUser,
   getDashboardOverviewForUser,
@@ -14,8 +18,12 @@ import {
   getReadinessInputForUser,
 } from "@/server/repositories/wedding-site";
 
-export default async function DashboardHomePage() {
-  const user = await requireUser();
+export default async function DashboardHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ purchase?: string }>;
+}) {
+  const [user, { purchase }] = await Promise.all([requireUser(), searchParams]);
   // siteId resolution is memoized (React cache) and shared with the overview
   // fetch, so resolving it up front lets the overview and summary queries run in
   // parallel instead of waterfalling overview → summary.
@@ -33,10 +41,11 @@ export default async function DashboardHomePage() {
     return unavailable;
   }
 
-  const [site, summary, readinessInput] = await Promise.all([
+  const [site, summary, readinessInput, planSummary] = await Promise.all([
     getDashboardOverviewForUser(user.id),
     getDashboardSummary(siteId),
     getReadinessInputForUser(user.id),
+    getPlanSummaryForUserId(user),
   ]);
 
   if (!site) {
@@ -54,6 +63,14 @@ export default async function DashboardHomePage() {
           Track activity, review responses, and keep your draft moving toward publish.
         </p>
       </div>
+      {purchase === "success" ? (
+        <PurchaseConfirmation
+          planKey={planSummary.planKey}
+          planName={planSummary.planKey === "hello" ? null : findPlan(planSummary.planKey).name}
+          supportEmail="hello@tonewbeginning.com"
+        />
+      ) : null}
+      <PlanCard planKey={planSummary.planKey} expiresAt={planSummary.expiresAt} />
       {readiness ? <ReadinessCard readiness={readiness} /> : null}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
         <StatCard label="RSVP responses" value={summary.rsvpCount} />
