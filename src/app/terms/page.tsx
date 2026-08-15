@@ -40,6 +40,26 @@ export default function TermsPage() {
               that occurs under your account.
             </p>
 
+            <h2>Payments and refunds</h2>
+            <p>
+              Paid plans are one-time payments. There are no subscriptions and no recurring
+              billing, so there is nothing to cancel. <strong>Together</strong> covers your wedding
+              year plus a six-month post-wedding archive. <strong>Forever</strong> is a single
+              payment with no expiry.
+            </p>
+            <p>
+              <strong>We offer a full refund within 14 days of purchase, no questions asked.</strong>{" "}
+              You do not need to give a reason. Email us from the address on your account and we
+              will refund the original payment method. Refunds typically appear within 5–10 business
+              days, depending on your bank.
+            </p>
+            <p>
+              Payments are processed by Paddle.com, which acts as the Merchant of Record for your
+              purchase. Paddle handles billing, invoicing, and applicable sales tax or VAT. Your
+              card or bank statement will show <strong>Paddle</strong> rather than
+              ToNewBeginning.com — if you do not recognise a charge, that is why.
+            </p>
+
             <h2>Guest use</h2>
             <p>
               Guests who submit RSVPs, messages, or photo uploads to a wedding site grant the couple
