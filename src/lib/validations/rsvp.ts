@@ -3,8 +3,14 @@ import { z } from "zod";
 export const rsvpSchema = z.object({
   slug: z.string().min(3).transform((value) => value.trim().toLowerCase()),
   guestName: z.string().min(2).max(120),
-  guestEmail: z.string().email().optional().or(z.literal("")),
-  guestPhone: z.string().max(30).optional().or(z.literal("")),
+  // Required: together with the name these form the identity used to block
+  // duplicate RSVPs, and the couple needs a way to reach every guest.
+  guestEmail: z.string().min(1, "An email address is required.").email("Enter a valid email address."),
+  guestPhone: z
+    .string()
+    .min(1, "A contact number is required.")
+    .max(30)
+    .refine((value) => value.replace(/\D/g, "").length >= 7, "Enter a valid contact number."),
   inviteCode: z.string().max(40).optional().or(z.literal("")),
   status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
   attendeeCount: z.coerce.number().min(1).max(10),
