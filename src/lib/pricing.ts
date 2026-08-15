@@ -115,7 +115,6 @@ export const plans: Plan[] = [
     highlights: [
       "AI-assisted content drafting",
       "Unlimited events, RSVPs, uploads",
-      "No ToNewBeginning branding",
       "Password protection + invite codes",
       "Priority email support",
     ],
