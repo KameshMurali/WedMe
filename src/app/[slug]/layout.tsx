@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { resolveSiteMetadata } from "@/lib/site-metadata";
 import { getPublicSiteStatus, getPublishedSiteSnapshot } from "@/server/services/site-snapshot";
 
 type RouteParams = {
@@ -15,21 +16,30 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
     return {};
   }
 
+  // Everything below is derived from the couple's own content unless they
+  // explicitly overrode it in Settings — so a site that never touches the SEO
+  // fields still gets a proper title, description, and share image.
+  const meta = resolveSiteMetadata(snapshot.site);
+
   return {
-    title: snapshot.site.seoTitle ?? `${snapshot.site.brandName} | Wedding Website`,
-    description:
-      snapshot.site.seoDescription ??
-      `${snapshot.site.coupleNames} invite you to celebrate their wedding. View events, RSVP, explore the gallery, and share your wishes, all on their personal wedding website.`,
+    title: meta.title,
+    description: meta.description,
     alternates: {
-      canonical: snapshot.site.canonicalUrl ?? `/${slug}`,
+      canonical: meta.canonicalUrl,
     },
     robots: snapshot.publish.noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: snapshot.site.seoTitle ?? snapshot.site.brandName,
-      description:
-        snapshot.site.seoDescription ??
-        `${snapshot.site.coupleNames} invite you to celebrate their wedding. View events, RSVP, explore the gallery, and share your wishes.`,
-      images: snapshot.site.ogImageUrl ? [snapshot.site.ogImageUrl] : [],
+      type: "website",
+      title: meta.title,
+      description: meta.description,
+      url: meta.canonicalUrl,
+      images: [meta.ogImageUrl],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta.title,
+      description: meta.description,
+      images: [meta.ogImageUrl],
     },
   };
 }

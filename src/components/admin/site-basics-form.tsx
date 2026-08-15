@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { SiteAssetUploadField } from "@/components/admin/site-asset-upload-field
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { deriveCanonicalUrl, deriveSeoDescription, deriveSeoTitle } from "@/lib/site-metadata";
 import { cn } from "@/lib/utils";
 import { siteBasicsSchema } from "@/lib/validations/engagement";
 
@@ -82,6 +83,38 @@ export function SiteBasicsForm({
   const heroImageUrl = watch("heroImageUrl") ?? "";
   const heroVideoUrl = watch("heroVideoUrl") ?? "";
   const ogImageUrl = watch("ogImageUrl") ?? "";
+
+  // Live preview of what we'll publish when the SEO fields are left blank, so
+  // the placeholders update as the couple edits their names/date/location.
+  const partnerOneName = watch("partnerOneName") ?? "";
+  const partnerTwoName = watch("partnerTwoName") ?? "";
+  const brandName = watch("brandName") ?? "";
+  const weddingDate = watch("weddingDate") ?? "";
+  const locationSummary = watch("locationSummary") ?? "";
+  const autoMeta = useMemo(() => {
+    const coupleNames = [partnerOneName, partnerTwoName].filter(Boolean).join(" & ");
+    const source = {
+      slug: defaultValues.slug,
+      brandName,
+      coupleNames,
+      weddingDate: weddingDate || null,
+      locationSummary: locationSummary || null,
+      heroImageUrl: heroImageUrl || null,
+    };
+    return {
+      title: deriveSeoTitle(source),
+      description: deriveSeoDescription(source),
+      canonicalUrl: deriveCanonicalUrl(source),
+    };
+  }, [
+    partnerOneName,
+    partnerTwoName,
+    brandName,
+    weddingDate,
+    locationSummary,
+    heroImageUrl,
+    defaultValues.slug,
+  ]);
 
   const onSubmit = handleSubmit((values) => {
     const formData = new FormData();
@@ -243,50 +276,82 @@ export function SiteBasicsForm({
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="SEO title" error={errors.seoTitle?.message}>
-          <Input aria-invalid={Boolean(errors.seoTitle)} placeholder="SEO title" {...register("seoTitle")} />
-        </Field>
-        <Field label="OG image URL" error={errors.ogImageUrl?.message}>
-          <Input
-            aria-invalid={Boolean(errors.ogImageUrl)}
-            placeholder="OG image URL or uploaded file path"
-            {...register("ogImageUrl")}
+      {/* Search & sharing is handled automatically from the couple's own
+          content — these overrides are collapsed so nobody has to understand
+          "Open Graph" or "canonical URL" to publish a good-looking site. Each
+          placeholder shows the exact value that will be used when left blank. */}
+      <details className="group rounded-3xl border border-black/8 bg-white/60 p-5">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+          <span>
+            <span className="block text-sm font-semibold text-[color:var(--text)]">
+              Search &amp; sharing (optional)
+            </span>
+            <span className="mt-1 block text-xs leading-6 text-[color:var(--muted)]">
+              We fill these in automatically from your names, date, and photos. Open only if you
+              want to override what Google and WhatsApp show.
+            </span>
+          </span>
+          <span className="flex-none rounded-full bg-black/5 px-3 py-1 text-xs font-semibold text-[color:var(--muted)] transition group-open:bg-[color:var(--accent)]/15 group-open:text-[color:var(--primary)]">
+            <span className="group-open:hidden">Show</span>
+            <span className="hidden group-open:inline">Hide</span>
+          </span>
+        </summary>
+
+        <div className="mt-5 space-y-4 border-t border-black/5 pt-5">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Search title" error={errors.seoTitle?.message}>
+              <Input
+                aria-invalid={Boolean(errors.seoTitle)}
+                placeholder={autoMeta.title}
+                {...register("seoTitle")}
+              />
+            </Field>
+            <Field label="Share image URL" error={errors.ogImageUrl?.message}>
+              <Input
+                aria-invalid={Boolean(errors.ogImageUrl)}
+                placeholder={heroImageUrl ? "Using your hero photo" : "Using the ToNewBeginning card"}
+                {...register("ogImageUrl")}
+              />
+            </Field>
+          </div>
+
+          <SiteAssetUploadField
+            field="ogImageUrl"
+            label="Share image upload"
+            slug={defaultValues.slug}
+            currentUrl={ogImageUrl}
+            kind="image"
+            useSignedUploads={useSignedUploads}
+            uploadsEnabled={uploadsEnabled}
+            disabledReason={disabledReason}
+            onUploaded={(url) => {
+              setValue("ogImageUrl", url, { shouldDirty: true, shouldValidate: true });
+              setFormMessage(null);
+            }}
+            onClear={() => setValue("ogImageUrl", "", { shouldDirty: true, shouldValidate: true })}
           />
-        </Field>
-      </div>
 
-      <SiteAssetUploadField
-        field="ogImageUrl"
-        label="Open Graph image upload"
-        slug={defaultValues.slug}
-        currentUrl={ogImageUrl}
-        kind="image"
-        useSignedUploads={useSignedUploads}
-        uploadsEnabled={uploadsEnabled}
-        disabledReason={disabledReason}
-        onUploaded={(url) => {
-          setValue("ogImageUrl", url, { shouldDirty: true, shouldValidate: true });
-          setFormMessage(null);
-        }}
-        onClear={() => setValue("ogImageUrl", "", { shouldDirty: true, shouldValidate: true })}
-      />
+          <Field label="Search description" error={errors.seoDescription?.message}>
+            <Textarea
+              aria-invalid={Boolean(errors.seoDescription)}
+              placeholder={autoMeta.description}
+              {...register("seoDescription")}
+            />
+          </Field>
 
-      <Field label="SEO description" error={errors.seoDescription?.message}>
-        <Textarea
-          aria-invalid={Boolean(errors.seoDescription)}
-          placeholder="SEO description"
-          {...register("seoDescription")}
-        />
-      </Field>
+          <Field label="Canonical URL" error={errors.canonicalUrl?.message}>
+            <Input
+              aria-invalid={Boolean(errors.canonicalUrl)}
+              placeholder={autoMeta.canonicalUrl}
+              {...register("canonicalUrl")}
+            />
+          </Field>
 
-      <Field label="Canonical URL" error={errors.canonicalUrl?.message}>
-        <Input
-          aria-invalid={Boolean(errors.canonicalUrl)}
-          placeholder="Canonical URL"
-          {...register("canonicalUrl")}
-        />
-      </Field>
+          <p className="text-xs leading-6 text-[color:var(--muted)]">
+            Leave any field blank and we use the greyed-out value shown in it.
+          </p>
+        </div>
+      </details>
 
       {formMessage ? (
         <div
