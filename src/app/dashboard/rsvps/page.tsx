@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
-import { Card } from "@/components/ui/card";
+import { RsvpManager } from "@/components/admin/rsvp-manager";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth/session";
 import { getRsvpManagerSiteForUser } from "@/server/repositories/wedding-site";
@@ -30,36 +30,11 @@ export default async function DashboardRsvpsPage() {
           <Link href="/api/dashboard/rsvps/export">Export CSV</Link>
         </Button>
       </div>
-      <div className="grid gap-4">
-        {site.rsvpResponses.map((response) => (
-          <Card key={response.id}>
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <h2 className="font-display text-3xl text-[color:var(--text)]">{response.guestName}</h2>
-                <p className="mt-2 text-sm text-[color:var(--muted)]">
-                  {response.status} · {response.attendeeCount} guest(s) · {response.guestEmail ?? "No email"}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {response.eventSelections.map((selection) => (
-                    <span
-                      key={selection.id}
-                      className="rounded-full bg-[color:var(--accent)]/10 px-3 py-1 text-xs font-medium text-[color:var(--primary)]"
-                    >
-                      {selection.event.title}: {selection.status}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="max-w-md space-y-2 text-sm text-[color:var(--muted)]">
-                {response.noteToCouple ? <p>Note: {response.noteToCouple}</p> : null}
-                {response.mealPreference ? <p>Meal: {response.mealPreference}</p> : null}
-                {response.accessibilityNeeds ? <p>Accessibility: {response.accessibilityNeeds}</p> : null}
-                {response.travelNotes ? <p>Travel: {response.travelNotes}</p> : null}
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <RsvpManager
+        responses={site.rsvpResponses}
+        partnerOneName={site.couple?.partnerOneName ?? "Partner 1"}
+        partnerTwoName={site.couple?.partnerTwoName ?? "Partner 2"}
+      />
     </div>
   );
 }

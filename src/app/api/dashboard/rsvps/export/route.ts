@@ -3,6 +3,18 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/server/auth/session";
 import { getRsvpManagerSiteForUser } from "@/server/repositories/wedding-site";
 
+// Mirrors the dashboard labels so the export reads the same as the UI.
+function sideLabel(
+  side: string | null | undefined,
+  partnerOne: string | undefined,
+  partnerTwo: string | undefined,
+) {
+  if (side === "PARTNER_ONE") return `${partnerOne ?? "Partner 1"}'s side`;
+  if (side === "PARTNER_TWO") return `${partnerTwo ?? "Partner 2"}'s side`;
+  if (side === "BOTH") return "Both / friend of the couple";
+  return "";
+}
+
 function quote(value: string | number | null | undefined) {
   const safeValue = value == null ? "" : String(value);
   return `"${safeValue.replaceAll('"', '""')}"`;
@@ -26,6 +38,7 @@ export async function GET() {
     "Status",
     "Attendee count",
     "Invite code",
+    "Side",
     "Meal preference",
     "Accessibility needs",
     "Travel notes",
@@ -38,6 +51,7 @@ export async function GET() {
     response.status,
     response.attendeeCount,
     response.inviteCode,
+    sideLabel(response.guestSide, site.couple?.partnerOneName, site.couple?.partnerTwoName),
     response.mealPreference,
     response.accessibilityNeeds,
     response.travelNotes,

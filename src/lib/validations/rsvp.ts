@@ -7,6 +7,8 @@ export const rsvpSchema = z.object({
   inviteCode: z.string().max(40).optional().or(z.literal("")),
   status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
   attendeeCount: z.coerce.number().min(1).max(10),
+  // Neutral keys; the guest-facing labels are rendered from the couple's names.
+  guestSide: z.enum(["PARTNER_ONE", "PARTNER_TWO", "BOTH"]).optional().or(z.literal("")),
   mealPreference: z.string().max(120).optional().or(z.literal("")),
   accommodationNeeds: z.string().max(200).optional().or(z.literal("")),
   travelNotes: z.string().max(300).optional().or(z.literal("")),

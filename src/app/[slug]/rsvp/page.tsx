@@ -23,6 +23,13 @@ export default async function RsvpPage({ params }: { params: Promise<{ slug: str
   const snapshot = await getPublishedSiteSnapshot(slug);
   if (!snapshot) notFound();
 
+  // The snapshot stores the combined "A & B" string; split it so the RSVP form
+  // can label the "whose side" options with each partner's own name. Falls back
+  // to generic labels if a site uses a single brand name.
+  const [partnerOneRaw, partnerTwoRaw] = snapshot.site.coupleNames.split(" & ");
+  const partnerOneName = partnerOneRaw?.trim() || "Partner 1";
+  const partnerTwoName = partnerTwoRaw?.trim() || "Partner 2";
+
   const base = `https://wed.tonewbeginning.com`;
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -49,6 +56,8 @@ export default async function RsvpPage({ params }: { params: Promise<{ slug: str
             <RsvpForm
               slug={slug}
               isOpen={snapshot.publish.isRsvpOpen}
+              partnerOneName={partnerOneName}
+              partnerTwoName={partnerTwoName}
               events={snapshot.events.map((event) => ({
                 id: event.id,
                 title: event.title,

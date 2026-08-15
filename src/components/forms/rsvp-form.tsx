@@ -20,6 +20,7 @@ function buildClientRsvpSchema(hasEvents: boolean) {
     inviteCode: z.string().optional().or(z.literal("")),
     status: z.enum(["ATTENDING", "MAYBE", "DECLINED"]),
     attendeeCount: z.number().min(1).max(10),
+    guestSide: z.enum(["PARTNER_ONE", "PARTNER_TWO", "BOTH", ""]).optional(),
     mealPreference: z.string().optional(),
     accommodationNeeds: z.string().optional(),
     travelNotes: z.string().optional(),
@@ -38,10 +39,16 @@ export function RsvpForm({
   slug,
   events,
   isOpen,
+  partnerOneName,
+  partnerTwoName,
 }: {
   slug: string;
   events: Array<{ id: string; title: string; dayLabel: string }>;
   isOpen: boolean;
+  // Used to label the "whose side" options with the couple's actual names
+  // instead of hardcoded bride/groom wording.
+  partnerOneName: string;
+  partnerTwoName: string;
 }) {
   const {
     register,
@@ -65,6 +72,7 @@ export function RsvpForm({
       inviteCode: values.inviteCode,
       status: values.status,
       attendeeCount: values.attendeeCount,
+      guestSide: values.guestSide,
       mealPreference: values.mealPreference,
       accommodationNeeds: values.accommodationNeeds,
       travelNotes: values.travelNotes,
@@ -188,6 +196,17 @@ export function RsvpForm({
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label htmlFor="rsvp-side" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">
+            Whose side are you joining from?
+          </label>
+          <Select id="rsvp-side" {...register("guestSide")}>
+            <option value="">Prefer not to say</option>
+            <option value="PARTNER_ONE">{partnerOneName}&apos;s side</option>
+            <option value="PARTNER_TWO">{partnerTwoName}&apos;s side</option>
+            <option value="BOTH">Both / friend of the couple</option>
+          </Select>
+        </div>
         <div>
           <label htmlFor="rsvp-meal" className="mb-1.5 block text-sm font-medium text-[color:var(--text)]">Meal preferences</label>
           <Input id="rsvp-meal" placeholder="e.g. Vegetarian, Vegan, No nuts" {...register("mealPreference")} />

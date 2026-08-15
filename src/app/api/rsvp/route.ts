@@ -85,6 +85,7 @@ export async function POST(request: Request) {
           inviteCode: parsed.data.inviteCode || null,
           status: parsed.data.status,
           attendeeCount: parsed.data.attendeeCount,
+          guestSide: parsed.data.guestSide || null,
           mealPreference: parsed.data.mealPreference || null,
           accommodationNeeds: parsed.data.accommodationNeeds || null,
           travelNotes: parsed.data.travelNotes || null,
