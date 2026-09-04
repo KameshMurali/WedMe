@@ -1,3 +1,4 @@
+import { ScrollProgressBar } from "@/components/public/motion-primitives";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { SiteHeader } from "@/components/public/site-header";
 import { findTemplateByKey } from "@/lib/template-registry";
@@ -71,6 +72,8 @@ export function SiteShell({
   const visibleNavItems = filterNavItems(navigationConfig, snapshot.sections);
 
   return (
+    <>
+    <ScrollProgressBar />
     <div
       style={
         {
@@ -162,5 +165,6 @@ export function SiteShell({
         </div>
       </footer>
     </div>
+    </>
   );
 }
