@@ -137,6 +137,7 @@ const shadowStyleLabels: Record<string, string> = {
 const headingFontLabels: Record<string, string> = {
   display: "Display serif",
   luxe: "Modern luxe serif",
+  tamil: "Tamil serif (Noto)",
 };
 
 const bodyFontLabels: Record<string, string> = {

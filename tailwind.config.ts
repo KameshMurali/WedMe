@@ -5,9 +5,14 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        body: ["var(--font-manrope)", "Manrope", "system-ui", "sans-serif"],
-        display: ["var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
+        body: ["var(--font-body-face)", "var(--font-manrope)", "Manrope", "system-ui", "sans-serif"],
+        // --font-heading-face is set per-site from the couple's headingFontKey
+        // in site-shell.tsx. It falls back to Cormorant, so every existing
+        // `font-display` usage keeps working unchanged while now honouring the
+        // choice the customizer has always let couples make.
+        display: ["var(--font-heading-face)", "var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
         luxe: ["var(--font-cinzel)", "Cinzel", "Georgia", "serif"],
+        tamil: ["var(--font-tamil)", "Noto Serif Tamil", "Georgia", "serif"],
       },
       colors: {
         ink: "#1f1724",

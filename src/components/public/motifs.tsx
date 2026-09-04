@@ -171,3 +171,13 @@ export function TemplateMotif({
 export function hasMotif(templateKey: string): boolean {
   return templateKey in motifsByTemplate;
 }
+
+// Templates that opt into the full Tamil invitation treatment: the generated
+// monogram, the self-drawing kolam divider, and the kolam edge borders.
+// Kept as a list rather than a boolean on the registry so adding a second
+// South Indian template later is a one-line change here.
+const KOLAM_TEMPLATES = new Set(["kolam-blush"]);
+
+export function usesKolamOrnament(templateKey: string): boolean {
+  return KOLAM_TEMPLATES.has(templateKey);
+}

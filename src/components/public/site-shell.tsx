@@ -1,9 +1,25 @@
+import { KolamEdgeBorder } from "@/components/public/kolam";
 import { ScrollProgressBar } from "@/components/public/motion-primitives";
+import { usesKolamOrnament } from "@/components/public/motifs";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { SiteHeader } from "@/components/public/site-header";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { cn, formatDate } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
+
+// Resolves a stored font key to the CSS variable next/font generated for it.
+// Unknown keys fall through to the default face rather than emitting an invalid
+// var(), so a stale key from an older theme can never break rendering.
+function headingFontFace(key: string | null | undefined): string {
+  if (key === "luxe") return "var(--font-cinzel)";
+  if (key === "tamil") return "var(--font-tamil)";
+  return "var(--font-cormorant)";
+}
+
+function bodyFontFace(key: string | null | undefined): string {
+  if (key === "tamil") return "var(--font-tamil)";
+  return "var(--font-manrope)";
+}
 
 // Maps route suffix → the SectionType that gates it. "Home" has no gate (always shown).
 const navigationConfig: Array<{ href: string; label: string; sectionType?: string }> = [
@@ -84,6 +100,12 @@ export function SiteShell({
           "--primary": snapshot.theme.primaryColor,
           "--accent": snapshot.theme.accentColor,
           "--radius": snapshot.theme.borderRadius,
+          // The customizer has always let couples pick a heading font, but the
+          // public site hardcoded font-display and ignored it. Resolving the
+          // key to a face here makes every existing `font-display` usage honour
+          // the choice, without touching each call site.
+          "--font-heading-face": headingFontFace(snapshot.theme.headingFontKey),
+          "--font-body-face": bodyFontFace(snapshot.theme.bodyFontKey),
         } as React.CSSProperties
       }
       className="relative min-h-screen bg-[color:var(--background)]"
@@ -93,6 +115,7 @@ export function SiteShell({
           silently disables position: sticky, which was why the header didn't
           stay pinned on scroll. This clips the gradients without trapping the
           header. */}
+      {usesKolamOrnament(template.key) ? <KolamEdgeBorder /> : null}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className={cn("absolute inset-0", getShellBackdropClasses(template.key))} />
         <div className="absolute inset-x-0 top-0 h-[32rem] bg-gradient-to-b from-white/25 to-transparent" />
