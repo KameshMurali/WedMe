@@ -21,12 +21,19 @@ import {
   youtubeVideoSchema,
 } from "@/lib/validations/engagement";
 import { workspaceFeedbackSchema } from "@/lib/validations/feedback";
+import { findContentPack, materialisePackEvents } from "@/lib/content-packs";
+import { isPremiumTemplate } from "@/lib/template-registry";
 import { hashPassword } from "@/server/auth/password";
 import { requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getEditableWeddingSiteForUser, getWeddingSiteForUser } from "@/server/repositories/wedding-site";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
-import { effectiveEventCap, getEffectivePlanForUser, getPlanLimits } from "@/server/services/plan";
+import {
+  canUsePremiumDesign,
+  effectiveEventCap,
+  getEffectivePlanForUser,
+  getPlanLimits,
+} from "@/server/services/plan";
 import { buildPublishSnapshot } from "@/server/services/site-snapshot";
 import { ensureTemplatePresetByKey } from "@/server/services/template-presets";
 import { extractYoutubeId, getYoutubeThumbnail } from "@/lib/youtube";
@@ -157,6 +164,18 @@ export async function updateTemplateThemeAction(
     }
 
     const { templateKey, ...themeData } = parsed.data;
+
+    // Premium templates are paid-only. Authoritative — the UI lock is
+    // convenience, and this action is reachable directly with any key.
+    if (isPremiumTemplate(templateKey)) {
+      const planKey = await getEffectivePlanForUser(user, site.id);
+      if (!canUsePremiumDesign(planKey)) {
+        return {
+          error: "That design is part of Together and Forever. Upgrade to unlock it.",
+        };
+      }
+    }
+
     const template = await ensureTemplatePresetByKey(templateKey, prisma);
 
     await prisma.$transaction([
@@ -786,4 +805,66 @@ export async function submitWorkspaceFeedbackAction(
   });
 
   return { success: "Thank you! Your feedback went straight to the team." };
+}
+
+// Applies a starter content pack's events to the site.
+//
+// Deliberately ADDITIVE: pack events are appended after whatever the couple
+// already has, never replacing it. Applying a pack should never be the reason
+// someone loses hours of entered detail, so there is no destructive path here
+// at all — a couple who applies the wrong pack deletes the extra rows.
+export async function applyContentPackAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const site = await getEditableWeddingSiteForUser(user.id);
+    if (!site) return { error: "No wedding site was found for this account." };
+    const readOnlyState = guardEditableSite(site);
+    if (readOnlyState) return readOnlyState;
+
+    // Paid-only, enforced here rather than in the UI — this action is reachable
+    // directly with any pack key.
+    const planKey = await getEffectivePlanForUser(user, site.id);
+    if (!canUsePremiumDesign(planKey)) {
+      return {
+        error: "Starter content packs are part of Together and Forever. Upgrade to unlock them.",
+      };
+    }
+
+    const packKey = String(formData.get("packKey") ?? "");
+    const pack = findContentPack(packKey);
+    if (!pack) return { error: "That starter pack is no longer available." };
+
+    // Pack timings are relative to the wedding date, so it has to exist first.
+    const record = await prisma.weddingSite.findUnique({
+      where: { id: site.id },
+      select: { weddingDate: true },
+    });
+    if (!record?.weddingDate) {
+      return { error: "Set your wedding date first — pack timings are built around it." };
+    }
+
+    const existingCount = await prisma.event.count({ where: { weddingSiteId: site.id } });
+    const events = materialisePackEvents(pack, record.weddingDate);
+
+    await prisma.$transaction([
+      prisma.event.createMany({
+        data: events.map((event, index) => ({
+          ...event,
+          weddingSiteId: site.id,
+          sortOrder: existingCount + index,
+        })),
+      }),
+      touchSite(site.id),
+    ]);
+
+    revalidateDashboardPaths();
+    return {
+      success: `Added ${events.length} events from ${pack.name}. Venues and timings are placeholders — edit them to match your plans.`,
+    };
+  } catch (error) {
+    return { error: formatDashboardActionError(error, "Unable to apply that starter pack.") };
+  }
 }

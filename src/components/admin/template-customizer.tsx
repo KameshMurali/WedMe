@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Palette } from "lucide-react";
+import { CheckCircle2, Lock, Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,7 @@ type TemplateOption = {
   description: string;
   mood: string;
   previewGradient: string;
+  isPremium: boolean;
   themeDefaults: Omit<TemplateValues, "templateKey">;
 };
 
@@ -193,9 +194,13 @@ function ColorControl({
 export function TemplateCustomizer({
   templates,
   defaultValues,
+  canUsePremium,
 }: {
   templates: TemplateOption[];
   defaultValues: TemplateValues;
+  // Whether this workspace may apply premium designs. Presentation only — the
+  // server action re-checks the plan, so a tampered client gains nothing.
+  canUsePremium: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -295,7 +300,8 @@ export function TemplateCustomizer({
         {templates.map((template) => {
           const isSelected = template.key === selectedTemplateKey;
           const isApplying = pendingTemplateKey === template.key;
-          const disabled = pendingTemplateKey !== null;
+          const locked = template.isPremium && !canUsePremium;
+          const disabled = pendingTemplateKey !== null || locked;
 
           return (
             <button
@@ -303,6 +309,7 @@ export function TemplateCustomizer({
               type="button"
               onClick={() => applyTemplate(template)}
               disabled={disabled}
+              title={locked ? "Included with Together and Forever" : undefined}
               className={cn("text-left", disabled && !isApplying && "opacity-60")}
             >
               <Card
@@ -317,6 +324,11 @@ export function TemplateCustomizer({
                     <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[color:var(--text)] shadow-sm">
                       <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[color:var(--accent)] border-t-transparent" />
                       Applying…
+                    </span>
+                  ) : locked ? (
+                    <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[color:var(--text)] shadow-sm">
+                      <Lock className="h-3.5 w-3.5" />
+                      Together
                     </span>
                   ) : isSelected ? (
                     <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[color:var(--text)] shadow-sm">
