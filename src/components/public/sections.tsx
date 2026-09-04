@@ -3,6 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Clock3, Gift, Heart, MapPin, PlayCircle, Sparkles } from "lucide-react";
 
+import { TemplateMotif } from "@/components/public/motifs";
+import { ParallaxLayer, StaggerGroup, StaggerItem } from "@/components/public/motion-primitives";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -342,6 +345,17 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
       <div className="relative overflow-hidden rounded-[calc(var(--radius)+0.7rem)] border border-[color:var(--accent)]/16 bg-[color:var(--surface)] rich-shadow">
         <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-[color:var(--accent)]/10" />
         <div className="absolute inset-0 premium-grid opacity-15" />
+        {/* Cultural ornament for the premium templates, drifting slowly as the
+            hero scrolls. Sits behind everything and is purely decorative. */}
+        <ParallaxLayer
+          className="pointer-events-none absolute inset-0 text-[color:var(--accent)] opacity-[0.07]"
+          distance={40}
+        >
+          <TemplateMotif
+            templateKey={snapshot.theme.templateKey}
+            className="h-[140%] w-full object-cover"
+          />
+        </ParallaxLayer>
         <div className="relative">
           {template.heroVariant === "editorial" ? <HeroSectionEditorial snapshot={snapshot} /> : null}
           {template.heroVariant === "split" ? <HeroSectionSplit snapshot={snapshot} /> : null}
@@ -434,13 +448,15 @@ export function EventsSection({
         title="Every celebration, clearly planned and beautifully presented."
         description="Each event includes timing, location, dress code, guidance, and invitation rules."
       />
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+      <StaggerGroup className="mt-10 grid gap-6 lg:grid-cols-2">
         {items.map((event, index) => (
-          <Card
+          <StaggerItem
             key={event.id}
+            className={index === 0 ? "lg:col-span-2" : undefined}
+          >
+          <Card
             className={cn(
-              "overflow-hidden p-0",
-              index === 0 ? "lg:col-span-2" : "",
+              "h-full overflow-hidden p-0",
             )}
           >
             <div
@@ -535,8 +551,9 @@ export function EventsSection({
               </div>
             </div>
           </Card>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerGroup>
     </section>
   );
 }
