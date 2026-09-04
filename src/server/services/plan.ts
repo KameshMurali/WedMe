@@ -129,6 +129,12 @@ export async function getPlanSummaryForUserId(
   }
 }
 
+// Premium designs (cultural templates + starter content packs) are a paid
+// feature. Admins resolve to "forever" upstream, so they pass here too.
+export function canUsePremiumDesign(plan: PlanKey): boolean {
+  return plan === "together" || plan === "forever";
+}
+
 export function getPlanLimits(plan: PlanKey) {
   return planLimits[plan];
 }

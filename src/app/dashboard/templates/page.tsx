@@ -1,13 +1,20 @@
+import { ContentPackPicker } from "@/components/admin/content-pack-picker";
 import { DashboardUnavailableState } from "@/components/admin/dashboard-unavailable-state";
 import { TemplateCustomizer } from "@/components/admin/template-customizer";
 import { Card } from "@/components/ui/card";
+import { contentPacks } from "@/lib/content-packs";
 import { templateRegistry } from "@/lib/template-registry";
 import { requireUser } from "@/server/auth/session";
 import { getTemplateSettingsForUser } from "@/server/repositories/wedding-site";
+import { canUsePremiumDesign, getEffectivePlanForUserId } from "@/server/services/plan";
 
 export default async function DashboardTemplatesPage() {
   const user = await requireUser();
-  const site = await getTemplateSettingsForUser(user.id);
+  const [site, planKey] = await Promise.all([
+    getTemplateSettingsForUser(user.id),
+    getEffectivePlanForUserId(user),
+  ]);
+  const canUsePremium = canUsePremiumDesign(planKey);
   if (!site) {
     return (
       <DashboardUnavailableState
@@ -32,8 +39,10 @@ export default async function DashboardTemplatesPage() {
             description: template.description,
             mood: template.mood,
             previewGradient: template.previewGradient,
+            isPremium: template.tier === "premium",
             themeDefaults: template.themeDefaults,
           }))}
+          canUsePremium={canUsePremium}
           defaultValues={{
             templateKey: site.templatePreset.key,
             paletteKey: site.theme?.paletteKey ?? "champagne",
@@ -49,6 +58,17 @@ export default async function DashboardTemplatesPage() {
             buttonVariant: site.theme?.buttonVariant ?? "solid",
             shadowStyle: site.theme?.shadowStyle ?? "glow",
           }}
+        />
+      </Card>
+      <Card>
+        <ContentPackPicker
+          packs={contentPacks.map((pack) => ({
+            key: pack.key,
+            name: pack.name,
+            tradition: pack.tradition,
+            description: pack.description,
+          }))}
+          canUsePremium={canUsePremium}
         />
       </Card>
     </div>
