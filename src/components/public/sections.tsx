@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Clock3, Gift, Heart, MapPin, PlayCircle, Sparkles } from "lucide-react";
 
-import { TemplateMotif } from "@/components/public/motifs";
+import { CoupleMonogram } from "@/components/public/couple-monogram";
+import { KolamDivider } from "@/components/public/kolam";
+import { TemplateMotif, usesKolamOrnament } from "@/components/public/motifs";
 import { ParallaxLayer, StaggerGroup, StaggerItem } from "@/components/public/motion-primitives";
 
 import { Badge } from "@/components/ui/badge";
@@ -357,6 +359,11 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
           />
         </ParallaxLayer>
         <div className="relative">
+          {usesKolamOrnament(snapshot.theme.templateKey) ? (
+            <div className="flex justify-center px-6 pt-10 sm:pt-12">
+              <CoupleMonogram coupleNames={snapshot.site.coupleNames} />
+            </div>
+          ) : null}
           {template.heroVariant === "editorial" ? <HeroSectionEditorial snapshot={snapshot} /> : null}
           {template.heroVariant === "split" ? <HeroSectionSplit snapshot={snapshot} /> : null}
           {template.heroVariant === "cinematic" ? <HeroSectionCinematic snapshot={snapshot} /> : null}
@@ -364,6 +371,8 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
           {template.heroVariant === "classic" ? <HeroSectionClassic snapshot={snapshot} /> : null}
         </div>
       </div>
+      {/* Drawn kolam closing the hero, in place of a plain rule. */}
+      {usesKolamOrnament(snapshot.theme.templateKey) ? <KolamDivider className="mt-14" /> : null}
     </section>
   );
 }

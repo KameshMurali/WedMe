@@ -472,6 +472,48 @@ export const templateRegistry: TemplateRegistryEntry[] = [
       "MESSAGES",
     ],
   },
+  {
+    key: "kolam-blush",
+    tier: "premium",
+    name: "Kolam Blush",
+    description: "Warm greige, rose and sage with a drawn kolam and a botanical monogram \u2014 Tamil invitation typography, in a soft editorial register.",
+    mood: "Tamil invitation",
+    previewGradient: "linear-gradient(135deg, #f6f1ec 0%, #e3d7cd 45%, #c2687f 100%)",
+    heroVariant: "editorial",
+    cardVariant: "soft",
+    navigationVariant: "underline",
+    themeDefaults: {
+      paletteKey: "blush-kolam",
+      // Tamil face, so a couple can set their names in Tamil script and have
+      // them render. Every other template is Latin-only by default.
+      headingFontKey: "tamil",
+      bodyFontKey: "body",
+      primaryColor: "#c2687f",
+      accentColor: "#93ab8a",
+      backgroundColor: "#f6f1ec",
+      surfaceColor: "#fdfaf7",
+      textColor: "#3a2b28",
+      mutedColor: "#8a7770",
+      borderRadius: "1.8rem",
+      buttonVariant: "solid",
+      shadowStyle: "card",
+    },
+    supportedSections: [
+      "HERO",
+      "STORY",
+      "EVENTS",
+      "SCHEDULE",
+      "TIDBITS",
+      "DRESS_CODE",
+      "EXPERIENCE",
+      "GALLERY",
+      "VIDEOS",
+      "REGISTRY",
+      "RSVP",
+      "MEMORIES",
+      "MESSAGES",
+    ],
+  },
 ];
 
 // Premium templates require a paid plan. Unknown keys are treated as premium

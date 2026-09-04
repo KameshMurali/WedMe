@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Manrope, Noto_Serif_Tamil } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { NavProgress } from "@/components/ui/nav-progress";
@@ -21,6 +21,17 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600"],
   display: "swap",
   variable: "--font-cormorant",
+});
+
+// Tamil script support. The other three faces are subsets: ["latin"] only, so
+// a couple writing their names in Tamil rendered as tofu boxes. Latin is kept
+// in the subset list so a mixed "Kamesh & கமலா" heading stays in one face
+// instead of silently falling back mid-string.
+const notoTamil = Noto_Serif_Tamil({
+  subsets: ["tamil", "latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-tamil",
 });
 
 const cinzel = Cinzel({
@@ -82,7 +93,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${cormorant.variable} ${cinzel.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${cormorant.variable} ${cinzel.variable} ${notoTamil.variable}`}>
       <body>
         <NavProgress />
         {children}
