@@ -31,11 +31,11 @@ export function StaggerGroup({
 }) {
   const reduceMotion = useReducedMotion();
 
-  if (reduceMotion) return <div className={className}>{children}</div>;
+  if (reduceMotion) return <div className={cn("min-w-0", className)}>{children}</div>;
 
   return (
     <motion.div
-      className={className}
+      className={cn("min-w-0", className)}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-60px" }}
@@ -51,6 +51,14 @@ export function StaggerGroup({
 
 // One item inside a StaggerGroup. Safe to use outside one too — it then just
 // animates on its own as it scrolls into view.
+//
+// min-w-0 is load-bearing, not styling. As a grid item this wrapper defaults to
+// `min-width: auto`, whose automatic minimum size is the content's MIN-CONTENT
+// width — so a wide child forces its grid column past the track size and the
+// page scrolls sideways. The cards this wraps previously sat in the grid
+// directly and set `overflow-hidden`, which zeroes that automatic minimum; the
+// wrapper has `overflow: visible` and reintroduced it. A wrapper whose only job
+// is animation must stay layout-neutral, so it opts out explicitly.
 export function StaggerItem({
   children,
   className,
@@ -60,11 +68,11 @@ export function StaggerItem({
 }) {
   const reduceMotion = useReducedMotion();
 
-  if (reduceMotion) return <div className={className}>{children}</div>;
+  if (reduceMotion) return <div className={cn("min-w-0", className)}>{children}</div>;
 
   return (
     <motion.div
-      className={className}
+      className={cn("min-w-0", className)}
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
