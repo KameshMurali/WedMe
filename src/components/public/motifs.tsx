@@ -181,3 +181,12 @@ const KOLAM_TEMPLATES = new Set(["kolam-blush"]);
 export function usesKolamOrnament(templateKey: string): boolean {
   return KOLAM_TEMPLATES.has(templateKey);
 }
+
+// Templates that opt into the FULL traditional treatment — gopuram towers,
+// hanging toran, peacocks, banana-leaf canopy — on top of the kolam ornament.
+// This is deliberately heavy; a restrained version reads as a different theme.
+const TEMPLE_TEMPLATES = new Set(["temple-gold"]);
+
+export function usesTempleOrnament(templateKey: string): boolean {
+  return TEMPLE_TEMPLATES.has(templateKey);
+}

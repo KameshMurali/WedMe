@@ -1,6 +1,7 @@
 import { KolamEdgeBorder } from "@/components/public/kolam";
 import { ScrollProgressBar } from "@/components/public/motion-primitives";
-import { usesKolamOrnament } from "@/components/public/motifs";
+import { usesKolamOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import { TempleFrame } from "@/components/public/temple-ornament";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { SiteHeader } from "@/components/public/site-header";
 import { findTemplateByKey } from "@/lib/template-registry";
@@ -121,6 +122,10 @@ export function SiteShell({
         <div className="absolute inset-x-0 top-0 h-[32rem] bg-gradient-to-b from-white/25 to-transparent" />
         <div className="absolute inset-x-0 top-20 h-px bg-gradient-to-r from-transparent via-[color:var(--accent)]/30 to-transparent" />
       </div>
+      {/* AFTER the backdrop: that layer is a later sibling with its own
+          gradients and painted straight over the ornament when this sat above
+          it. z-[1] keeps it above the backdrop but under the content (z-10). */}
+      {usesTempleOrnament(template.key) ? <TempleFrame /> : null}
       <SiteActivityTracker slug={snapshot.site.slug} />
 
       <SiteHeader
