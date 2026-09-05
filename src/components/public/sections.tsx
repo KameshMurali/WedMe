@@ -5,7 +5,17 @@ import { ArrowUpRight, CalendarDays, Clock3, Gift, Heart, MapPin, PlayCircle, Sp
 
 import { CoupleMonogram } from "@/components/public/couple-monogram";
 import { KolamDivider } from "@/components/public/kolam";
-import { TemplateMotif, usesKolamOrnament, usesPalaceOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import {
+  ornamentKindFor,
+  TemplateMotif,
+  usesKolamOrnament,
+  usesPalaceOrnament,
+  usesTempleOrnament,
+} from "@/components/public/motifs";
+import { ChapelHeroArch } from "@/components/public/chapel-ornament";
+import { DesertHeroArch } from "@/components/public/desert-ornament";
+import { GirihHeroArch } from "@/components/public/girih-ornament";
+import { LanternHeroArch } from "@/components/public/lantern-ornament";
 import { PalaceHeroArch } from "@/components/public/palace-ornament";
 import { TempleHeroArch, ToranGarland } from "@/components/public/temple-ornament";
 import { ParallaxLayer, StaggerGroup, StaggerItem } from "@/components/public/motion-primitives";
@@ -362,6 +372,10 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
         </ParallaxLayer>
         {usesTempleOrnament(snapshot.theme.templateKey) ? <TempleHeroArch /> : null}
         {usesPalaceOrnament(snapshot.theme.templateKey) ? <PalaceHeroArch /> : null}
+        {ornamentKindFor(snapshot.theme.templateKey) === "girih" ? <GirihHeroArch /> : null}
+        {ornamentKindFor(snapshot.theme.templateKey) === "chapel" ? <ChapelHeroArch /> : null}
+        {ornamentKindFor(snapshot.theme.templateKey) === "lantern" ? <LanternHeroArch /> : null}
+        {ornamentKindFor(snapshot.theme.templateKey) === "desert" ? <DesertHeroArch /> : null}
         {usesTempleOrnament(snapshot.theme.templateKey) ? (
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 text-[color:var(--primary)]">
             <ToranGarland className="h-24 sm:h-32" />
@@ -370,9 +384,15 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
         <div className="relative">
           {usesKolamOrnament(snapshot.theme.templateKey) ||
           usesTempleOrnament(snapshot.theme.templateKey) ||
-          usesPalaceOrnament(snapshot.theme.templateKey) ? (
+          usesPalaceOrnament(snapshot.theme.templateKey) ||
+          ornamentKindFor(snapshot.theme.templateKey) ? (
             <div className="flex justify-center px-6 pt-24 sm:pt-32">
-              <CoupleMonogram coupleNames={snapshot.site.coupleNames} />
+              <CoupleMonogram
+                coupleNames={snapshot.site.coupleNames}
+                // Lotus only on the Indic templates; the others crown the hero
+                // with their own architectural form.
+                showCrest={!ornamentKindFor(snapshot.theme.templateKey)}
+              />
             </div>
           ) : null}
           {template.heroVariant === "editorial" ? <HeroSectionEditorial snapshot={snapshot} /> : null}
@@ -385,7 +405,8 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
       {/* Drawn kolam closing the hero, in place of a plain rule. */}
       {usesKolamOrnament(snapshot.theme.templateKey) ||
           usesTempleOrnament(snapshot.theme.templateKey) ||
-          usesPalaceOrnament(snapshot.theme.templateKey) ? (
+          usesPalaceOrnament(snapshot.theme.templateKey) ||
+          ornamentKindFor(snapshot.theme.templateKey) ? (
         <KolamDivider className="mt-14" />
       ) : null}
     </section>

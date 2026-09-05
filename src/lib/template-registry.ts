@@ -404,7 +404,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     navigationVariant: "pill",
     themeDefaults: {
       paletteKey: "crimson",
-      headingFontKey: "display",
+      headingFontKey: "sc",
       bodyFontKey: "body",
       primaryColor: "#b3121e",
       accentColor: "#c9a227",
@@ -444,7 +444,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     navigationVariant: "ghost",
     themeDefaults: {
       paletteKey: "oud",
-      headingFontKey: "luxe",
+      headingFontKey: "arabic",
       bodyFontKey: "body",
       primaryColor: "#6f5137",
       accentColor: "#a98756",

@@ -13,6 +13,8 @@ const config: Config = {
         display: ["var(--font-heading-face)", "var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
         luxe: ["var(--font-cinzel)", "Cinzel", "Georgia", "serif"],
         tamil: ["var(--font-tamil)", "Noto Serif Tamil", "Georgia", "serif"],
+        arabic: ["var(--font-arabic)", "Noto Naskh Arabic", "Georgia", "serif"],
+        sc: ["var(--font-sc)", "Noto Serif SC", "Georgia", "serif"],
       },
       colors: {
         ink: "#1f1724",
