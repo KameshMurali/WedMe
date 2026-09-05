@@ -730,7 +730,9 @@ export function ExperienceSection({
         description="Everything you need before you arrive: where to stay, how to get around, and what to expect."
       />
       <div className="mt-10 grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="space-y-6">
+        {/* min-w-0: grid items default to min-width:auto and refuse to shrink
+            below their content, which overflowed narrow phones. */}
+        <div className="min-w-0 space-y-6">
           {Object.entries(grouped).map(([category, entries]) => (
             <Card key={category} className="overflow-hidden p-0">
               <div className="border-b border-[color:var(--accent)]/12 bg-[color:var(--accent)]/8 px-6 py-5 sm:px-8">
@@ -760,7 +762,7 @@ export function ExperienceSection({
           ))}
         </div>
 
-        <div className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+        <div className="min-w-0 space-y-6 lg:sticky lg:top-28 lg:self-start">
           <Card className="overflow-hidden p-0">
             <div className="border-b border-[color:var(--accent)]/12 bg-[color:var(--accent)]/8 px-6 py-5 sm:px-8">
               <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--primary)]">FAQ</p>

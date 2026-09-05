@@ -40,8 +40,11 @@ export default async function MemoriesPage({ params }: { params: Promise<{ slug:
           title="Share photos, clips, and little moments from the celebration."
           description="Uploads are mobile-friendly, validated, and moderated before they appear on the public memories wall."
         />
+        {/* min-w-0 on both grid children: grid items default to min-width:auto
+            and will not shrink below their content's min-content width, which
+            pushed this page sideways on narrow phones. */}
         <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-          <Card>
+          <Card className="min-w-0">
             <GuestUploadForm
               slug={slug}
               isOpen={snapshot.publish.isUploadsOpen}
@@ -49,7 +52,7 @@ export default async function MemoriesPage({ params }: { params: Promise<{ slug:
               useSignedUploads={directBlobUploadsEnabled}
             />
           </Card>
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             {uploads.length ? (
               uploads.map((upload) => (
                 <Card key={upload.id} className="overflow-hidden p-0">

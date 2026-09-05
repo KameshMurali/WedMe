@@ -56,7 +56,7 @@ export function PricingCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-[1.6rem] border bg-white p-7 shadow-[0_20px_60px_rgba(43,26,24,0.08)] transition",
+        "relative flex min-w-0 flex-col rounded-[1.6rem] border bg-white p-7 shadow-[0_20px_60px_rgba(43,26,24,0.08)] transition",
         emphasis
           ? "border-[color:var(--primary)]/30 ring-2 ring-[color:var(--primary)]/15"
           : "border-black/8",
