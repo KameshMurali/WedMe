@@ -45,6 +45,22 @@ a {
   backdrop-filter: blur(18px);
 }
 
+/* Surface for the public site's sticky header. The header floats over whatever
+   the guest has scrolled to, so its own paint — not the backdrop — has to carry
+   the contrast: a dark hero photo passing underneath must never swallow the
+   dark nav text. This cannot be a Tailwind bg-* utility: an opacity modifier on
+   an arbitrary var() colour is silently dropped (as bg-[color:var(--surface)]/82
+   was), which left the panel fully transparent. color-mix does work with custom
+   properties, and 94% keeps every template's text within ~12% of the contrast it
+   has on a fully opaque surface no matter what scrolls behind, while the
+   remaining sliver plus backdrop-blur keeps the glassy feel. The plain
+   background-color above it is the fallback for engines without color-mix:
+   solid, and legible. */
+.site-header-surface {
+  background-color: var(--surface);
+  background-color: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
 .section-shell {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
 }

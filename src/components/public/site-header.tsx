@@ -22,7 +22,11 @@ function getNavLinkClasses(
     return cn(
       "rounded-full px-4 py-2.5 text-sm transition",
       active
-        ? "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-[color:var(--accent)]/20"
+        // Same solid-white-pill trap as the default variant below: on a dark
+        // palette --text is near-white and would vanish on it.
+        ? isDark
+          ? "bg-white text-[color:var(--background)] shadow-sm ring-1 ring-black/10"
+          : "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-black/10"
         : "text-[color:var(--muted)] hover:text-[color:var(--text)]",
     );
   }
@@ -50,23 +54,34 @@ function getNavLinkClasses(
   );
 }
 
+// The header is sticky and translucent, so a dark hero photo or image card can
+// scroll underneath it at any moment. Nothing can know in advance what will be
+// back there, so the panel carries its own near-opaque surface
+// (.site-header-surface) instead of borrowing contrast from the backdrop; only
+// the border and shadow stay template-specific. Alphas here must be on
+// Tailwind's opacity scale (multiples of 5) — off-scale values like /8 compile
+// to nothing at all, which is how this header lost its background in the first
+// place.
 function getHeaderPanelClasses(templateKey: string) {
   switch (templateKey) {
     case "cinematic-modern":
-      return "border-white/10 bg-[color:var(--surface)]/78 text-[color:var(--text)] shadow-[0_24px_80px_rgba(7,5,12,0.45)]";
+      return "site-header-surface border-white/10 text-[color:var(--text)] shadow-[0_24px_80px_rgba(7,5,12,0.45)]";
     case "minimal-luxury":
-      return "border-black/8 bg-white/88 text-[color:var(--text)] shadow-[0_18px_60px_rgba(31,26,23,0.08)]";
+      return "site-header-surface border-black/10 text-[color:var(--text)] shadow-[0_18px_60px_rgba(31,26,23,0.08)]";
     case "traditional-celebration":
-      return "border-[color:var(--accent)]/28 bg-[color:var(--surface)]/92 text-[color:var(--text)] shadow-[0_24px_80px_rgba(135,73,28,0.14)]";
+      return "site-header-surface border-black/10 text-[color:var(--text)] shadow-[0_24px_80px_rgba(135,73,28,0.14)]";
     default:
-      return "border-white/60 bg-[color:var(--surface)]/82 text-[color:var(--text)] shadow-[0_24px_80px_rgba(46,22,24,0.10)]";
+      return "site-header-surface border-white/60 text-[color:var(--text)] shadow-[0_24px_80px_rgba(46,22,24,0.10)]";
   }
 }
 
+// The rail sits on the panel above, so it only has to lift the links off that
+// surface — it never has to fight the page behind. /10 and /75 are on the
+// opacity scale; the /8 and /76 used before were not, and never rendered.
 function getNavRailClasses(isDark: boolean) {
   return isDark
-    ? "bg-white/8 ring-1 ring-white/10 backdrop-blur"
-    : "bg-white/76 ring-1 ring-black/5 shadow-sm backdrop-blur";
+    ? "bg-white/10 ring-1 ring-white/10 backdrop-blur"
+    : "bg-white/75 ring-1 ring-black/5 shadow-sm backdrop-blur";
 }
 
 export function SiteHeader({
@@ -139,7 +154,7 @@ export function SiteHeader({
         >
           <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-[color:var(--accent)]/10" />
           {showBackToPlatformHome ? (
-            <div className="relative border-b border-black/6 px-5 py-3 group-data-[collapsed=true]:hidden sm:px-6 lg:group-data-[collapsed=true]:block">
+            <div className="relative border-b border-black/5 px-5 py-3 group-data-[collapsed=true]:hidden sm:px-6 lg:group-data-[collapsed=true]:block">
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/20 bg-white/70 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:bg-white"
