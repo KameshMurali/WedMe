@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Cinzel, Cormorant_Garamond, Manrope, Noto_Serif_Tamil } from "next/font/google";
+import {
+  Cinzel,
+  Cormorant_Garamond,
+  Manrope,
+  Noto_Naskh_Arabic,
+  Noto_Serif_SC,
+  Noto_Serif_Tamil,
+} from "next/font/google";
 import { Toaster } from "sonner";
 
 import { NavProgress } from "@/components/ui/nav-progress";
@@ -32,6 +39,24 @@ const notoTamil = Noto_Serif_Tamil({
   weight: ["400", "500", "600"],
   display: "swap",
   variable: "--font-tamil",
+});
+
+// Arabic and Chinese faces, for the same reason as the Tamil one: a template
+// named for a script that cannot render that script is a contradiction. Latin
+// stays in each subset so a mixed heading holds one face rather than falling
+// back mid-string.
+const notoArabic = Noto_Naskh_Arabic({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-arabic",
+});
+
+const notoSC = Noto_Serif_SC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-sc",
 });
 
 const cinzel = Cinzel({
@@ -93,7 +118,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${cormorant.variable} ${cinzel.variable} ${notoTamil.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${cormorant.variable} ${cinzel.variable} ${notoTamil.variable} ${notoArabic.variable} ${notoSC.variable}`}>
       <body>
         <NavProgress />
         {children}

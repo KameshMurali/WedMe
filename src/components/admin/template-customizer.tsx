@@ -138,6 +138,8 @@ const headingFontLabels: Record<string, string> = {
   display: "Display serif",
   luxe: "Modern luxe serif",
   tamil: "Tamil serif (Noto)",
+  arabic: "Arabic naskh (Noto)",
+  sc: "Chinese serif (Noto SC)",
 };
 
 const bodyFontLabels: Record<string, string> = {

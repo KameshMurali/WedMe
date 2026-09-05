@@ -1,6 +1,15 @@
 import { KolamEdgeBorder } from "@/components/public/kolam";
 import { ScrollProgressBar } from "@/components/public/motion-primitives";
-import { usesKolamOrnament, usesPalaceOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import {
+  ornamentKindFor,
+  usesKolamOrnament,
+  usesPalaceOrnament,
+  usesTempleOrnament,
+} from "@/components/public/motifs";
+import { ChapelFrame } from "@/components/public/chapel-ornament";
+import { DesertFrame } from "@/components/public/desert-ornament";
+import { GirihFrame } from "@/components/public/girih-ornament";
+import { LanternFrame } from "@/components/public/lantern-ornament";
 import { PalaceFrame } from "@/components/public/palace-ornament";
 import { TempleFrame } from "@/components/public/temple-ornament";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
@@ -15,11 +24,15 @@ import type { SiteSnapshot } from "@/types";
 function headingFontFace(key: string | null | undefined): string {
   if (key === "luxe") return "var(--font-cinzel)";
   if (key === "tamil") return "var(--font-tamil)";
+  if (key === "arabic") return "var(--font-arabic)";
+  if (key === "sc") return "var(--font-sc)";
   return "var(--font-cormorant)";
 }
 
 function bodyFontFace(key: string | null | undefined): string {
   if (key === "tamil") return "var(--font-tamil)";
+  if (key === "arabic") return "var(--font-arabic)";
+  if (key === "sc") return "var(--font-sc)";
   return "var(--font-manrope)";
 }
 
@@ -128,6 +141,10 @@ export function SiteShell({
           it. z-[1] keeps it above the backdrop but under the content (z-10). */}
       {usesTempleOrnament(template.key) ? <TempleFrame /> : null}
       {usesPalaceOrnament(template.key) ? <PalaceFrame /> : null}
+      {ornamentKindFor(template.key) === "girih" ? <GirihFrame /> : null}
+      {ornamentKindFor(template.key) === "chapel" ? <ChapelFrame /> : null}
+      {ornamentKindFor(template.key) === "lantern" ? <LanternFrame /> : null}
+      {ornamentKindFor(template.key) === "desert" ? <DesertFrame /> : null}
       <SiteActivityTracker slug={snapshot.site.slug} />
 
       <SiteHeader

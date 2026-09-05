@@ -200,3 +200,18 @@ const PALACE_TEMPLATES = new Set(["marigold-festive"]);
 export function usesPalaceOrnament(templateKey: string): boolean {
   return PALACE_TEMPLATES.has(templateKey);
 }
+
+// Each remaining tradition gets its own vocabulary rather than a shared kit:
+// girih geometry and the mihrab for Nikah; tracery and glass for the chapel;
+// moon gate and lanterns for the Chinese theme; horseshoe arch, mashrabiya and
+// palms for the Khaleeji one.
+const ORNAMENT_BY_TEMPLATE: Record<string, "girih" | "chapel" | "lantern" | "desert"> = {
+  "emerald-pearl": "girih",
+  "chapel-ivory": "chapel",
+  "crimson-gold": "lantern",
+  "desert-neutral": "desert",
+};
+
+export function ornamentKindFor(templateKey: string) {
+  return ORNAMENT_BY_TEMPLATE[templateKey] ?? null;
+}

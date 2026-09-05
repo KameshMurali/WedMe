@@ -93,9 +93,16 @@ function LeafSprig({ className }: { className?: string }) {
 export function CoupleMonogram({
   coupleNames,
   className,
+  showCrest = true,
 }: {
   coupleNames: string;
   className?: string;
+  // The lotus crest is an INDIC motif. It belongs on the kolam, temple and
+  // haveli templates and nowhere else — a lotus crowning a Nikah or a chapel
+  // page is the same category of error as using a sacred symbol as wallpaper.
+  // Those templates crown the hero with their own form instead (a girih
+  // rosette, a rose window, a moon gate), so the crest simply switches off.
+  showCrest?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const { first, second } = deriveInitials(coupleNames);
@@ -132,7 +139,7 @@ export function CoupleMonogram({
       viewport={{ once: true, margin: "-40px" }}
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.14 } } }}
     >
-      <LotusBloom className="h-auto w-20 text-[color:var(--primary)] sm:w-24" />
+      {showCrest ? <LotusBloom className="h-auto w-20 text-[color:var(--primary)] sm:w-24" /> : null}
 
       <div
         className={cn(
@@ -162,7 +169,7 @@ export function CoupleMonogram({
           </motion.span>
         ) : null}
 
-        {second ? (
+        {second && showCrest ? (
           <span className="pointer-events-none absolute -right-5 bottom-2 w-6 text-[color:var(--accent)] sm:-right-7 sm:w-8">
             <LeafSprig className="h-auto w-full" />
           </span>
