@@ -22,7 +22,18 @@ npm run db:generate       # Regenerate Prisma client after schema changes
 npm run db:seed           # Seed demo data (KamMonBeginnings couple)
 ```
 
-No test framework is configured.
+### Tests
+
+```bash
+npm run test:layout       # Playwright: no horizontal overflow, 16 routes x {320,390,768}
+```
+
+Playwright is pinned to 1.56.0 to match the Chromium build available in the
+dev container. `playwright.config.ts` starts `next dev` (not `next build`,
+which runs `prisma migrate deploy` and needs a live database) — the tests need
+no database at all. CI runs this on every PR via `.github/workflows/layout.yml`.
+
+No other test framework is configured.
 
 ## Architecture
 
