@@ -190,3 +190,13 @@ const TEMPLE_TEMPLATES = new Set(["temple-gold"]);
 export function usesTempleOrnament(templateKey: string): boolean {
   return TEMPLE_TEMPLATES.has(templateKey);
 }
+
+// North Indian palace treatment — cusped arches, jaali, jhoomar, elephants.
+// A deliberately DIFFERENT vocabulary from the temple set rather than the same
+// shapes recoloured, so the two traditions do not read as one theme in two
+// palettes.
+const PALACE_TEMPLATES = new Set(["marigold-festive"]);
+
+export function usesPalaceOrnament(templateKey: string): boolean {
+  return PALACE_TEMPLATES.has(templateKey);
+}

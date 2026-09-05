@@ -1,6 +1,7 @@
 import { KolamEdgeBorder } from "@/components/public/kolam";
 import { ScrollProgressBar } from "@/components/public/motion-primitives";
-import { usesKolamOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import { usesKolamOrnament, usesPalaceOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import { PalaceFrame } from "@/components/public/palace-ornament";
 import { TempleFrame } from "@/components/public/temple-ornament";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { SiteHeader } from "@/components/public/site-header";
@@ -126,6 +127,7 @@ export function SiteShell({
           gradients and painted straight over the ornament when this sat above
           it. z-[1] keeps it above the backdrop but under the content (z-10). */}
       {usesTempleOrnament(template.key) ? <TempleFrame /> : null}
+      {usesPalaceOrnament(template.key) ? <PalaceFrame /> : null}
       <SiteActivityTracker slug={snapshot.site.slug} />
 
       <SiteHeader
