@@ -415,14 +415,34 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
   );
 }
 
+// Condensed sections on the homepage only render the first few items. Without
+// an explicit affordance that truncation is invisible and reads as missing
+// data, so every condensed section links to its full page when (and only when)
+// something was actually cut.
+function SeeAllLink({ href, label }: { href: Route; label: string }) {
+  return (
+    <div className="mt-10 flex justify-center">
+      <Button asChild variant="outline">
+        <Link href={href}>
+          {label}
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
 export function StorySection({
   milestones,
+  slug,
   condensed = false,
 }: {
   milestones: SiteSnapshot["storyMilestones"];
+  slug?: string;
   condensed?: boolean;
 }) {
   const items = condensed ? milestones.slice(0, 4) : milestones;
+  const hiddenCount = milestones.length - items.length;
 
   if (!items.length) {
     return <EmptyState title="Story coming soon" description="The couple will share their milestones here soon." />;
@@ -469,6 +489,12 @@ export function StorySection({
           </Card>
         ))}
       </div>
+      {hiddenCount > 0 && slug ? (
+        <SeeAllLink
+          href={`/${slug}/story` as Route}
+          label={`See all ${milestones.length} milestones`}
+        />
+      ) : null}
     </section>
   );
 }
@@ -483,6 +509,7 @@ export function EventsSection({
   condensed?: boolean;
 }) {
   const items = condensed ? events.slice(0, 3) : events;
+  const hiddenCount = events.length - items.length;
 
   if (!items.length) {
     return <EmptyState title="Events coming soon" description="Event details will be shared here soon." />;
@@ -601,6 +628,9 @@ export function EventsSection({
           </StaggerItem>
         ))}
       </StaggerGroup>
+      {hiddenCount > 0 ? (
+        <SeeAllLink href={`/${slug}/events` as Route} label={`See all ${events.length} events`} />
+      ) : null}
     </section>
   );
 }
@@ -832,15 +862,18 @@ export function ExperienceSection({
 
 export function GallerySection({
   assets,
+  slug,
   condensed = false,
 }: {
   assets: SiteSnapshot["mediaAssets"];
+  slug?: string;
   condensed?: boolean;
 }) {
   const gallery = assets.filter((asset) => asset.category === "GALLERY");
   // The spotlight is cinematic — too few frames feel awkward, but capping
   // condensed at 8 keeps the homepage scan-friendly.
   const items = condensed ? gallery.slice(0, 8) : gallery;
+  const hiddenCount = gallery.length - items.length;
 
   if (!items.length) {
     return <EmptyState title="Gallery is empty" description="Images will appear here once media has been added." />;
@@ -864,6 +897,12 @@ export function GallerySection({
           }))}
         />
       </div>
+      {hiddenCount > 0 && slug ? (
+        <SeeAllLink
+          href={`/${slug}/gallery` as Route}
+          label={`See all ${gallery.length} photos`}
+        />
+      ) : null}
     </section>
   );
 }
