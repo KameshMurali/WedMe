@@ -135,6 +135,14 @@ export function canUsePremiumDesign(plan: PlanKey): boolean {
   return plan === "together" || plan === "forever";
 }
 
+// Per-day AI attempt cap for a plan, falling back to the owner-tunable env
+// default when the plan does not narrow it. This is the cap that bounds SPEND:
+// a failed or off-topic attempt costs a model call but never a lifetime credit,
+// so the lifetime teaser alone does not limit how much a free account can cost.
+export function aiDailyDraftLimit(plan: PlanKey, fallback: number): number {
+  return planLimits[plan].aiDailyDrafts ?? fallback;
+}
+
 export function getPlanLimits(plan: PlanKey) {
   return planLimits[plan];
 }

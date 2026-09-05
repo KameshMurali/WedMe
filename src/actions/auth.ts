@@ -103,6 +103,26 @@ export async function registerAction(
   }
 
   try {
+    // Signup abuse guard. Keyed on IP/UA rather than the submitted email,
+    // because an attacker minting accounts varies the email every time — an
+    // email-keyed limit would never trigger. Each account carries its own AI
+    // drafting allowance, so unbounded signup is what turns a per-account cap
+    // into an unbounded bill.
+    const registerHeaders = await headers();
+    const registerLimit = await consumeRateLimit({
+      action: "register",
+      source: registerHeaders,
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+      keyParts: [],
+    });
+
+    if (!registerLimit.ok) {
+      return {
+        error: `Too many sign-up attempts from this device. Please wait ${registerLimit.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+
     const [existingUser, existingSlug] = await Promise.all([
       prisma.user.findUnique({ where: { email } }),
       prisma.weddingSite.findUnique({ where: { slug } }),
