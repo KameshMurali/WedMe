@@ -5,7 +5,8 @@ import { ArrowUpRight, CalendarDays, Clock3, Gift, Heart, MapPin, PlayCircle, Sp
 
 import { CoupleMonogram } from "@/components/public/couple-monogram";
 import { KolamDivider } from "@/components/public/kolam";
-import { TemplateMotif, usesKolamOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import { TemplateMotif, usesKolamOrnament, usesPalaceOrnament, usesTempleOrnament } from "@/components/public/motifs";
+import { PalaceHeroArch } from "@/components/public/palace-ornament";
 import { TempleHeroArch, ToranGarland } from "@/components/public/temple-ornament";
 import { ParallaxLayer, StaggerGroup, StaggerItem } from "@/components/public/motion-primitives";
 
@@ -360,13 +361,16 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
           />
         </ParallaxLayer>
         {usesTempleOrnament(snapshot.theme.templateKey) ? <TempleHeroArch /> : null}
+        {usesPalaceOrnament(snapshot.theme.templateKey) ? <PalaceHeroArch /> : null}
         {usesTempleOrnament(snapshot.theme.templateKey) ? (
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 text-[color:var(--primary)]">
             <ToranGarland className="h-24 sm:h-32" />
           </div>
         ) : null}
         <div className="relative">
-          {usesKolamOrnament(snapshot.theme.templateKey) || usesTempleOrnament(snapshot.theme.templateKey) ? (
+          {usesKolamOrnament(snapshot.theme.templateKey) ||
+          usesTempleOrnament(snapshot.theme.templateKey) ||
+          usesPalaceOrnament(snapshot.theme.templateKey) ? (
             <div className="flex justify-center px-6 pt-24 sm:pt-32">
               <CoupleMonogram coupleNames={snapshot.site.coupleNames} />
             </div>
@@ -379,7 +383,9 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
         </div>
       </div>
       {/* Drawn kolam closing the hero, in place of a plain rule. */}
-      {usesKolamOrnament(snapshot.theme.templateKey) || usesTempleOrnament(snapshot.theme.templateKey) ? (
+      {usesKolamOrnament(snapshot.theme.templateKey) ||
+          usesTempleOrnament(snapshot.theme.templateKey) ||
+          usesPalaceOrnament(snapshot.theme.templateKey) ? (
         <KolamDivider className="mt-14" />
       ) : null}
     </section>
