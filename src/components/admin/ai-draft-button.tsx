@@ -87,7 +87,7 @@ export function AiDraftButton({
       }
       if (result.draft) {
         onDraft(result.draft);
-        toast.success("Draft added — edit it to make it yours, then save.");
+        toast.success("Draft added. Edit it to make it yours, then save.");
       }
     });
   }
@@ -98,11 +98,11 @@ export function AiDraftButton({
   if (lifetimeExhausted) {
     statusLine = (
       <Link href="/pricing" className="font-semibold text-[color:var(--primary)] hover:underline">
-        Free drafts used — upgrade to Together for unlimited
+        Free drafts used. Upgrade to Together for unlimited
       </Link>
     );
   } else if (dailyExhausted) {
-    statusLine = <>Daily limit reached — resets tomorrow</>;
+    statusLine = <>Daily limit reached. Resets tomorrow</>;
   } else if (remainingLifetime !== null && remainingLifetime < remainingToday) {
     statusLine = <>{remainingLifetime} of 10 free drafts left</>;
   } else {

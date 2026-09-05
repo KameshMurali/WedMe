@@ -79,7 +79,7 @@ export async function joinWaitlistAction(
         "",
         `In the meantime, you can keep building your free wedding workspace: ${appUrl}/dashboard`,
         "",
-        "— The ToNewBeginning team",
+        "The ToNewBeginning team",
       ].join("\n"),
       html: `
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#2b1a18;line-height:1.6;">

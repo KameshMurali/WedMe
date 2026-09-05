@@ -66,7 +66,7 @@ export const contentPacks: ContentPack[] = [
         offsetDays: -2,
         startHour: 16,
         durationHours: 4,
-        dressCode: "Bright informal — expect turmeric stains",
+        dressCode: "Bright informal (expect turmeric stains)",
       },
       {
         title: "Sangeet",
@@ -183,7 +183,7 @@ export const contentPacks: ContentPack[] = [
     name: "Nikah & Walima",
     tradition: "Muslim ceremony structure",
     description:
-      "Mangni through Nikah and Walima. Works for South Indian, North Indian and Arabic families alike — the ceremony structure is shared.",
+      "Mangni through Nikah and Walima. Works for South Indian, North Indian and Arabic families alike, since the ceremony structure is shared.",
     events: [
       {
         title: "Mangni",
@@ -236,7 +236,7 @@ export const contentPacks: ContentPack[] = [
     name: "Christian Wedding",
     tradition: "Church ceremony and reception",
     description:
-      "Rehearsal, nuptial ceremony and reception — suited to Catholic, Orthodox and Protestant weddings in India and abroad.",
+      "Rehearsal, nuptial ceremony and reception, suited to Catholic, Orthodox and Protestant weddings in India and abroad.",
     events: [
       {
         title: "Rehearsal & Family Dinner",
@@ -258,7 +258,7 @@ export const contentPacks: ContentPack[] = [
         offsetDays: 0,
         startHour: 11,
         durationHours: 2,
-        dressCode: "Formal — shoulders covered in church",
+        dressCode: "Formal (shoulders covered in church)",
       },
       {
         title: "Reception",
@@ -300,7 +300,7 @@ export const contentPacks: ContentPack[] = [
         offsetDays: 0,
         startHour: 8,
         durationHours: 4,
-        dressCode: "Traditional red — avoid white and black",
+        dressCode: "Traditional red (avoid white and black)",
       },
       {
         title: "Wedding Banquet",
@@ -311,7 +311,7 @@ export const contentPacks: ContentPack[] = [
         offsetDays: 0,
         startHour: 18,
         durationHours: 5,
-        dressCode: "Formal — red and gold welcome",
+        dressCode: "Formal (red and gold welcome)",
       },
     ],
   },
@@ -320,7 +320,7 @@ export const contentPacks: ContentPack[] = [
     name: "Western Wedding",
     tradition: "European & American structure",
     description:
-      "A single-day ceremony and reception with a rehearsal dinner — the standard European and American running order.",
+      "A single-day ceremony and reception with a rehearsal dinner: the standard European and American running order.",
     events: [
       {
         title: "Rehearsal Dinner",

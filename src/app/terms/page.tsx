@@ -57,7 +57,7 @@ export default function TermsPage() {
               Payments are processed by Paddle.com, which acts as the Merchant of Record for your
               purchase. Paddle handles billing, invoicing, and applicable sales tax or VAT. Your
               card or bank statement will show <strong>Paddle</strong> rather than
-              ToNewBeginning.com — if you do not recognise a charge, that is why.
+              ToNewBeginning.com, so if you do not recognise a charge, that is why.
             </p>
 
             <h2>Guest use</h2>

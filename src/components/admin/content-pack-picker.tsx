@@ -36,7 +36,7 @@ export function ContentPackPicker({
         </div>
         <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
           Add the usual ceremonies for your tradition in one go, then edit the details. Your existing
-          events are kept — packs only add.
+          events are kept. Packs only add.
         </p>
       </div>
 

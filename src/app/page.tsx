@@ -64,7 +64,7 @@ const websiteSchema = {
   alternateName: ["To New Beginning", "ToNewBeginning", "wed.tonewbeginning", "wed.tonewbeginning.com"],
   url: BASE_URL,
   description:
-    "A multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings: multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
+    "A multi-event wedding website builder for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings: multi-event ceremonies, RSVP workflows, photo galleries, and a polished guest experience.",
 };
 
 const softwareSchema = {
@@ -75,7 +75,7 @@ const softwareSchema = {
   operatingSystem: "Web",
   url: BASE_URL,
   description:
-    "ToNewBeginning.com is a multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings — with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
+    "ToNewBeginning.com is a multi-event wedding website builder for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings, with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
   offers: [
     { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan with up to 2 wedding events and 50 RSVPs." },
     { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan: AI-assisted content drafting, unlimited events and RSVPs." },
@@ -86,7 +86,7 @@ const softwareSchema = {
 const homepageFaqs = [
   {
     q: "What is ToNewBeginning.com?",
-    a: "ToNewBeginning.com is a multi-event wedding website builder for couples planning weddings with more than one celebration — Indian, South Asian, fusion, and Western multi-day weddings alike. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard, all in one place.",
+    a: "ToNewBeginning.com is a multi-event wedding website builder for couples planning weddings with more than one celebration: Indian, South Asian, fusion, and Western multi-day weddings alike. It lets you create a personalised wedding website with support for multi-day events (Haldi, Sangeet, Baraat, reception and more), RSVP management, photo galleries, travel guidance for guests, and a polished couple dashboard, all in one place.",
   },
   {
     q: "Does it support weddings with multiple ceremonies?",
@@ -114,7 +114,7 @@ const homepageFaqs = [
   },
   {
     q: "Is the platform only for a specific kind of wedding?",
-    a: "ToNewBeginning.com is built for multi-event weddings of every kind — Indian, South Asian, fusion, and Western multi-day celebrations: multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
+    a: "ToNewBeginning.com is built for multi-event weddings of every kind, including Indian, South Asian, fusion, and Western multi-day celebrations: multi-day timelines, large guest lists, multi-ceremony structure, and a design aesthetic that suits traditional and modern celebrations alike. It works equally well for destination weddings and elopements.",
   },
 ];
 
@@ -410,7 +410,7 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="Common questions"
           title="Everything couples ask before choosing a wedding website builder."
-          description="Answers to the questions we hear most from couples planning multi-event weddings — Indian, South Asian, fusion, and Western multi-day celebrations alike."
+          description="Answers to the questions we hear most from couples planning multi-event weddings, whether Indian, South Asian, fusion, or Western multi-day celebrations."
         />
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {homepageFaqs.map(({ q, a }) => (
