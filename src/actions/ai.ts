@@ -49,7 +49,9 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
     return { error: "Please review the drafting request and try again." };
   }
 
-  // All drafting context comes from DB truth, never from the client.
+  // Authoritative context (tenancy, plan, quota) always comes from DB truth.
+  // The client may additionally send the live, unsaved form values — those are
+  // presentation context only and are merged in further down.
   const record = await prisma.weddingSite.findUnique({
     where: { id: site.id },
     select: {
@@ -135,18 +137,33 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
   }
 
   const template = findTemplateByKey(record.templatePreset?.key ?? "");
+
+  // Zod-validated, presentation-only overrides: the couple may still be typing
+  // (e.g. they changed the venue to Bali but haven't hit Save), so prefer the
+  // live form values and fall back to the persisted record when a call site
+  // doesn't have that field. Nothing here affects authorization or quota.
+  const clientContext = parsed.data.context;
+  const liveCoupleNames = clientContext?.coupleNames?.trim();
+  const liveWeddingDate = clientContext?.weddingDate?.trim();
+  const liveLocationSummary = clientContext?.locationSummary?.trim();
+
   const coupleNames =
+    liveCoupleNames ||
     [record.couple.partnerOneName, record.couple.partnerTwoName].filter(Boolean).join(" & ") ||
     "The couple";
+  let weddingDate = record.weddingDate ? formatDate(record.weddingDate) : null;
+  if (liveWeddingDate) {
+    weddingDate = formatDate(liveWeddingDate);
+  }
 
   const result = await generateAiDraft(parsed.data.kind, {
     coupleNames,
-    weddingDate: record.weddingDate ? formatDate(record.weddingDate) : null,
-    locationSummary: record.locationSummary,
+    weddingDate,
+    locationSummary: liveLocationSummary || record.locationSummary,
     templateMood: template.mood,
     hint: parsed.data.hint,
-    title: parsed.data.context?.title,
-    question: parsed.data.context?.question,
+    title: clientContext?.title,
+    question: clientContext?.question,
   });
 
   if (!result.ok) {
