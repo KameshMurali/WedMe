@@ -67,7 +67,7 @@ const cinzel = Cinzel({
 });
 
 const siteDescription =
-  "ToNewBeginning.com is a multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings: multi-event timelines, RSVP management, photo galleries, and a polished guest experience.";
+  "ToNewBeginning.com is a multi-event wedding website builder for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings: multi-event timelines, RSVP management, photo galleries, and a polished guest experience.";
 
 export const metadata: Metadata = {
   // Use the shared siteUrl (prod fallback) rather than env.APP_URL, which
@@ -92,7 +92,7 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ToNewBeginning — one beautiful website for your whole wedding",
+        alt: "ToNewBeginning: one beautiful website for your whole wedding",
       },
     ],
   },

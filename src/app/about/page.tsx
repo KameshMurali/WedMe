@@ -6,7 +6,7 @@ import { MarketingFooter } from "@/components/marketing/marketing-footer";
 export const metadata: Metadata = {
   title: "About ToNewBeginning.com · Multi-Event Wedding Website Builder",
   description:
-    "ToNewBeginning.com is a multi-event wedding website platform for every celebration — Indian, South Asian, fusion, and Western multi-day weddings. Learn who we are, what we believe, and how to reach us.",
+    "ToNewBeginning.com is a multi-event wedding website platform for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings. Learn who we are, what we believe, and how to reach us.",
   alternates: { canonical: "/about" },
 };
 
@@ -30,7 +30,7 @@ const orgSchema = {
     "https://www.facebook.com/wed.tonewbeginning",
   ],
   description:
-    "A premium multi-event wedding website builder for every celebration — Indian, South Asian, fusion, and Western multi-day weddings: multi-day ceremonies, large guest lists, RSVP management, photo galleries, and a calm couple dashboard.",
+    "A premium multi-event wedding website builder for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings: multi-day ceremonies, large guest lists, RSVP management, photo galleries, and a calm couple dashboard.",
 };
 
 export default function AboutPage() {
@@ -49,9 +49,10 @@ export default function AboutPage() {
             Built for the weddings that deserve more.
           </h1>
           <p className="mt-6 text-base leading-8 text-[color:var(--muted)]">
-            ToNewBeginning.com is a wedding website platform built for multi-event celebrations —
-            Indian, South Asian, fusion, and Western multi-day weddings alike: celebrations that span
-            multiple days, multiple ceremonies, and hundreds of guests across cities and countries.
+            ToNewBeginning.com is a wedding website platform built for multi-event celebrations,
+            from Indian and South Asian to fusion and Western multi-day weddings: celebrations that
+            span multiple days, multiple ceremonies, and hundreds of guests across cities and
+            countries.
           </p>
 
           <div className="mt-12 space-y-10">
@@ -72,8 +73,8 @@ export default function AboutPage() {
                 We built ToNewBeginning.com for couples who want a wedding website that reflects
                 their celebration honestly: one that supports five events and five hundred guests
                 as comfortably as it supports two people eloping. The platform is built for
-                multi-event weddings of every kind — Indian, South Asian, fusion, and Western
-                multi-day celebrations — and works equally well for any multi-day, multi-event
+                multi-event weddings of every kind, including Indian, South Asian, fusion, and
+                Western multi-day celebrations, and works equally well for any multi-day, multi-event
                 wedding.
               </p>
             </section>

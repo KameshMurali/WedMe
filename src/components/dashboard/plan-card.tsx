@@ -22,7 +22,7 @@ export function PlanCard({
 
   const detail =
     planKey === "forever"
-      ? "Yours permanently — no renewal, nothing to cancel."
+      ? "Yours permanently. No renewal, nothing to cancel."
       : expiresAt
         ? `Your wedding year · through ${formatExpiry(expiresAt)}`
         : plan.tagline;

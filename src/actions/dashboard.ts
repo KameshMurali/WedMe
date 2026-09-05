@@ -843,7 +843,7 @@ export async function applyContentPackAction(
       select: { weddingDate: true },
     });
     if (!record?.weddingDate) {
-      return { error: "Set your wedding date first — pack timings are built around it." };
+      return { error: "Set your wedding date first. Pack timings are built around it." };
     }
 
     const existingCount = await prisma.event.count({ where: { weddingSiteId: site.id } });
@@ -862,7 +862,7 @@ export async function applyContentPackAction(
 
     revalidateDashboardPaths();
     return {
-      success: `Added ${events.length} events from ${pack.name}. Venues and timings are placeholders — edit them to match your plans.`,
+      success: `Added ${events.length} events from ${pack.name}. Venues and timings are placeholders, so edit them to match your plans.`,
     };
   } catch (error) {
     return { error: formatDashboardActionError(error, "Unable to apply that starter pack.") };

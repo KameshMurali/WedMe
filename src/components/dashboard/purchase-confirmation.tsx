@@ -66,7 +66,7 @@ export function PurchaseConfirmation({
             You&apos;re on {planName ?? "your new plan"}. Thank you.
           </p>
           <p className="mt-1 text-sm text-emerald-800">
-            Everything in your plan is unlocked right away — your receipt is on its way by email.
+            Everything in your plan is unlocked right away. Your receipt is on its way by email.
           </p>
         </div>
       </div>
@@ -82,7 +82,7 @@ export function PurchaseConfirmation({
         <div>
           <p className="font-medium text-amber-900">Your payment went through.</p>
           <p className="mt-1 text-sm text-amber-800">
-            Confirming it is taking longer than usual. Your plan will activate on its own — refresh
+            Confirming it is taking longer than usual. Your plan will activate on its own. Refresh
             in a minute. If it still hasn&apos;t, email{" "}
             <a className="underline" href={`mailto:${supportEmail}`}>
               {supportEmail}
@@ -98,7 +98,7 @@ export function PurchaseConfirmation({
     <div className="flex items-start gap-3 rounded-3xl border border-black/8 bg-white/70 px-5 py-4">
       <Loader2 className="mt-0.5 h-5 w-5 flex-none animate-spin text-[color:var(--primary)]" />
       <div>
-        <p className="font-medium text-[color:var(--text)]">Payment received — confirming your plan…</p>
+        <p className="font-medium text-[color:var(--text)]">Payment received. Confirming your plan…</p>
         <p className="mt-1 text-sm text-[color:var(--muted)]">
           This usually takes a couple of seconds. You don&apos;t need to do anything.
         </p>

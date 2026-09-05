@@ -113,7 +113,7 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
       keyParts: [user.id],
     });
     return {
-      error: "You're drafting very fast — give it a minute and try again.",
+      error: "You're drafting very fast. Give it a minute and try again.",
       remainingToday: peek.remaining,
       remainingLifetime:
         lifetimeLimit === null ? null : Math.max(0, lifetimeLimit - record.couple.aiDraftCount),
@@ -131,7 +131,7 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
     keyByPartsOnly: true,
   });
   if (!daily.ok) {
-    return { error: "Daily limit reached — resets tomorrow.", remainingToday: 0 };
+    return { error: "Daily limit reached. It resets tomorrow.", remainingToday: 0 };
   }
 
   const template = findTemplateByKey(record.templatePreset?.key ?? "");

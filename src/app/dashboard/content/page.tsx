@@ -145,7 +145,7 @@ export default async function DashboardContentPage() {
       />
       <ArrayEditor
         title="Gift registry"
-        description="Link the registries, experience funds, or charities you've already set up elsewhere. Guests open them in a new tab — nothing is paid through this site."
+        description="Link the registries, experience funds, or charities you've already set up elsewhere. Guests open them in a new tab. Nothing is paid through this site."
         items={site.registryLinks.map((item) => ({
           label: item.label,
           url: item.url,

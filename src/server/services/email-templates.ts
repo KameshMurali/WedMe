@@ -51,7 +51,7 @@ export function buildWelcomeEmail(input: WelcomeEmailInput) {
     "  • Open RSVPs when you're ready to share with guests",
     "",
     "Congratulations again. We're glad you're here.",
-    "— The ToNewBeginning team",
+    "The ToNewBeginning team",
   ].join("\n");
 
   const html = `

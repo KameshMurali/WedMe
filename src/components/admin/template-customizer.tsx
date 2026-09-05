@@ -275,7 +275,7 @@ export function TemplateCustomizer({
         return;
       }
 
-      toast.success("Template applied — open Preview to see it");
+      toast.success("Template applied. Open Preview to see it");
       router.refresh();
     });
   }
@@ -545,7 +545,7 @@ export function TemplateCustomizer({
           Selected template:{" "}
           <span className="font-semibold text-[color:var(--text)]">{selectedTemplate?.name}</span>
           <span className="ml-2 text-xs text-[color:var(--muted)]">
-            Templates apply the moment you pick one — this saves your color &amp; typography tweaks.
+            Templates apply the moment you pick one. This saves your color &amp; typography tweaks.
           </span>
         </p>
         <Button type="submit" disabled={isPending} className="min-w-[184px]">
