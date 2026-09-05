@@ -116,6 +116,21 @@ export function SiteBasicsForm({
     defaultValues.slug,
   ]);
 
+  // Live context for the AI drafting assistant: the couple may have retyped the
+  // venue or date without saving yet, and the saved record would otherwise be
+  // fed to the model as authoritative.
+  function getAiContext() {
+    const names = [getValues("partnerOneName"), getValues("partnerTwoName")]
+      .map((name) => String(name ?? "").trim())
+      .filter(Boolean)
+      .join(" & ");
+    return {
+      coupleNames: names || undefined,
+      weddingDate: String(getValues("weddingDate") ?? "").trim() || undefined,
+      locationSummary: String(getValues("locationSummary") ?? "").trim() || undefined,
+    };
+  }
+
   const onSubmit = handleSubmit((values) => {
     const formData = new FormData();
     Object.entries(values).forEach(([key, value]) => {
@@ -181,6 +196,7 @@ export function SiteBasicsForm({
             <AiDraftButton
               kind="welcome_hero"
               getHint={() => String(getValues("subtitle") ?? "")}
+              getContext={getAiContext}
               onDraft={(text) =>
                 setValue("subtitle", text, { shouldDirty: true, shouldValidate: true })
               }
@@ -202,6 +218,7 @@ export function SiteBasicsForm({
               <AiDraftButton
                 kind="welcome_hero"
                 getHint={() => String(getValues("tagline") ?? "")}
+                getContext={getAiContext}
                 onDraft={(text) =>
                   setValue("tagline", text, { shouldDirty: true, shouldValidate: true })
                 }

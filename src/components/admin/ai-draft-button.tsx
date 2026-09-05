@@ -6,7 +6,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { generateAiDraftAction } from "@/actions/ai";
-import type { AiDraftKind } from "@/lib/validations/ai";
+import type { AiDraftClientContext, AiDraftKind } from "@/lib/validations/ai";
 
 type AiRemaining = {
   today: number;
@@ -50,7 +50,10 @@ export function AiDraftButton({
   kind: AiDraftKind;
   // Current field text — it doubles as the couple's rough notes for the draft.
   getHint: () => string;
-  getContext?: () => { title?: string; question?: string } | undefined;
+  // Live, still-unsaved values from the form around this button (couple names,
+  // wedding date, location, sibling field titles). Presentation context only —
+  // the server re-validates it and never treats it as authorization.
+  getContext?: () => AiDraftClientContext | undefined;
   onDraft: (text: string) => void;
   initialRemainingToday: number;
   initialRemainingLifetime: number | null;
