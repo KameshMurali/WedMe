@@ -272,6 +272,66 @@ function HeroSectionSplit({ snapshot }: { snapshot: SiteSnapshot }) {
   );
 }
 
+// Destination hero: the couple's own photograph, full bleed, with their names
+// set over it.
+//
+// Unlike the cultural templates this carries NO ornament. On a destination site
+// the photograph is the design — Como, Santorini, Bali all look completely
+// different because the picture does, not because we drew something. Adding
+// gopurams or jaali over a photo would fight it.
+//
+// The one real risk is legibility: the couple can upload any photograph, and a
+// bright sky behind white type is unreadable. So the type never sits on the
+// bare image — a two-stop scrim runs bottom-to-top under the copy, strong
+// enough to hold white text over a pale image and unobtrusive over a dark one.
+function HeroSectionDestination({ snapshot }: { snapshot: SiteSnapshot }) {
+  return (
+    <div className="relative min-h-[640px] overflow-hidden sm:min-h-[760px]">
+      <HeroMediaFrame
+        snapshot={snapshot}
+        className="absolute inset-0 rounded-none"
+        imageClassName="h-full min-h-[640px] sm:min-h-[760px]"
+        imageSizes="100vw"
+      />
+      {/* Scrim. Weighted to the bottom where the copy sits, with a lighter top
+          pass so the header still reads against a bright sky. */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(12,10,10,0.78)_0%,rgba(12,10,10,0.42)_38%,rgba(12,10,10,0.10)_66%,rgba(12,10,10,0.34)_100%)]" />
+
+      <div className="relative flex min-h-[640px] flex-col justify-end p-7 pb-12 sm:min-h-[760px] sm:p-12 sm:pb-16 lg:p-16 lg:pb-20">
+        <div className="max-w-2xl">
+          <p className="text-[11px] uppercase tracking-[0.34em] text-white/75">
+            Welcome to our wedding
+          </p>
+
+          <h1 className="mt-5 font-display text-5xl leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+            {snapshot.site.coupleNames}
+          </h1>
+
+          <span className="mt-7 block h-px w-16 bg-white/45" />
+
+          <p className="mt-6 text-sm uppercase tracking-[0.24em] text-white/85">
+            {formatDate(snapshot.site.weddingDate)}
+          </p>
+          {snapshot.site.locationSummary ? (
+            <p className="mt-2 font-display text-2xl italic text-white/90 sm:text-3xl">
+              {snapshot.site.locationSummary}
+            </p>
+          ) : null}
+
+          <div className="mt-9 flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href={`/${snapshot.site.slug}/rsvp` as Route}>RSVP &amp; Travel</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20">
+              <Link href={`/${snapshot.site.slug}/experience` as Route}>Getting there</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HeroSectionCinematic({ snapshot }: { snapshot: SiteSnapshot }) {
   const highlightEvents = snapshot.events.slice(0, 3);
 
@@ -400,6 +460,7 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
           {template.heroVariant === "cinematic" ? <HeroSectionCinematic snapshot={snapshot} /> : null}
           {template.heroVariant === "celebration" ? <HeroSectionCelebration snapshot={snapshot} /> : null}
           {template.heroVariant === "classic" ? <HeroSectionClassic snapshot={snapshot} /> : null}
+          {template.heroVariant === "destination" ? <HeroSectionDestination snapshot={snapshot} /> : null}
         </div>
       </div>
       {/* Drawn kolam closing the hero, in place of a plain rule. */}
