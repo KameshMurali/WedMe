@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Clock3, Gift, Heart, MapPin, PlayCircle, Sparkles } from "lucide-react";
 
 import { CoupleMonogram } from "@/components/public/couple-monogram";
-import { KolamDivider } from "@/components/public/kolam";
+import { TraditionDivider } from "@/components/public/tradition-divider";
 import {
   ornamentKindFor,
   TemplateMotif,
@@ -407,7 +407,9 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
           usesTempleOrnament(snapshot.theme.templateKey) ||
           usesPalaceOrnament(snapshot.theme.templateKey) ||
           ornamentKindFor(snapshot.theme.templateKey) ? (
-        <KolamDivider className="mt-14" />
+        // Each tradition draws its OWN figure. A kolam is drawn at the
+        // threshold of Hindu homes, so it stays on the Indic templates only.
+        <TraditionDivider templateKey={snapshot.theme.templateKey} className="mt-14" />
       ) : null}
     </section>
   );

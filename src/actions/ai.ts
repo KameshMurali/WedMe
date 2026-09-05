@@ -9,7 +9,7 @@ import { aiDraftRequestSchema } from "@/lib/validations/ai";
 import { isAdminUser, requireUser } from "@/server/auth/session";
 import { prisma } from "@/server/prisma";
 import { getEditableWeddingSiteForUser } from "@/server/repositories/wedding-site";
-import { consumeRateLimit } from "@/server/security/rate-limit";
+import { consumeRateLimit, peekRateLimit } from "@/server/security/rate-limit";
 import {
   AI_DRAFT_BURST_ACTION,
   AI_DRAFT_BURST_LIMIT,
@@ -79,9 +79,16 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
   const lifetimeLimit = getPlanLimits(planKey).aiLifetimeDrafts;
 
   if (lifetimeLimit !== null && record.couple.aiDraftCount >= lifetimeLimit) {
+    const peek = await peekRateLimit({
+      action: AI_DRAFT_DAILY_ACTION,
+      limit: env.AI_DRAFT_DAILY_LIMIT,
+      windowMs: AI_DRAFT_DAILY_WINDOW_MS,
+      keyParts: [user.id],
+    });
     return {
       error: `You've used all ${lifetimeLimit} free drafts. Upgrade to Together for unlimited AI drafting.`,
       remainingLifetime: 0,
+      remainingToday: peek.remaining,
     };
   }
 
@@ -96,7 +103,21 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
     keyParts: [user.id],
   });
   if (!burst.ok) {
-    return { error: "You're drafting very fast — give it a minute and try again." };
+    // Report the CURRENT daily count even though this attempt was refused.
+    // Without it the client falls back to its previous value and the counter
+    // appears frozen — a refusal must not leave the number lying.
+    const peek = await peekRateLimit({
+      action: AI_DRAFT_DAILY_ACTION,
+      limit: env.AI_DRAFT_DAILY_LIMIT,
+      windowMs: AI_DRAFT_DAILY_WINDOW_MS,
+      keyParts: [user.id],
+    });
+    return {
+      error: "You're drafting very fast — give it a minute and try again.",
+      remainingToday: peek.remaining,
+      remainingLifetime:
+        lifetimeLimit === null ? null : Math.max(0, lifetimeLimit - record.couple.aiDraftCount),
+    };
   }
 
   // Daily cap, keyed on userId ONLY so it stays stable across devices and
