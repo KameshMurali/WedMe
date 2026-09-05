@@ -94,12 +94,18 @@ export type PlanLimits = {
   // Lifetime free-tier AI drafting teaser (persistent Couple.aiDraftCount).
   // Paid tiers are "unlimited" behind invisible abuse caps (burst + daily).
   aiLifetimeDrafts: number | null;
+  // Per-day attempt cap. This is the one that bounds SPEND, because a failed or
+  // off-topic attempt still costs a model call while never spending a lifetime
+  // credit — so without a tighter free-tier daily cap a free account could burn
+  // the full daily allowance every day forever without ever using its ten
+  // drafts. null = fall back to AI_DRAFT_DAILY_LIMIT.
+  aiDailyDrafts: number | null;
 };
 
 export const planLimits: Record<PlanKey, PlanLimits> = {
-  hello: { maxEvents: 2, maxRsvps: 50, maxRegistryLinks: 4, aiLifetimeDrafts: 10 },
-  together: { maxEvents: null, maxRsvps: null, maxRegistryLinks: null, aiLifetimeDrafts: null },
-  forever: { maxEvents: null, maxRsvps: null, maxRegistryLinks: null, aiLifetimeDrafts: null },
+  hello: { maxEvents: 2, maxRsvps: 50, maxRegistryLinks: 4, aiLifetimeDrafts: 10, aiDailyDrafts: 3 },
+  together: { maxEvents: null, maxRsvps: null, maxRegistryLinks: null, aiLifetimeDrafts: null, aiDailyDrafts: null },
+  forever: { maxEvents: null, maxRsvps: null, maxRegistryLinks: null, aiLifetimeDrafts: null, aiDailyDrafts: null },
 };
 
 export const plans: Plan[] = [

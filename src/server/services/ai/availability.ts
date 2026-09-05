@@ -10,7 +10,7 @@ import {
   aiDraftingEnabled,
 } from "@/server/services/ai/config";
 import { isDemoUserId } from "@/server/services/demo-site";
-import { getPlanLimits, resolvePlanKey, type PlanUser } from "@/server/services/plan";
+import { aiDailyDraftLimit, getPlanLimits, resolvePlanKey, type PlanUser } from "@/server/services/plan";
 
 export type AiDraftAvailability = {
   enabled: boolean;
@@ -38,16 +38,19 @@ export async function getAiDraftAvailability(
     return disabledAvailability;
   }
 
-  const daily = await peekRateLimit({
-    action: AI_DRAFT_DAILY_ACTION,
-    limit: env.AI_DRAFT_DAILY_LIMIT,
-    windowMs: AI_DRAFT_DAILY_WINDOW_MS,
-    keyParts: [user.id],
-  });
-
-  // Admins see the paid experience — no lifetime teaser. Role OR allowlist,
+  // The daily cap is now plan-aware, so the plan has to be resolved BEFORE the
+  // bucket is read — peeking with the wrong limit would report the wrong
+  // remaining count to the UI.
+  //
+  // Admins see the paid experience: no lifetime teaser. Role OR allowlist,
   // matching isAdminUser everywhere else.
   if (isAdminUser(user)) {
+    const daily = await peekRateLimit({
+      action: AI_DRAFT_DAILY_ACTION,
+      limit: aiDailyDraftLimit("forever", env.AI_DRAFT_DAILY_LIMIT),
+      windowMs: AI_DRAFT_DAILY_WINDOW_MS,
+      keyParts: [user.id],
+    });
     return { enabled: true, remainingToday: daily.remaining, remainingLifetime: null };
   }
 
@@ -58,6 +61,12 @@ export async function getAiDraftAvailability(
     });
 
     const planKey = resolvePlanKey(couple?.planKey, couple?.planExpiresAt);
+    const daily = await peekRateLimit({
+      action: AI_DRAFT_DAILY_ACTION,
+      limit: aiDailyDraftLimit(planKey, env.AI_DRAFT_DAILY_LIMIT),
+      windowMs: AI_DRAFT_DAILY_WINDOW_MS,
+      keyParts: [user.id],
+    });
     const lifetimeLimit = getPlanLimits(planKey).aiLifetimeDrafts;
     const remainingLifetime =
       lifetimeLimit === null
@@ -69,9 +78,12 @@ export async function getAiDraftAvailability(
     console.error("getAiDraftAvailability failed", error);
     // Don't falsely disable the button on a transient read failure — the
     // server action re-checks all quotas authoritatively before drafting.
+    // The plan is unknown here, so report the most restrictive tier's caps
+    // rather than an optimistic number: over-promising attempts a user does not
+    // have is worse than under-promising ones they do.
     return {
       enabled: true,
-      remainingToday: daily.remaining,
+      remainingToday: aiDailyDraftLimit("hello", env.AI_DRAFT_DAILY_LIMIT),
       remainingLifetime: getPlanLimits("hello").aiLifetimeDrafts,
     };
   }

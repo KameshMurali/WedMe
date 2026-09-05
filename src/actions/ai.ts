@@ -20,7 +20,7 @@ import {
 } from "@/server/services/ai/config";
 import { generateAiDraft } from "@/server/services/ai/draft";
 import { demoWorkspaceReadOnlyMessage, isDemoSiteId } from "@/server/services/demo-site";
-import { getPlanLimits, resolvePlanKey } from "@/server/services/plan";
+import { aiDailyDraftLimit, getPlanLimits, resolvePlanKey } from "@/server/services/plan";
 
 // Deliberately NOT the FormData/ActionState signature — this returns data, not
 // a mutation result. It never writes site content: the draft only lands in the
@@ -83,7 +83,7 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
   if (lifetimeLimit !== null && record.couple.aiDraftCount >= lifetimeLimit) {
     const peek = await peekRateLimit({
       action: AI_DRAFT_DAILY_ACTION,
-      limit: env.AI_DRAFT_DAILY_LIMIT,
+      limit: aiDailyDraftLimit(planKey, env.AI_DRAFT_DAILY_LIMIT),
       windowMs: AI_DRAFT_DAILY_WINDOW_MS,
       keyParts: [user.id],
     });
@@ -110,7 +110,7 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
     // appears frozen — a refusal must not leave the number lying.
     const peek = await peekRateLimit({
       action: AI_DRAFT_DAILY_ACTION,
-      limit: env.AI_DRAFT_DAILY_LIMIT,
+      limit: aiDailyDraftLimit(planKey, env.AI_DRAFT_DAILY_LIMIT),
       windowMs: AI_DRAFT_DAILY_WINDOW_MS,
       keyParts: [user.id],
     });
@@ -127,7 +127,7 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
   const daily = await consumeRateLimit({
     action: AI_DRAFT_DAILY_ACTION,
     source: headerSource,
-    limit: env.AI_DRAFT_DAILY_LIMIT,
+    limit: aiDailyDraftLimit(planKey, env.AI_DRAFT_DAILY_LIMIT),
     windowMs: AI_DRAFT_DAILY_WINDOW_MS,
     keyParts: [user.id],
     keyByPartsOnly: true,
