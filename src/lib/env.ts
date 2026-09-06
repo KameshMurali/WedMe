@@ -55,6 +55,14 @@ const environmentSchema = z.object({
   // in src/lib/pricing.ts, which is imported by client components.
   // All optional: with nothing configured, checkoutEnabled stays false and the
   // pricing page keeps showing the waitlist capture.
+  // Email-verification enforcement. Optional and defaulting to FALSE so this
+  // ships inert: turning it on before scripts/backfill-email-verified.ts has
+  // run would lock out every existing couple, because verification has never
+  // been required and nobody has clicked the link.
+  REQUIRE_EMAIL_VERIFICATION: z.preprocess(
+    (value) => (value === "" || value === undefined ? undefined : value === "true" || value === true),
+    z.boolean().default(false),
+  ),
   PADDLE_API_KEY: z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.string().optional(),
@@ -90,6 +98,7 @@ export const env = environmentSchema.parse({
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   AI_DRAFT_MODEL: process.env.AI_DRAFT_MODEL,
   AI_DRAFT_DAILY_LIMIT: process.env.AI_DRAFT_DAILY_LIMIT,
+  REQUIRE_EMAIL_VERIFICATION: process.env.REQUIRE_EMAIL_VERIFICATION,
   PADDLE_API_KEY: process.env.PADDLE_API_KEY,
   PADDLE_WEBHOOK_SECRET: process.env.PADDLE_WEBHOOK_SECRET,
 });

@@ -277,10 +277,15 @@ export async function registerAction(
   redirect("/dashboard");
 }
 
+// Login can additionally report that the account exists and is simply
+// unverified, so the form can offer a resend. A flag rather than matching on
+// the error text, which would break the moment the copy is reworded.
+export type LoginActionState = ActionState & { needsVerification?: boolean };
+
 export async function loginAction(
-  _previousState: ActionState = initialActionState,
+  _previousState: LoginActionState = initialActionState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<LoginActionState> {
   const parsed = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
@@ -293,6 +298,7 @@ export async function loginAction(
         email: string;
         role: UserRole;
         passwordHash: string;
+        emailVerifiedAt: Date | null;
       }
     | null
     | undefined;
@@ -360,6 +366,20 @@ export async function loginAction(
 
   if (!isValid) {
     return { error: "Incorrect password. Please try again." };
+  }
+
+  // Verification gate. Deliberately placed AFTER the password check: refusing
+  // before it would tell an attacker which addresses have accounts, since only
+  // a real unverified account could produce this message.
+  //
+  // Defaults OFF. Turning it on before scripts/backfill-email-verified.ts has
+  // run would lock out every existing couple.
+  if (env.REQUIRE_EMAIL_VERIFICATION && !user.emailVerifiedAt) {
+    return {
+      error:
+        "Please confirm your email address before signing in. Check your inbox for the link we sent when you registered.",
+      needsVerification: true,
+    };
   }
 
   try {
@@ -520,4 +540,92 @@ export async function extendSessionAction(): Promise<
     console.error("extendSessionAction failed", error);
     return { ok: false, reason: "error" };
   }
+}
+
+/**
+ * Sends a fresh email-verification link.
+ *
+ * Registration's welcome email is best-effort — sendEmail is wrapped in
+ * try/catch so signup still succeeds if delivery fails — which means a couple
+ * can end up permanently unverified through no fault of their own. Once
+ * REQUIRE_EMAIL_VERIFICATION is on, that would be a locked door with no handle.
+ * This is the handle.
+ *
+ * Deliberately reveals nothing: the same confirmation comes back whether the
+ * address is unknown, already verified, or genuinely pending. A resend endpoint
+ * that says "no such account" is an email-enumeration oracle, and this one is
+ * reachable without logging in.
+ */
+export async function resendVerificationAction(
+  _previousState: ActionState = initialActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please enter a valid email address." };
+  }
+
+  // Same shape as the confirmation below, so a caller cannot distinguish
+  // "rate limited because this address exists" from anything else.
+  const genericSuccess: ActionState = {
+    success: "If that account still needs verifying, a new link is on its way.",
+  };
+
+  try {
+    const resendHeaders = await headers();
+    const rateLimit = await consumeRateLimit({
+      action: "resend-verification",
+      source: resendHeaders,
+      limit: 3,
+      windowMs: 15 * 60 * 1000,
+      keyParts: [parsed.data.email],
+    });
+
+    if (!rateLimit.ok) {
+      return {
+        error: `Too many requests. Please wait ${rateLimit.retryAfterSeconds} seconds and try again.`,
+      };
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+
+    // Unknown address, or already verified: say the same thing and send nothing.
+    if (!user || user.emailVerifiedAt) {
+      return genericSuccess;
+    }
+
+    const plainToken = generatePlainToken();
+    await prisma.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(plainToken),
+        // Matches the 24h window registration uses.
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      },
+    });
+
+    const verificationUrl = `${env.APP_URL}/verify-email/${plainToken}`;
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your ToNewBeginning.com email",
+      text: `Confirm your email address using this link (valid for 24 hours): ${verificationUrl}\n\nIf you didn't request this, you can safely ignore this email.`,
+      html: `
+        <div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#2b1a18;line-height:1.6;">
+          <h1 style="font-size:22px;margin:0 0 12px;">Confirm your email</h1>
+          <p style="font-size:15px;color:#6b554f;">Click the button below to confirm your email address and get back into your wedding workspace. This link is valid for 24 hours.</p>
+          <p style="margin:20px 0;">
+            <a href="${verificationUrl}" style="display:inline-block;background:#7a4b3a;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:999px;">Confirm email</a>
+          </p>
+          <p style="font-size:13px;color:#9a7a6a;">If you didn't request this, you can safely ignore this email.</p>
+        </div>
+      `,
+    });
+  } catch (error) {
+    // Same swallow-and-succeed as the password reset: a delivery or database
+    // failure must not become a signal about whether the account exists.
+    console.error("resendVerificationAction failed", error);
+  }
+
+  return genericSuccess;
 }
