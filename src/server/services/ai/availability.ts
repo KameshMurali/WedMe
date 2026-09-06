@@ -15,7 +15,8 @@ import { aiDailyDraftLimit, getPlanLimits, resolvePlanKey, type PlanUser } from 
 export type AiDraftAvailability = {
   enabled: boolean;
   // Attempts left in today's window ("You can attempt N more times today").
-  remainingToday: number;
+  // null = limiter failed open; the count is unknown and must not be shown.
+  remainingToday: number | null;
   // Free-tier lifetime teaser remaining; null = unlimited (paid plan / admin).
   remainingLifetime: number | null;
 };

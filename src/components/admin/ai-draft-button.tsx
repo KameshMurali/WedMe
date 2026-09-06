@@ -9,7 +9,8 @@ import { generateAiDraftAction } from "@/actions/ai";
 import type { AiDraftClientContext, AiDraftKind } from "@/lib/validations/ai";
 
 type AiRemaining = {
-  today: number;
+  // null = unknown, because the rate limiter failed open. Distinct from 0.
+  today: number | null;
   lifetime: number | null; // null = unlimited (paid plan / admin)
 };
 
@@ -55,7 +56,7 @@ export function AiDraftButton({
   // the server re-validates it and never treats it as authorization.
   getContext?: () => AiDraftClientContext | undefined;
   onDraft: (text: string) => void;
-  initialRemainingToday: number;
+  initialRemainingToday: number | null;
   initialRemainingLifetime: number | null;
 }) {
   const [isPending, startTransition] = useTransition();
@@ -65,7 +66,7 @@ export function AiDraftButton({
   const remainingLifetime = shared ? shared.lifetime : initialRemainingLifetime;
 
   const lifetimeExhausted = remainingLifetime !== null && remainingLifetime <= 0;
-  const dailyExhausted = remainingToday <= 0;
+  const dailyExhausted = remainingToday !== null && remainingToday <= 0;
   const disabled = isPending || lifetimeExhausted || dailyExhausted;
 
   function handleClick() {
@@ -78,7 +79,8 @@ export function AiDraftButton({
       });
 
       const nextRemaining: AiRemaining = {
-        today: typeof result.remainingToday === "number" ? result.remainingToday : remainingToday,
+        today:
+          result.remainingToday === undefined ? remainingToday : result.remainingToday,
         lifetime:
           result.remainingLifetime === undefined ? remainingLifetime : result.remainingLifetime,
       };
@@ -106,8 +108,16 @@ export function AiDraftButton({
     );
   } else if (dailyExhausted) {
     statusLine = <>Daily limit reached. Resets tomorrow</>;
-  } else if (remainingLifetime !== null && remainingLifetime < remainingToday) {
+  } else if (
+    remainingLifetime !== null &&
+    (remainingToday === null || remainingLifetime < remainingToday)
+  ) {
     statusLine = <>{remainingLifetime} of 10 free drafts left</>;
+  } else if (remainingToday === null) {
+    // The limiter failed open, so the true count is unknown. Say nothing rather
+    // than print a number — a fabricated "20 more times today" is exactly what
+    // masked a completely disabled rate limiter for three rounds of debugging.
+    statusLine = null;
   } else {
     statusLine = <>You can attempt {remainingToday} more times today</>;
   }

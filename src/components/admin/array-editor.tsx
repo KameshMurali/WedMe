@@ -72,7 +72,7 @@ export function ArrayEditor({
   maxItemsNote?: string;
   // AI drafting: passed from the server page (hidden when no ANTHROPIC_API_KEY).
   aiEnabled?: boolean;
-  aiRemainingToday?: number;
+  aiRemainingToday?: number | null;
   aiRemainingLifetime?: number | null;
 }) {
   const router = useRouter();

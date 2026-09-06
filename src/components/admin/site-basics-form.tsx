@@ -62,7 +62,7 @@ export function SiteBasicsForm({
   uploadsEnabled: boolean;
   disabledReason?: string | null;
   aiEnabled?: boolean;
-  aiRemainingToday?: number;
+  aiRemainingToday?: number | null;
   aiRemainingLifetime?: number | null;
 }) {
   const router = useRouter();
