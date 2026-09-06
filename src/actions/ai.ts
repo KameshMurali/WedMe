@@ -28,7 +28,8 @@ import { aiDailyDraftLimit, getPlanLimits, resolvePlanKey } from "@/server/servi
 // validation/authz path stays the single write path.
 export type AiDraftActionResult = {
   draft?: string;
-  remainingToday?: number;
+  // null = the limiter failed open and the true count is unknown.
+  remainingToday?: number | null;
   remainingLifetime?: number | null;
   error?: string;
 };

@@ -23,7 +23,10 @@ export type RateLimitConfig = {
 export type RateLimitResult = {
   ok: boolean;
   limit: number;
-  remaining: number;
+  // null = unknown. Set when the limiter failed open on an error: the request
+  // is allowed, but no honest count can be reported and callers must not
+  // display one.
+  remaining: number | null;
   retryAfterSeconds: number;
 };
 
@@ -65,6 +68,9 @@ function getWindowStart(now: Date, windowMs: number) {
 
 async function ensureRateLimitTable() {
   if (!rateLimitTableReady) {
+    // NOTE: the promise is cleared on failure below. Caching a REJECTED promise
+    // here would make every later await re-throw, so a single transient error
+    // would silently disable every rate limit for the life of the instance.
     rateLimitTableReady = (async () => {
       await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "RateLimitBucket" (
@@ -91,7 +97,15 @@ async function ensureRateLimitTable() {
     })();
   }
 
-  await rateLimitTableReady;
+  try {
+    await rateLimitTableReady;
+  } catch (error) {
+    // Clear the cached promise so the next call retries. Leaving a REJECTED
+    // promise memoised would make every later await re-throw, so one transient
+    // failure would disable every rate limit for the life of the instance.
+    rateLimitTableReady = null;
+    throw error;
+  }
 }
 
 export async function consumeRateLimit({
@@ -113,8 +127,8 @@ export async function consumeRateLimit({
 
     const [bucket] = await prisma.$queryRawUnsafe<RateLimitRow[]>(
       `
-        INSERT INTO "RateLimitBucket" ("id", "action", "keyHash", "windowStart", "count", "expiresAt")
-        VALUES ($1, $2, $3, $4, 1, $5)
+        INSERT INTO "RateLimitBucket" ("id", "action", "keyHash", "windowStart", "count", "expiresAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, 1, $5, CURRENT_TIMESTAMP)
         ON CONFLICT ("action", "keyHash", "windowStart")
         DO UPDATE
           SET "count" = "RateLimitBucket"."count" + 1,
@@ -146,10 +160,12 @@ export async function consumeRateLimit({
   } catch (error) {
     console.error("consumeRateLimit failed; allowing request", { action, error });
 
+    // Fail open so a database blip cannot lock people out of login, but report
+    // the count as UNKNOWN rather than as the full limit.
     return {
       ok: true,
       limit,
-      remaining: limit,
+      remaining: null,
       retryAfterSeconds: 0,
     };
   }
