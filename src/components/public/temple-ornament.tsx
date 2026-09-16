@@ -278,10 +278,10 @@ export function TempleFrame() {
       {/* Gopuram towers flank the page. Desktop only: at phone widths there is
           no side margin to give them, and squeezing the content to fit
           decoration would be a straight downgrade. */}
-      <GopuramTower className="absolute bottom-0 left-0 hidden h-[78vh] w-36 text-[color:var(--primary)] opacity-[0.42] lg:block xl:w-44" />
+      <GopuramTower className="absolute bottom-0 left-0 h-[52vh] w-14 text-[color:var(--primary)] opacity-[0.42] sm:w-20 lg:h-[78vh] lg:w-36 xl:w-44" />
       <GopuramTower
         flip
-        className="absolute bottom-0 right-0 hidden h-[78vh] w-36 text-[color:var(--primary)] opacity-[0.42] lg:block xl:w-44"
+        className="absolute bottom-0 right-0 h-[52vh] w-14 text-[color:var(--primary)] opacity-[0.42] sm:w-20 lg:h-[78vh] lg:w-36 xl:w-44"
       />
 
       {/* Peacocks at the foot of each tower */}

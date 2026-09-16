@@ -16,7 +16,8 @@
     "make-admin": "tsx scripts/make-admin.ts",
     "grant-plan": "tsx scripts/grant-plan.ts",
     "test:layout": "playwright test",
-    "backfill-verified": "tsx scripts/backfill-email-verified.ts"
+    "backfill-verified": "tsx scripts/backfill-email-verified.ts",
+    "test:templates": "TEMPLATE_SHOTS=1 playwright test template-gallery"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

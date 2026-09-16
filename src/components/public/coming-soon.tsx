@@ -37,7 +37,7 @@ export function ComingSoonPage({
           {coupleNames} are putting the finishing touches on their wedding site. Check back here soon.
           This page will fill with their story, schedule, and the details you&apos;ll need to celebrate together.
         </p>
-        <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/85 px-5 py-3 text-sm text-[color:var(--muted)] ring-1 ring-black/5">
+        <div className="mt-8 panel-solid inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm text-[color:var(--muted)] ring-1 ring-black/5">
           <CalendarDays className="h-4 w-4" />
           {formatDate(weddingDate)}
         </div>

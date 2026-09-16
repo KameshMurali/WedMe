@@ -23,7 +23,17 @@ function starPoints(cx: number, cy: number, outer: number, inner: number, points
   return coords.join(" ");
 }
 
-export function GirihScreen({ className }: { className?: string }) {
+// patternId is a prop because every *Frame renders this twice, left and
+// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// and both url(#girih) references resolved to whichever came first — invalid,
+// and silently wrong the moment the two sides differ in colour or scale.
+export function GirihScreen({
+  className,
+  patternId = "girih",
+}: {
+  className?: string;
+  patternId?: string;
+}) {
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
@@ -35,7 +45,7 @@ export function GirihScreen({ className }: { className?: string }) {
           </g>
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="url(#girih)" />
+      <rect width="100%" height="100%" fill={`url(#${patternId})`} />
     </svg>
   );
 }
@@ -112,11 +122,11 @@ export function MosqueLamp({ className, delay = 0 }: { className?: string; delay
 export function GirihFrame() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      <div className="absolute inset-y-0 left-0 hidden w-28 text-[color:var(--primary)] opacity-[0.16] lg:block xl:w-36">
-        <GirihScreen className="h-full w-full" />
+      <div className="absolute inset-y-0 left-0 w-8 text-[color:var(--primary)] opacity-[0.16] sm:w-14 lg:w-28 xl:w-36">
+        <GirihScreen className="h-full w-full" patternId="girih-left" />
       </div>
-      <div className="absolute inset-y-0 right-0 hidden w-28 text-[color:var(--primary)] opacity-[0.16] lg:block xl:w-36">
-        <GirihScreen className="h-full w-full" />
+      <div className="absolute inset-y-0 right-0 w-8 text-[color:var(--primary)] opacity-[0.16] sm:w-14 lg:w-28 xl:w-36">
+        <GirihScreen className="h-full w-full" patternId="girih-right" />
       </div>
     </div>
   );

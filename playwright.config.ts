@@ -37,6 +37,9 @@ export default defineConfig({
       DIRECT_URL: process.env.DIRECT_URL ?? "postgresql://u:p@127.0.0.1:5432/none",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "playwright-layout-test-secret",
       APP_URL: BASE_URL,
+      // Opens /dev/template-gallery/[key], which 404s by default. The gallery
+      // is how every template gets checked rather than just the demo site's.
+      TEMPLATE_GALLERY: "1",
     },
   },
 });

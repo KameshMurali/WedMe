@@ -1,8 +1,16 @@
 name: Layout
 
-# Guards against horizontal overflow on the public site (see #43). Runs on PRs
-# so a min-width:auto regression is caught before merge rather than by a guest
-# on a phone.
+# Guards the public site's layout and chrome. Two things, both of which type
+# checks and the build pass straight through:
+#
+#  1. Horizontal overflow (see #43): grid/flex items default to
+#     `min-width: auto`, so a track refuses to shrink below its min-content
+#     width and the page scrolls sideways on a phone.
+#  2. Template chrome: every design must resolve its own backdrop. The
+#     per-template switches were written for the original five templates, and
+#     the eleven added after fell through to a shared champagne default.
+#
+# Runs on PRs so either regression is caught before merge rather than by a guest.
 on:
   pull_request:
   workflow_dispatch:

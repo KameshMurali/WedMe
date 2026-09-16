@@ -33,7 +33,7 @@ import type { SiteSnapshot } from "@/types";
 
 function glassPanel(className?: string) {
   return cn(
-    "rounded-[calc(var(--radius)-0.35rem)] border border-[color:var(--accent)]/14 bg-white/72 backdrop-blur-xl",
+    "rounded-[calc(var(--radius)-0.35rem)] glass-panel border border-[color:var(--accent)]/14",
     className,
   );
 }
@@ -80,7 +80,35 @@ function HeroMediaFrame({
           className={cn("h-full w-full object-cover", imageClassName)}
         />
       ) : (
-        <div className={cn("h-full w-full bg-hero-mesh", imageClassName)} />
+        // No photo yet. bg-hero-mesh was a fixed warm-beige gradient from the
+        // Tailwind config, which is the one thing this must not be: the
+        // destination heroes lay white copy over a four-stop dark scrim, so a
+        // pale slab left the couple's names unreadable, and every template got
+        // the same beige regardless of palette.
+        //
+        // This composes a dusk from the template's own --primary and --accent,
+        // so Shoreline Blue reads as a blue evening and Palm & Teak as a green
+        // one, and it is dark enough at the bottom for the copy that sits there.
+        <div
+          className={cn("h-full w-full", imageClassName)}
+          style={{
+            backgroundImage: [
+              "radial-gradient(ellipse 90% 60% at 50% 8%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 70%)",
+              "linear-gradient(170deg, color-mix(in srgb, var(--primary) 78%, #000) 0%, color-mix(in srgb, var(--primary) 58%, var(--accent)) 54%, color-mix(in srgb, var(--accent) 62%, #000) 100%)",
+            ].join(", "),
+          }}
+        >
+          {/* Owner-only. A guest should never be told the site is unfinished,
+              and the fallback above is meant to stand on its own for a couple
+              who simply never uploads anything. */}
+          {snapshot.ownerPreview ? (
+            <div className="absolute inset-x-0 bottom-0 flex justify-center p-4">
+              <p className="rounded-full bg-black/45 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/90 backdrop-blur">
+                Add a hero photo in Settings to replace this
+              </p>
+            </div>
+          ) : null}
+        </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
     </div>
@@ -383,7 +411,7 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
           {highlightEvents.map((event) => (
             <span
               key={event.id}
-              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/18 bg-white/68 px-4 py-2 text-sm text-[color:var(--muted)]"
+              className="panel-soft inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/18 px-4 py-2 text-sm text-[color:var(--muted)]"
             >
               <Sparkles className="h-3.5 w-3.5 text-[color:var(--primary)]" />
               {event.title}
@@ -629,7 +657,7 @@ export function EventsSection({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 flex flex-wrap gap-2">
                   <Badge>{event.dayLabel}</Badge>
-                  <Badge className="bg-white/90 text-[color:var(--text)]">
+                  <Badge className="panel-solid text-[color:var(--text)]">
                     {formatEnumLabel(event.audience, "ALL GUESTS")}
                   </Badge>
                 </div>
@@ -725,7 +753,7 @@ export function ScheduleSection({ items }: { items: SiteSnapshot["scheduleItems"
                 {entries.map((item) => (
                   <div
                     key={item.id}
-                    className="grid gap-4 rounded-[calc(var(--radius)-0.55rem)] border border-[color:var(--accent)]/12 bg-white/68 px-5 py-5 sm:grid-cols-[9rem_1fr]"
+                    className="panel-soft grid gap-4 rounded-[calc(var(--radius)-0.55rem)] border border-[color:var(--accent)]/12 px-5 py-5 sm:grid-cols-[9rem_1fr]"
                   >
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">{item.category}</p>
@@ -873,7 +901,7 @@ export function ExperienceSection({
                 {entries.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-[calc(var(--radius)-0.55rem)] border border-[color:var(--accent)]/12 bg-white/68 px-5 py-5"
+                    className="panel-soft rounded-[calc(var(--radius)-0.55rem)] border border-[color:var(--accent)]/12 px-5 py-5"
                   >
                     <h4 className="text-lg font-semibold text-[color:var(--text)]">{item.title}</h4>
                     <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{item.description}</p>
