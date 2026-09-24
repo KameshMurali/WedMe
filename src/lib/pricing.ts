@@ -193,7 +193,11 @@ export function findPlan(key: PlanKey) {
 export const launchOffer = {
   // Bump this date when you re-launch a promo. Re-opened for the paid launch;
   // the matching Paddle discount must be live or the strike-through misleads.
-  endsAt: new Date("2026-09-30T23:59:59Z"),
+  //
+  // Pushed out from 2026-09-30 ahead of the launch post: driving signups into
+  // an offer that lapses days later strands everyone who arrives late, and
+  // checkout is still gated on paddleConfig anyway.
+  endsAt: new Date("2026-12-31T23:59:59Z"),
   label: "Launch offer",
   blurb: "First 100 couples: 30% off Forever",
 };

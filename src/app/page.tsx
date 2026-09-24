@@ -20,6 +20,8 @@ import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { Reveal } from "@/components/marketing/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { WaitlistForm } from "@/components/marketing/waitlist-form";
+import { detectCurrency } from "@/lib/geo";
 import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
 import { getCurrentUser } from "@/server/auth/session";
@@ -179,6 +181,9 @@ function getResumeLabel(pathname: string) {
 export default async function HomePage() {
   const user = await getCurrentUser();
   const workspace = user ? await getWorkspaceShellForUser(user.id) : null;
+  // Same resolution the pricing page uses, so a visitor is offered the founding
+  // -couple list in the currency they would actually pay in.
+  const currency = await detectCurrency();
   const cookieStore = await cookies();
   const rawResumePath = cookieStore.get(workspaceResumeCookieName)?.value;
   const safeResumePath = resolveWorkspaceResumePath(rawResumePath);
@@ -423,6 +428,32 @@ export default async function HomePage() {
             </details>
           ))}
         </div>
+      </section>
+
+      {/* Closing waitlist band. Until this existed, the only way to join was
+          inside a pricing card on /pricing — so anyone arriving on the bare
+          domain from a link or a post had no way in and simply left. */}
+      <section className="section-shell mt-20">
+        <Card className="mx-auto max-w-3xl text-center">
+          <SectionHeading
+            align="center"
+            eyebrow="Founding couples"
+            title="Paid plans are opening soon."
+            description="We'll tell you the moment they open. One email, nothing else."
+          />
+          {/* text-center so the form's own line sits with the copy above it
+              rather than hanging left inside a centred card. */}
+          <div className="mx-auto mt-8 max-w-md text-center">
+            <WaitlistForm
+              planKey="together"
+              planName="Together"
+              currency={currency}
+              ctaLabel="Join the founding-couple list"
+              source="home_waitlist"
+              defaultOpen
+            />
+          </div>
+        </Card>
       </section>
     </main>
     <MarketingFooter />
