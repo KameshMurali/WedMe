@@ -14,6 +14,7 @@ import { PalaceFrame } from "@/components/public/palace-ornament";
 import { TempleFrame } from "@/components/public/temple-ornament";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { SiteHeader } from "@/components/public/site-header";
+import { isDarkColor } from "@/lib/color";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { cn, formatDate } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
@@ -60,31 +61,27 @@ function filterNavItems(
   return config.filter((item) => !item.sectionType || enabledTypes.has(item.sectionType));
 }
 
-function getShellBackdropClasses(templateKey: string) {
-  switch (templateKey) {
-    case "floral-romantic":
-      return "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.88),transparent_32%),radial-gradient(circle_at_22%_18%,rgba(217,138,162,0.18),transparent_26%),radial-gradient(circle_at_78%_12%,rgba(255,207,220,0.22),transparent_24%),linear-gradient(180deg,rgba(255,250,252,0.9)_0%,rgba(255,247,250,0.96)_38%,rgba(255,244,248,1)_100%)]";
-    case "minimal-luxury":
-      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(250,248,244,0.98)_100%),linear-gradient(90deg,rgba(44,36,29,0.03)_1px,transparent_1px),linear-gradient(rgba(44,36,29,0.03)_1px,transparent_1px)] [background-size:auto,52px_52px,52px_52px]";
-    case "cinematic-modern":
-      return "bg-[radial-gradient(circle_at_top_left,rgba(199,149,89,0.2),transparent_24%),radial-gradient(circle_at_80%_16%,rgba(255,255,255,0.08),transparent_20%),linear-gradient(180deg,#120d16_0%,#17111d_38%,#120d16_100%)]";
-    case "traditional-celebration":
-      return "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.82),transparent_28%),radial-gradient(circle_at_78%_18%,rgba(207,122,36,0.16),transparent_26%),radial-gradient(circle_at_18%_12%,rgba(207,122,36,0.12),transparent_24%),linear-gradient(180deg,#fff9f2_0%,#fff5ea_52%,#fffaf6_100%)]";
-    default:
-      return "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.9),transparent_28%),radial-gradient(circle_at_78%_16%,rgba(184,140,74,0.14),transparent_24%),linear-gradient(180deg,#fffaf5_0%,#fcf6f0_42%,#fcf8f3_100%)]";
-  }
-}
-
-function getFooterPanelClasses(templateKey: string) {
-  switch (templateKey) {
-    case "cinematic-modern":
-      return "border-white/10 bg-[linear-gradient(135deg,rgba(32,22,37,0.96),rgba(20,15,24,0.92))]";
-    case "traditional-celebration":
-      return "border-[color:var(--accent)]/28 bg-[linear-gradient(135deg,rgba(255,253,248,0.96),rgba(255,244,227,0.86))]";
-    case "minimal-luxury":
-      return "border-black/8 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(246,243,238,0.92))]";
-    default:
-      return "border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(255,248,244,0.88))]";
+// Page backdrop. One class per chromeStyle; every gradient inside it is
+// composed from the template's own tokens in globals.css, so the palette drives
+// the page. The switch has no default arm on purpose — TypeScript then requires
+// a case for every member of the union, which is what stops a newly added
+// template from silently inheriting another one's colours.
+function getShellBackdropClass(
+  chromeStyle: ReturnType<typeof findTemplateByKey>["chromeStyle"],
+) {
+  switch (chromeStyle) {
+    case "wash":
+      return "chrome-wash";
+    case "grid":
+      return "chrome-grid";
+    case "vignette":
+      return "chrome-vignette";
+    case "radiant":
+      return "chrome-radiant";
+    case "veil":
+      return "chrome-veil";
+    case "horizon":
+      return "chrome-horizon";
   }
 }
 
@@ -98,7 +95,11 @@ export function SiteShell({
   children: React.ReactNode;
 }) {
   const template = findTemplateByKey(snapshot.theme.templateKey);
-  const isDark = template.key === "cinematic-modern";
+  // Derived from the palette, not the template key. The old check was
+  // `template.key === "cinematic-modern"`, so any other dark template — and any
+  // couple who darkened their own background in the customizer — kept the light
+  // nav treatment and got near-white text on a white pill.
+  const isDark = isDarkColor(snapshot.theme.backgroundColor);
   const showBackToPlatformHome = snapshot.site.slug === "kammonbeginnings";
   const visibleNavItems = filterNavItems(navigationConfig, snapshot.sections);
 
@@ -123,22 +124,39 @@ export function SiteShell({
           "--font-body-face": bodyFontFace(snapshot.theme.bodyFontKey),
         } as React.CSSProperties
       }
-      className="relative min-h-screen bg-[color:var(--background)]"
+      // theme-scope is what derives --border and --elevation from this
+      // element's own --primary; data-tone lets CSS branch on light/dark
+      // without threading a prop through every panel.
+      className="theme-scope relative min-h-screen bg-[color:var(--background)]"
+      data-tone={isDark ? "dark" : "light"}
+      // shadowStyle has been editable in the customizer, validated and stored
+      // since the theme table existed, and no public component ever read it.
+      // Now that elevation is a token it can finally mean something.
+      data-shadow={snapshot.theme.shadowStyle}
     >
       {/* Decorations live in their own overflow-hidden layer that is a SIBLING
           of the sticky header, not an ancestor. An overflow-hidden ancestor
           silently disables position: sticky, which was why the header didn't
           stay pinned on scroll. This clips the gradients without trapping the
           header. */}
-      {usesKolamOrnament(template.key) ? <KolamEdgeBorder /> : null}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className={cn("absolute inset-0", getShellBackdropClasses(template.key))} />
-        <div className="absolute inset-x-0 top-0 h-[32rem] bg-gradient-to-b from-white/25 to-transparent" />
+        <div className={cn("absolute inset-0", getShellBackdropClass(template.chromeStyle))} />
+        {/* A lift at the top of the page. This was from-white/25, which on a dark
+            template washed the header area grey; mixing from --surface keeps the
+            same lift in the template's own material. */}
+        <div
+          className="absolute inset-x-0 top-0 h-[32rem]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, color-mix(in srgb, var(--surface) 25%, transparent), transparent)",
+          }}
+        />
         <div className="absolute inset-x-0 top-20 h-px bg-gradient-to-r from-transparent via-[color:var(--accent)]/30 to-transparent" />
       </div>
       {/* AFTER the backdrop: that layer is a later sibling with its own
           gradients and painted straight over the ornament when this sat above
           it. z-[1] keeps it above the backdrop but under the content (z-10). */}
+      {usesKolamOrnament(template.key) ? <KolamEdgeBorder /> : null}
       {usesTempleOrnament(template.key) ? <TempleFrame /> : null}
       {usesPalaceOrnament(template.key) ? <PalaceFrame /> : null}
       {ornamentKindFor(template.key) === "girih" ? <GirihFrame /> : null}
@@ -178,8 +196,7 @@ export function SiteShell({
         <div className="section-shell pb-10">
           <div
             className={cn(
-              "overflow-hidden rounded-[calc(var(--radius)+0.8rem)] border px-6 py-8 sm:px-8 sm:py-10",
-              getFooterPanelClasses(template.key),
+              "chrome-footer overflow-hidden rounded-[calc(var(--radius)+0.8rem)] border px-6 py-8 sm:px-8 sm:py-10",
             )}
           >
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -194,13 +211,13 @@ export function SiteShell({
                 </p>
               </div>
               <div className="grid gap-3 text-sm text-[color:var(--muted)] sm:grid-cols-2">
-                <div className="rounded-[1.6rem] border border-[color:var(--accent)]/18 bg-white/35 px-4 py-4">
+                <div className="rounded-[1.6rem] panel-faint border border-[color:var(--accent)]/18 px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">Celebration</p>
                   <p className="mt-2 text-base font-semibold text-[color:var(--text)]">
                     {snapshot.site.locationSummary ?? "Destination to be revealed"}
                   </p>
                 </div>
-                <div className="rounded-[1.6rem] border border-[color:var(--accent)]/18 bg-white/35 px-4 py-4">
+                <div className="rounded-[1.6rem] panel-faint border border-[color:var(--accent)]/18 px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">Date</p>
                   <p className="mt-2 text-base font-semibold text-[color:var(--text)]">
                     {formatDate(snapshot.site.weddingDate)}

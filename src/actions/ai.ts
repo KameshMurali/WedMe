@@ -97,13 +97,21 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
 
   const headerSource = await headers();
 
-  // Burst abuse guard (IP/UA + user in the key).
+  // Burst abuse guard, keyed on userId ONLY.
+  //
+  // This used to omit keyByPartsOnly, which folded the IP and User-Agent into
+  // the bucket key. A scripted client that varied its User-Agent header got a
+  // fresh 8-per-minute bucket for every value it sent, which defeated the
+  // guard entirely. The daily cap is the thing that bounds volume, but the
+  // burst guard is what stops one account saturating the model concurrently.
   const burst = await consumeRateLimit({
     action: AI_DRAFT_BURST_ACTION,
     source: headerSource,
     limit: AI_DRAFT_BURST_LIMIT,
     windowMs: AI_DRAFT_BURST_WINDOW_MS,
     keyParts: [user.id],
+    keyByPartsOnly: true,
+    onError: "closed",
   });
   if (!burst.ok) {
     // Report the CURRENT daily count even though this attempt was refused.
@@ -116,7 +124,14 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
       keyParts: [user.id],
     });
     return {
-      error: "You're drafting very fast. Give it a minute and try again.",
+      // remaining === null means the limiter itself failed and refused rather
+      // than that a real ceiling was hit. Telling someone they are "drafting
+      // very fast" when the database is down sends them off to count their own
+      // clicks for a problem that is ours.
+      error:
+        burst.remaining === null
+          ? "Drafting is briefly unavailable. Please try again in a moment."
+          : "You're drafting very fast. Give it a minute and try again.",
       remainingToday: peek.remaining,
       remainingLifetime:
         lifetimeLimit === null ? null : Math.max(0, lifetimeLimit - record.couple.aiDraftCount),
@@ -132,8 +147,18 @@ export async function generateAiDraftAction(input: unknown): Promise<AiDraftActi
     windowMs: AI_DRAFT_DAILY_WINDOW_MS,
     keyParts: [user.id],
     keyByPartsOnly: true,
+    onError: "closed",
   });
   if (!daily.ok) {
+    // Same distinction as the burst guard: a fail-closed refusal is an outage
+    // on our side, not a quota the couple has spent, and the count is unknown
+    // rather than zero.
+    if (daily.remaining === null) {
+      return {
+        error: "Drafting is briefly unavailable. Please try again in a moment.",
+        remainingToday: null,
+      };
+    }
     return { error: "Daily limit reached. It resets tomorrow.", remainingToday: 0 };
   }
 

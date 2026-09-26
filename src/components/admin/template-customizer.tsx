@@ -414,21 +414,37 @@ export function TemplateCustomizer({
             </label>
             <label className="space-y-2">
               <span className="text-sm font-semibold text-[color:var(--text)]">Heading font</span>
+              {/* Driven by headingFontLabels rather than a hardcoded pair. The
+                  list used to offer only display and luxe, so a couple on Kolam
+                  Blush, Desert Neutral or Crimson & Gold could not re-select
+                  their own template's font — and because a <select> whose value
+                  is absent from its options falls back to the first one, simply
+                  opening this panel and saving silently replaced their Tamil,
+                  Arabic or Chinese heading face with the default serif. */}
               <Select {...register("headingFontKey")}>
-                <option value="display">Display serif</option>
-                <option value="luxe">Modern luxe serif</option>
+                {Object.entries(headingFontLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </Select>
             </label>
             <label className="space-y-2">
               <span className="text-sm font-semibold text-[color:var(--text)]">Body font</span>
               <Select {...register("bodyFontKey")}>
-                <option value="body">Editorial sans</option>
+                {Object.entries(bodyFontLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </Select>
             </label>
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-[color:var(--text)]">Palette name</span>
-              <Input placeholder="champagne" {...register("paletteKey")} />
-            </label>
+            {/* paletteKey is an internal identifier, not something a couple has
+                any way to reason about — it was on screen as a free-text
+                "Palette name" box with a placeholder of "champagne". It stays
+                registered so the value round-trips through the form and the
+                schema, but it is no longer presented as a choice. */}
+            <input type="hidden" {...register("paletteKey")} />
           </div>
         </Card>
 

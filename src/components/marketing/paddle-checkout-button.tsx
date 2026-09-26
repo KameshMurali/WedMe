@@ -108,6 +108,20 @@ export function PaddleCheckoutButton({
       return;
     }
 
+    // Refuse rather than quietly bill full price. This branch used to fall
+    // through to `: {}` below, so a deploy with the price ids set but
+    // NEXT_PUBLIC_PADDLE_DISCOUNT_LAUNCH missing would advertise a discounted
+    // price on the card and open checkout at the undiscounted one, with no
+    // error anywhere. Overcharging against a displayed price is worse than an
+    // unavailable button.
+    if (applyLaunchDiscount && !paddleConfig.launchDiscountId) {
+      toast.error("The launch offer isn't ready yet. Please try again shortly.");
+      console.error(
+        "Launch discount requested but NEXT_PUBLIC_PADDLE_DISCOUNT_LAUNCH is unset; refusing to open checkout at full price.",
+      );
+      return;
+    }
+
     setIsOpening(true);
     try {
       const paddle = await loadPaddle();
@@ -117,9 +131,7 @@ export function PaddleCheckoutButton({
         // Read back by the webhook to grant the plan. Without this the payment
         // cannot be attributed to a workspace.
         customData: { userId: user!.id, planKey },
-        ...(applyLaunchDiscount && paddleConfig.launchDiscountId
-          ? { discountId: paddleConfig.launchDiscountId }
-          : {}),
+        ...(applyLaunchDiscount ? { discountId: paddleConfig.launchDiscountId } : {}),
         settings: {
           displayMode: "overlay",
           theme: "light",

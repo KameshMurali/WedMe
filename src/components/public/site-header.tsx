@@ -50,38 +50,26 @@ function getNavLinkClasses(
       ? isDark
         ? "bg-white text-[color:var(--background)] shadow-sm ring-1 ring-black/5"
         : "bg-white text-[color:var(--text)] shadow-sm ring-1 ring-black/5"
-      : "text-[color:var(--muted)] hover:bg-white/70 hover:text-[color:var(--text)]",
+      : "text-[color:var(--muted)] hover:bg-[color:var(--surface)] hover:text-[color:var(--text)]",
   );
 }
 
 // The header is sticky and translucent, so a dark hero photo or image card can
 // scroll underneath it at any moment. Nothing can know in advance what will be
 // back there, so the panel carries its own near-opaque surface
-// (.site-header-surface) instead of borrowing contrast from the backdrop; only
-// the border and shadow stay template-specific. Alphas here must be on
-// Tailwind's opacity scale (multiples of 5) — off-scale values like /8 compile
-// to nothing at all, which is how this header lost its background in the first
-// place.
-function getHeaderPanelClasses(templateKey: string) {
-  switch (templateKey) {
-    case "cinematic-modern":
-      return "site-header-surface border-white/10 text-[color:var(--text)] shadow-[0_24px_80px_rgba(7,5,12,0.45)]";
-    case "minimal-luxury":
-      return "site-header-surface border-black/10 text-[color:var(--text)] shadow-[0_18px_60px_rgba(31,26,23,0.08)]";
-    case "traditional-celebration":
-      return "site-header-surface border-black/10 text-[color:var(--text)] shadow-[0_24px_80px_rgba(135,73,28,0.14)]";
-    default:
-      return "site-header-surface border-white/60 text-[color:var(--text)] shadow-[0_24px_80px_rgba(46,22,24,0.10)]";
-  }
-}
-
+// (.site-header-surface) instead of borrowing contrast from the backdrop.
+//
+// The border and shadow used to be a switch over template keys that named three
+// of the sixteen, leaving thirteen on a warm default. They now come from
+// --border and --elevation, which .theme-scope derives from the template's own
+// --primary and re-derives again for a dark tone.
 // The rail sits on the panel above, so it only has to lift the links off that
 // surface — it never has to fight the page behind. /10 and /75 are on the
 // opacity scale; the /8 and /76 used before were not, and never rendered.
 function getNavRailClasses(isDark: boolean) {
   return isDark
-    ? "bg-white/10 ring-1 ring-white/10 backdrop-blur"
-    : "bg-white/75 ring-1 ring-black/5 shadow-sm backdrop-blur";
+    ? "panel-faint ring-1 ring-white/10 backdrop-blur"
+    : "panel-soft ring-1 ring-black/5 shadow-sm backdrop-blur";
 }
 
 export function SiteHeader({
@@ -148,16 +136,21 @@ export function SiteHeader({
         <div
           data-collapsed={collapsed ? "true" : "false"}
           className={cn(
-            "group relative overflow-hidden rounded-[calc(var(--radius)+0.9rem)] border backdrop-blur-xl",
-            getHeaderPanelClasses(template.key),
+            "site-header-surface group relative overflow-hidden rounded-[calc(var(--radius)+0.9rem)] border text-[color:var(--text)] backdrop-blur-xl",
           )}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-[color:var(--accent)]/10" />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, color-mix(in srgb, var(--surface) 20%, transparent), transparent, color-mix(in srgb, var(--accent) 10%, transparent))",
+            }}
+          />
           {showBackToPlatformHome ? (
             <div className="relative border-b border-black/5 px-5 py-3 group-data-[collapsed=true]:hidden sm:px-6 lg:group-data-[collapsed=true]:block">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--accent)]/20 bg-white/70 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:bg-white"
+                className="inline-flex items-center gap-2 rounded-full panel-soft border border-[color:var(--accent)]/20 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:opacity-80"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
@@ -192,7 +185,7 @@ export function SiteHeader({
               </div>
 
               <div className="flex shrink-0 items-center gap-3">
-                <div className="hidden rounded-full border border-[color:var(--accent)]/18 bg-white/55 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
+                <div className="hidden rounded-full panel-faint border border-[color:var(--accent)]/18 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
                   {formatEnumLabel(visibility, "PUBLIC")}
                 </div>
                 <Button asChild size="sm">

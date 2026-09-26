@@ -37,7 +37,17 @@ export function MoonGate({ className }: { className?: string }) {
 }
 
 // Ice-ray lattice: the irregular cracked-ice window screen.
-export function IceRayLattice({ className }: { className?: string }) {
+// patternId is a prop because every *Frame renders this twice, left and
+// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// and both url(#iceray) references resolved to whichever came first — invalid,
+// and silently wrong the moment the two sides differ in colour or scale.
+export function IceRayLattice({
+  className,
+  patternId = "iceray",
+}: {
+  className?: string;
+  patternId?: string;
+}) {
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
@@ -50,7 +60,7 @@ export function IceRayLattice({ className }: { className?: string }) {
           </g>
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="url(#iceray)" />
+      <rect width="100%" height="100%" fill={`url(#${patternId})`} />
     </svg>
   );
 }
@@ -147,11 +157,11 @@ export function Cloud({ className, delay = 0 }: { className?: string; delay?: nu
 export function LanternFrame() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      <div className="absolute inset-y-0 left-0 hidden w-28 text-[color:var(--primary)] opacity-[0.15] lg:block xl:w-36">
-        <IceRayLattice className="h-full w-full" />
+      <div className="absolute inset-y-0 left-0 w-8 text-[color:var(--primary)] opacity-[0.15] sm:w-14 lg:w-28 xl:w-36">
+        <IceRayLattice className="h-full w-full" patternId="iceray-left" />
       </div>
-      <div className="absolute inset-y-0 right-0 hidden w-28 text-[color:var(--primary)] opacity-[0.15] lg:block xl:w-36">
-        <IceRayLattice className="h-full w-full" />
+      <div className="absolute inset-y-0 right-0 w-8 text-[color:var(--primary)] opacity-[0.15] sm:w-14 lg:w-28 xl:w-36">
+        <IceRayLattice className="h-full w-full" patternId="iceray-right" />
       </div>
     </div>
   );

@@ -2,19 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fallback token set. The public site overrides every one of these per template
+   on .theme-scope (site-shell.tsx); these values are what the dashboard,
+   marketing pages and auth screens resolve against. --surface is deliberately
+   OPAQUE here: .section-card and the header now mix their own transparency from
+   it, and starting from a translucent value compounded the two into a panel too
+   faint to read. */
 :root {
   color-scheme: light;
   --background: #fcf8f4;
-  --surface: rgba(255, 255, 255, 0.82);
+  --surface: #fffaf6;
   --text: #1d1014;
   --muted: #5f4549;
   --primary: #7b5842;
   --accent: #c79b66;
   --radius: 28px;
+  --border: color-mix(in srgb, var(--primary) 16%, transparent);
+  --elevation: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* The per-template scope. site-shell sets --primary/--accent/--surface/etc as
+   inline custom properties on this same element, so the derived tokens below
+   resolve against the TEMPLATE's palette rather than the :root fallback —
+   custom properties substitute using the computed value on the element where
+   they are declared, which is why these live here and not in :root. */
+.theme-scope {
+  --border: color-mix(in srgb, var(--primary) 16%, transparent);
+  --elevation: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* Tone is derived from the template's own background luminance (lib/color.ts),
+   not from a template key, so a couple who darkens their palette in the
+   customizer gets the dark treatment too. A dark page needs a brighter hairline
+   and a genuinely dark shadow — a shadow mixed from a light --primary would
+   read as a glow. */
+.theme-scope[data-tone="dark"] {
+  --border: color-mix(in srgb, var(--primary) 24%, transparent);
+  --elevation: rgba(0, 0, 0, 0.55);
+}
+
+/* The customizer's "Shadow style" control. Declared after the tone rules so it
+   modulates whichever elevation they resolved to. Anything other than these
+   three values leaves the default alone. */
+.theme-scope[data-shadow="glow"] {
+  --elevation: color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.theme-scope[data-shadow="card"] {
+  --elevation: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.theme-scope[data-shadow="none"] {
+  --elevation: transparent;
+}
+
+.theme-scope[data-tone="dark"][data-shadow="glow"] {
+  --elevation: rgba(0, 0, 0, 0.62);
+}
+
+.theme-scope[data-tone="dark"][data-shadow="card"] {
+  --elevation: rgba(0, 0, 0, 0.42);
 }
 
 * {
-  border-color: rgba(123, 88, 66, 0.14);
+  border-color: var(--border);
 }
 
 html {
@@ -23,10 +74,7 @@ html {
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 28%),
-    radial-gradient(circle at top right, rgba(199, 155, 102, 0.16), transparent 30%),
-    linear-gradient(160deg, #fffaf6 0%, #f8f0ea 38%, #fcfbf8 100%);
+  background: var(--background);
   color: var(--text);
   font-family: var(--font-manrope), system-ui, sans-serif;
 }
@@ -37,12 +85,7 @@ a {
 }
 
 ::selection {
-  background: rgba(199, 155, 102, 0.28);
-}
-
-.glass-panel {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(18px);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 /* Surface for the public site's sticky header. The header floats over whatever
@@ -59,27 +102,170 @@ a {
 .site-header-surface {
   background-color: var(--surface);
   background-color: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-color: var(--border);
+  box-shadow: 0 24px 80px var(--elevation);
 }
 
 .section-shell {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
 }
 
+@layer components {
+  /* Panel surfaces. Every one of these used to be a literal bg-white/NN, which
+     is why the dark template rendered white cards carrying near-white text, and
+     why all sixteen templates shared the same chrome. Mixing from --surface
+     instead means a panel is always the template's own material.
+
+     They are in @layer components on purpose: a plain rule after
+     @tailwind utilities would beat any background or border utility a caller passes in.
+
+     Alphas must be expressed here in color-mix, never as a Tailwind opacity
+     modifier on a var() colour — that combination compiles to nothing. */
+  .panel-solid {
+    background-color: color-mix(in srgb, var(--surface) 92%, transparent);
+  }
+
+  .panel-soft {
+    background-color: color-mix(in srgb, var(--surface) 74%, transparent);
+  }
+
+  .panel-faint {
+    background-color: color-mix(in srgb, var(--surface) 42%, transparent);
+  }
+
+  .glass-panel {
+    background-color: color-mix(in srgb, var(--surface) 78%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .section-card {
+    border-radius: var(--radius);
+    /* border-width/-color only, never the `border` shorthand: the shorthand
+       would also set border-style and silently kill `border-dashed` on the
+       empty-state cards. */
+    border-width: 1px;
+    border-color: var(--border);
+    background-color: color-mix(in srgb, var(--surface) 88%, transparent);
+    box-shadow: 0 20px 65px var(--elevation);
+    backdrop-filter: blur(12px);
+  }
+
+  /* Page backdrops, one per chromeStyle in the template registry. Each composes
+     entirely from the template's own tokens, so a palette change changes the
+     page — and because the registry field is a closed union consumed by an
+     exhaustive switch, a new template cannot fall through to another template's
+     colours the way all eleven cultural and destination designs previously fell
+     through to champagne. */
+  .chrome-wash {
+    background:
+      radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--surface) 70%, transparent), transparent 30%),
+      radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 28%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 55%, var(--background)) 0%,
+        var(--background) 46%,
+        color-mix(in srgb, var(--surface) 35%, var(--background)) 100%
+      );
+  }
+
+  .chrome-grid {
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px),
+      linear-gradient(color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 70%, var(--background)) 0%,
+        var(--background) 100%
+      );
+    background-size:
+      52px 52px,
+      52px 52px,
+      auto;
+  }
+
+  .chrome-vignette {
+    background:
+      radial-gradient(circle at 18% 6%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 26%),
+      radial-gradient(circle at 84% 14%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 22%),
+      linear-gradient(
+        180deg,
+        var(--background) 0%,
+        color-mix(in srgb, var(--surface) 60%, var(--background)) 42%,
+        var(--background) 100%
+      );
+  }
+
+  .chrome-radiant {
+    background:
+      radial-gradient(circle at 50% -6%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 34%),
+      radial-gradient(circle at 10% 16%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 26%),
+      radial-gradient(circle at 90% 18%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 26%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 62%, var(--background)) 0%,
+        var(--background) 54%,
+        color-mix(in srgb, var(--accent) 8%, var(--background)) 100%
+      );
+  }
+
+  .chrome-veil {
+    background:
+      radial-gradient(
+        ellipse 120% 40% at 50% 0%,
+        color-mix(in srgb, var(--accent) 16%, transparent),
+        transparent 70%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 85%, var(--background)) 0%,
+        var(--background) 60%
+      );
+  }
+
+  .chrome-horizon {
+    background:
+      linear-gradient(
+        180deg,
+        transparent 58%,
+        color-mix(in srgb, var(--accent) 14%, transparent) 78%,
+        color-mix(in srgb, var(--primary) 14%, transparent) 100%
+      ),
+      radial-gradient(
+        ellipse 100% 32% at 50% 4%,
+        color-mix(in srgb, var(--surface) 72%, transparent),
+        transparent 70%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 50%, var(--background)) 0%,
+        var(--background) 62%
+      );
+  }
+
+  /* The footer panel. One rule for all sixteen templates, because the variation
+     now comes from the tokens rather than from a switch that only ever named
+     three keys. */
+  .chrome-footer {
+    border-color: var(--border);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--surface) 94%, transparent) 0%,
+      color-mix(in srgb, var(--accent) 12%, var(--surface)) 100%
+    );
+  }
+}
+
 .premium-grid {
   background-image:
-    linear-gradient(rgba(123, 88, 66, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(123, 88, 66, 0.05) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--primary) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 5%, transparent) 1px, transparent 1px);
   background-size: 34px 34px;
 }
 
 .rich-shadow {
   box-shadow:
-    0 24px 80px rgba(52, 27, 20, 0.09),
-    0 8px 28px rgba(52, 27, 20, 0.06);
-}
-
-.section-card {
-  @apply rounded-[var(--radius)] border border-white/50 bg-white/85 shadow-card backdrop-blur;
+    0 24px 80px var(--elevation),
+    0 8px 28px var(--elevation);
 }
 
 .fade-border {
@@ -91,7 +277,11 @@ a {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(199, 155, 102, 0.5), rgba(255, 255, 255, 0.2));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 50%, transparent),
+    color-mix(in srgb, var(--surface) 20%, transparent)
+  );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -137,7 +327,13 @@ a {
   animation: marquee 30s linear infinite;
 }
 
+/* Smooth scrolling is motion too: a guest who has asked for less of it should
+   not get a long animated glide every time they tap a nav link. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .marquee-track {
     animation: none;
   }

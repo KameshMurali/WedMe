@@ -162,7 +162,7 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
                 type="button"
                 onClick={goPrev}
                 aria-label="Previous photo"
-                className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[color:var(--text)] shadow-md backdrop-blur transition hover:bg-white sm:left-5 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
+                className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center panel-solid rounded-full text-[color:var(--text)] shadow-md backdrop-blur transition hover:opacity-90 sm:left-5 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -170,7 +170,7 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
                 type="button"
                 onClick={goNext}
                 aria-label="Next photo"
-                className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[color:var(--text)] shadow-md backdrop-blur transition hover:bg-white sm:right-5 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
+                className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center panel-solid rounded-full text-[color:var(--text)] shadow-md backdrop-blur transition hover:opacity-90 sm:right-5 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -180,7 +180,7 @@ export function GallerySpotlight({ assets }: { assets: GalleryAsset[] }) {
 
         {/* Caption strip — sits OUTSIDE the image area so the photo is never
             covered. Frame counter on the left, title + caption alongside. */}
-        <div className="flex flex-col gap-2 border-t border-black/8 bg-white/85 px-5 py-4 backdrop-blur sm:flex-row sm:items-baseline sm:gap-5 sm:px-7">
+        <div className="panel-solid flex flex-col gap-2 border-t px-5 py-4 backdrop-blur sm:flex-row sm:items-baseline sm:gap-5 sm:px-7">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
             {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
           </span>

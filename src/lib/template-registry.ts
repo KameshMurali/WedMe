@@ -12,6 +12,14 @@ type TemplateRegistryEntry = {
   tier: "free" | "premium";
   previewGradient: string;
   heroVariant: "classic" | "split" | "cinematic" | "editorial" | "celebration" | "destination";
+  // Drives the page chrome: backdrop, footer panel and header treatment.
+  // These used to be switch statements over template keys, written when there
+  // were five templates; the eleven added since all fell through to the
+  // champagne default, which is why Emerald & Pearl rendered on a warm gold
+  // page. A closed union consumed by an exhaustive switch makes that
+  // impossible to repeat — adding a template without choosing a chrome is a
+  // type error.
+  chromeStyle: "wash" | "grid" | "vignette" | "radiant" | "veil" | "horizon";
   cardVariant: "glass" | "soft" | "outline" | "shadow";
   navigationVariant: "pill" | "underline" | "ghost";
   themeDefaults: {
@@ -40,6 +48,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Timeless luxury",
     previewGradient: "linear-gradient(135deg, #fffaf5 0%, #f1e7dc 45%, #d8b98c 100%)",
     heroVariant: "classic",
+    chromeStyle: "wash",
     cardVariant: "glass",
     navigationVariant: "pill",
     themeDefaults: {
@@ -80,6 +89,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Garden romance",
     previewGradient: "linear-gradient(135deg, #fff8fb 0%, #f9dce5 40%, #f0b3c6 100%)",
     heroVariant: "editorial",
+    chromeStyle: "wash",
     cardVariant: "soft",
     navigationVariant: "underline",
     themeDefaults: {
@@ -120,6 +130,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Modern luxury",
     previewGradient: "linear-gradient(135deg, #ffffff 0%, #f1f0ed 50%, #c8c0b4 100%)",
     heroVariant: "split",
+    chromeStyle: "grid",
     cardVariant: "outline",
     navigationVariant: "ghost",
     themeDefaults: {
@@ -160,6 +171,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Cinematic celebration",
     previewGradient: "linear-gradient(135deg, #1f1c2c 0%, #3a2f4f 45%, #7f5f89 100%)",
     heroVariant: "cinematic",
+    chromeStyle: "vignette",
     cardVariant: "glass",
     navigationVariant: "pill",
     themeDefaults: {
@@ -200,6 +212,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Festive heritage",
     previewGradient: "linear-gradient(135deg, #fff6ec 0%, #f4d8b2 45%, #c45d24 100%)",
     heroVariant: "celebration",
+    chromeStyle: "radiant",
     cardVariant: "shadow",
     navigationVariant: "underline",
     themeDefaults: {
@@ -240,6 +253,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "South Indian temple",
     previewGradient: "linear-gradient(135deg, #fdf6ec 0%, #e8b98a 40%, #2f6f6b 100%)",
     heroVariant: "celebration",
+    chromeStyle: "radiant",
     cardVariant: "shadow",
     navigationVariant: "underline",
     themeDefaults: {
@@ -280,6 +294,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "North Indian palace",
     previewGradient: "linear-gradient(135deg, #fdf5ec 0%, #e7bb62 38%, #a3234e 100%)",
     heroVariant: "celebration",
+    chromeStyle: "radiant",
     cardVariant: "soft",
     navigationVariant: "pill",
     themeDefaults: {
@@ -320,6 +335,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Islamic elegance",
     previewGradient: "linear-gradient(135deg, #f6fbf8 0%, #cfe6d8 45%, #0f5c46 100%)",
     heroVariant: "editorial",
+    chromeStyle: "veil",
     cardVariant: "glass",
     navigationVariant: "underline",
     themeDefaults: {
@@ -360,6 +376,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Christian classic",
     previewGradient: "linear-gradient(135deg, #fcfcfa 0%, #e4e7ee 45%, #46618f 100%)",
     heroVariant: "classic",
+    chromeStyle: "veil",
     cardVariant: "outline",
     navigationVariant: "underline",
     themeDefaults: {
@@ -400,6 +417,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Chinese double happiness",
     previewGradient: "linear-gradient(135deg, #fff7f4 0%, #f0c9a0 40%, #b3121e 100%)",
     heroVariant: "cinematic",
+    chromeStyle: "radiant",
     cardVariant: "shadow",
     navigationVariant: "pill",
     themeDefaults: {
@@ -440,6 +458,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Arabic understatement",
     previewGradient: "linear-gradient(135deg, #fdfaf5 0%, #e6d7c1 45%, #6f5137 100%)",
     heroVariant: "editorial",
+    chromeStyle: "horizon",
     cardVariant: "glass",
     navigationVariant: "ghost",
     themeDefaults: {
@@ -480,6 +499,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Tamil invitation",
     previewGradient: "linear-gradient(135deg, #f6f1ec 0%, #e3d7cd 45%, #c2687f 100%)",
     heroVariant: "editorial",
+    chromeStyle: "wash",
     cardVariant: "soft",
     navigationVariant: "underline",
     themeDefaults: {
@@ -522,6 +542,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Mediterranean coast",
     previewGradient: "linear-gradient(135deg, #f7fbfd 0%, #bcd8e6 42%, #1d5d86 100%)",
     heroVariant: "destination",
+    chromeStyle: "veil",
     cardVariant: "glass",
     navigationVariant: "underline",
     themeDefaults: {
@@ -562,6 +583,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Tuscan countryside",
     previewGradient: "linear-gradient(135deg, #fdfaf2 0%, #ddd0ac 44%, #6d7546 100%)",
     heroVariant: "destination",
+    chromeStyle: "horizon",
     cardVariant: "soft",
     navigationVariant: "underline",
     themeDefaults: {
@@ -602,6 +624,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Tropical evening",
     previewGradient: "linear-gradient(135deg, #fdf7f1 0%, #e0b384 42%, #2f4a3c 100%)",
     heroVariant: "destination",
+    chromeStyle: "horizon",
     cardVariant: "shadow",
     navigationVariant: "pill",
     themeDefaults: {
@@ -642,6 +665,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Island lagoon",
     previewGradient: "linear-gradient(135deg, #fbfdfd 0%, #cfe8e6 44%, #4d9c96 100%)",
     heroVariant: "destination",
+    chromeStyle: "veil",
     cardVariant: "glass",
     navigationVariant: "ghost",
     themeDefaults: {

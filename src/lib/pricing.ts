@@ -34,6 +34,26 @@ export const checkoutEnabled = Boolean(
   paddleConfig.clientToken && paddleConfig.priceIds.together && paddleConfig.priceIds.forever,
 );
 
+// Whether the launch discount can actually be CHARGED, which is a stricter
+// question than whether the offer window is open.
+//
+// The discount is applied by Paddle at checkout using launchDiscountId. If that
+// id is missing, the checkout call silently drops it and bills full price, so
+// any struck-through price shown next to it is false. Three ways that used to
+// happen, all of which this closes:
+//
+//   1. Paddle not configured at all — the card advertised "save 30%" beside a
+//      "Coming Soon" pill and copy saying payments were not open.
+//   2. Token and price ids set but the discount id forgotten — the card
+//      advertised the discounted price and Paddle opened at full price.
+//   3. The window open but nothing purchasable, so the countdown created
+//      urgency toward a date on which nothing would change.
+export const launchDiscountConfigured = Boolean(paddleConfig.launchDiscountId);
+
+export function isLaunchOfferChargeable() {
+  return checkoutEnabled && launchDiscountConfigured;
+}
+
 export type PriceAmount = {
   amount: number; // integer in MAJOR units (we don't need cents for these prices)
   display: string; // pre-formatted for paste into headlines (e.g. "$49")
@@ -193,21 +213,80 @@ export function findPlan(key: PlanKey) {
 export const launchOffer = {
   // Bump this date when you re-launch a promo. Re-opened for the paid launch;
   // the matching Paddle discount must be live or the strike-through misleads.
-  endsAt: new Date("2026-09-30T23:59:59Z"),
+  //
+  // Pushed out from 2026-09-30 ahead of the launch post: driving signups into
+  // an offer that lapses days later strands everyone who arrives late, and
+  // checkout is still gated on paddleConfig anyway.
+  endsAt: new Date("2026-12-31T23:59:59Z"),
   label: "Launch offer",
   blurb: "First 100 couples: 30% off Forever",
 };
 
+// The window is open. Says nothing about whether the discount can be charged.
+// Use this for forward-looking copy ("30% off at launch"), never for a price.
 export function isLaunchOfferActive(now: Date = new Date()) {
   return now < launchOffer.endsAt;
 }
 
+// The window is open AND Paddle can actually apply the discount. This is the
+// only condition under which it is honest to show a reduced number.
+export function isLaunchOfferLive(now: Date = new Date()) {
+  return isLaunchOfferActive(now) && isLaunchOfferChargeable();
+}
+
+// Returns the price to DISPLAY. Gated on isLaunchOfferLive, not merely on the
+// window: a discounted figure beside a "Coming Soon" pill, or beside a checkout
+// that will bill full price, is a false claim about what the customer pays.
+//
+// `chargeable` exists so tests can exercise all four combinations without
+// mutating NEXT_PUBLIC_* env vars, which are inlined at build time.
 export function applyLaunchOffer(
   amount: number,
   plan: Plan,
   now: Date = new Date(),
+  chargeable: boolean = isLaunchOfferChargeable(),
 ) {
-  if (!plan.launchOfferPct || !isLaunchOfferActive(now)) return amount;
+  if (!plan.launchOfferPct) return amount;
+  if (!isLaunchOfferActive(now) || !chargeable) return amount;
   const discounted = Math.round(amount * (1 - plan.launchOfferPct / 100));
   return discounted;
+}
+
+// "Ends 31 December" from launchOffer.endsAt. The card hardcoded "Ends 31 Jul"
+// while the date said December, so the urgency line was simply wrong.
+export function formatLaunchOfferEnd(locale = "en-GB") {
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(launchOffer.endsAt);
+}
+
+// schema.org Offers for the marketing pages, derived from `plans`.
+//
+// Both the homepage and the pricing page previously hardcoded their own copies
+// of these prices as string literals. That put "price: 99, availability:
+// InStock" in the same document that rendered a "Coming Soon" pill, which is
+// exactly the on-page/structured-data mismatch search engines penalise. Derived
+// here so the two can never disagree with each other or with the prices a
+// visitor sees.
+//
+// Availability follows checkout: PreOrder while payments are closed, because
+// nothing on the site can be bought yet.
+export function buildOfferSchema(currency: CurrencyCode = "USD") {
+  const availability = checkoutEnabled
+    ? "https://schema.org/InStock"
+    : "https://schema.org/PreOrder";
+
+  return plans.map((plan) => ({
+    "@type": "Offer",
+    name: plan.name,
+    // Run through applyLaunchOffer so the structured price equals the price on
+    // the card in every state: undiscounted while the offer is not chargeable,
+    // discounted once it is.
+    price: String(applyLaunchOffer(plan.prices[currency].amount, plan)),
+    priceCurrency: currency,
+    availability,
+    description: plan.tagline,
+  }));
 }

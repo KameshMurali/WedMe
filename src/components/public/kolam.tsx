@@ -96,7 +96,7 @@ export function KolamEdgeBorder() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-y-0 left-0 right-0 z-0 hidden lg:block"
+      className="pointer-events-none fixed inset-y-0 left-0 right-0 z-[1]"
     >
       {(["left-0", "right-0 rotate-180"] as const).map((position) => (
         <svg

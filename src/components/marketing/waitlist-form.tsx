@@ -15,13 +15,24 @@ export function WaitlistForm({
   planName,
   currency,
   ctaLabel,
+  source,
+  defaultOpen = false,
 }: {
   planKey: PlanKey;
   planName: string;
   currency: CurrencyCode;
   ctaLabel: string;
+  // Where the signup came from, stored on WaitlistSignup. Defaults to the
+  // pricing-card behaviour so those call sites are unchanged; the homepage
+  // passes its own value, which is the only way to tell a campaign signup
+  // apart from someone who read the pricing page.
+  source?: string;
+  // The form normally hides behind a button and opens on click. That is right
+  // next to a price, where the visitor is already deciding. It is wrong for
+  // someone arriving cold from a link, who should see the email field.
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [state, formAction, pending] = useActionState(joinWaitlistAction, initialState);
 
   if (state.success) {
@@ -46,7 +57,7 @@ export function WaitlistForm({
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="planKey" value={planKey} />
       <input type="hidden" name="currency" value={currency} />
-      <input type="hidden" name="source" value={`pricing_${planKey}`} />
+      <input type="hidden" name="source" value={source ?? `pricing_${planKey}`} />
       <p className="text-xs text-[color:var(--muted)]">
         Get founding-couple pricing on <strong className="text-[color:var(--text)]">{planName}</strong> when it launches.
       </p>

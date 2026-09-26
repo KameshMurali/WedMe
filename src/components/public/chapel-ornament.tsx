@@ -99,7 +99,17 @@ export function RoseWindow({ className }: { className?: string }) {
 }
 
 // Colonnade: the arcade running down a nave aisle.
-export function Colonnade({ className }: { className?: string }) {
+// patternId is a prop because every *Frame renders this twice, left and
+// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// and both url(#colonnade) references resolved to whichever came first — invalid,
+// and silently wrong the moment the two sides differ in colour or scale.
+export function Colonnade({
+  className,
+  patternId = "colonnade",
+}: {
+  className?: string;
+  patternId?: string;
+}) {
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
@@ -116,7 +126,7 @@ export function Colonnade({ className }: { className?: string }) {
           </g>
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="url(#colonnade)" />
+      <rect width="100%" height="100%" fill={`url(#${patternId})`} />
     </svg>
   );
 }
@@ -124,11 +134,11 @@ export function Colonnade({ className }: { className?: string }) {
 export function ChapelFrame() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      <div className="absolute inset-y-0 left-0 hidden w-24 text-[color:var(--primary)] opacity-[0.17] lg:block xl:w-32">
-        <Colonnade className="h-full w-full" />
+      <div className="absolute inset-y-0 left-0 w-8 text-[color:var(--primary)] opacity-[0.17] sm:w-14 lg:w-24 xl:w-32">
+        <Colonnade className="h-full w-full" patternId="colonnade-left" />
       </div>
-      <div className="absolute inset-y-0 right-0 hidden w-24 text-[color:var(--primary)] opacity-[0.17] lg:block xl:w-32">
-        <Colonnade className="h-full w-full" />
+      <div className="absolute inset-y-0 right-0 w-8 text-[color:var(--primary)] opacity-[0.17] sm:w-14 lg:w-24 xl:w-32">
+        <Colonnade className="h-full w-full" patternId="colonnade-right" />
       </div>
     </div>
   );
