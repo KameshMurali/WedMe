@@ -18,6 +18,15 @@ export type RateLimitConfig = {
   // so a limit stays stable for a user across devices and networks. Use for
   // per-account quotas (e.g. the AI daily cap); leave off for abuse buckets.
   keyByPartsOnly?: boolean;
+  // What to do when the limiter itself fails (table unavailable, statement
+  // timeout, permissions). Default "open": a database blip must not lock anyone
+  // out of login or stop a guest replying to an invitation.
+  //
+  // "closed" is for actions where being wrong costs money rather than
+  // availability. On the AI path, failing open means failing expensive: if the
+  // bucket table goes away, both the burst and daily caps silently vanish and a
+  // paid account becomes unbounded against a metered API.
+  onError?: "open" | "closed";
 };
 
 export type RateLimitResult = {
@@ -115,6 +124,7 @@ export async function consumeRateLimit({
   windowMs,
   keyParts,
   keyByPartsOnly,
+  onError = "open",
 }: RateLimitConfig): Promise<RateLimitResult> {
   try {
     await ensureRateLimitTable();
@@ -158,15 +168,22 @@ export async function consumeRateLimit({
       retryAfterSeconds,
     };
   } catch (error) {
-    console.error("consumeRateLimit failed; allowing request", { action, error });
+    const failClosed = onError === "closed";
+    console.error(
+      failClosed
+        ? "consumeRateLimit failed; REFUSING request (fail-closed action)"
+        : "consumeRateLimit failed; allowing request",
+      { action, error },
+    );
 
-    // Fail open so a database blip cannot lock people out of login, but report
-    // the count as UNKNOWN rather than as the full limit.
+    // Either way the count is UNKNOWN and must never be reported as the full
+    // limit: a fabricated `remaining` is what hid a completely disabled limiter
+    // for three rounds of debugging in #56.
     return {
-      ok: true,
+      ok: !failClosed,
       limit,
       remaining: null,
-      retryAfterSeconds: 0,
+      retryAfterSeconds: failClosed ? 30 : 0,
     };
   }
 }

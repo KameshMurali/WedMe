@@ -6,8 +6,9 @@ import { Sparkles } from "lucide-react";
 import { CurrencySwitcher } from "@/components/marketing/currency-switcher";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { PricingCard } from "@/components/marketing/pricing-card";
+import { siteUrl } from "@/lib/constants";
 import { detectCurrency } from "@/lib/geo";
-import { isLaunchOfferActive, launchOffer, plans } from "@/lib/pricing";
+import { buildOfferSchema, isLaunchOfferActive, launchOffer, plans } from "@/lib/pricing";
 import { getCurrentUser } from "@/server/auth/session";
 
 export const metadata: Metadata = {
@@ -24,37 +25,14 @@ const productSchema = {
   description:
     "A multi-event wedding website platform for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings, with multi-event support, RSVP management, photo galleries, and a polished couple dashboard.",
   brand: { "@type": "Brand", name: "ToNewBeginning" },
-  offers: [
-    {
-      "@type": "Offer",
-      name: "Hello",
-      description: "Free forever, with up to 2 wedding events and 50 RSVPs, gallery, story timeline.",
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-      url: "https://wed.tonewbeginning.com/register",
-    },
-    {
-      "@type": "Offer",
-      name: "Together",
-      description:
-        "Wedding year plan: AI-assisted content drafting, unlimited events, unlimited RSVPs, password protection and invite codes.",
-      price: "49",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-      url: "https://wed.tonewbeginning.com/register",
-    },
-    {
-      "@type": "Offer",
-      name: "Forever",
-      description:
-        "Lifetime plan: everything in Together plus permanent hosting, anniversary refresh emails, AI content help, and concierge setup.",
-      price: "99",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-      url: "https://wed.tonewbeginning.com/register",
-    },
-  ],
+  // Derived from `plans` so this can never disagree with the homepage's copy of
+  // the same offers, nor with the prices rendered on this very page. It used to
+  // declare all three InStock at full price while the cards showed "Coming
+  // Soon" and a discounted figure.
+  offers: buildOfferSchema().map((offer) => ({
+    ...offer,
+    url: `${siteUrl}/register`,
+  })),
 };
 
 const pricingFaqSchema = {

@@ -21,6 +21,7 @@ import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { Reveal } from "@/components/marketing/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
+import { buildOfferSchema } from "@/lib/pricing";
 import { detectCurrency } from "@/lib/geo";
 import { resolveWorkspaceResumePath, workspaceResumeCookieName } from "@/lib/constants";
 import { templateRegistry } from "@/lib/template-registry";
@@ -78,11 +79,10 @@ const softwareSchema = {
   url: BASE_URL,
   description:
     "ToNewBeginning.com is a multi-event wedding website builder for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings, with support for multi-day events, multi-event RSVPs, photo galleries, guest messages, and a couple dashboard.",
-  offers: [
-    { "@type": "Offer", name: "Hello", price: "0", priceCurrency: "USD", description: "Free plan with up to 2 wedding events and 50 RSVPs." },
-    { "@type": "Offer", name: "Together", price: "49", priceCurrency: "USD", description: "Wedding year plan: AI-assisted content drafting, unlimited events and RSVPs." },
-    { "@type": "Offer", name: "Forever", price: "99", priceCurrency: "USD", description: "Lifetime plan: everything in Together plus permanent hosting and anniversary emails." },
-  ],
+  // Derived from `plans` rather than hardcoded, so the price Google is told
+  // always equals the price on the page, and availability reflects whether
+  // anything can actually be bought.
+  offers: buildOfferSchema(),
 };
 
 const homepageFaqs = [

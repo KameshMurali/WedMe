@@ -9,7 +9,9 @@ import {
   applyLaunchOffer,
   checkoutEnabled,
   currencies,
+  formatLaunchOfferEnd,
   isLaunchOfferActive,
+  isLaunchOfferLive,
   type CurrencyCode,
   type Plan,
 } from "@/lib/pricing";
@@ -48,10 +50,19 @@ export function PricingCard({
   user?: { id: string; email: string } | null;
 }) {
   const basePrice = plan.prices[currency];
+  // applyLaunchOffer now returns the base amount unless the discount can
+  // actually be charged, so a struck-through price can only ever appear beside
+  // a checkout that will honour it.
   const discountedAmount = applyLaunchOffer(basePrice.amount, plan);
   const isDiscounted = discountedAmount !== basePrice.amount;
   const priceLabel = formatPrice(discountedAmount, currency);
   const strikeLabel = isDiscounted ? formatPrice(basePrice.amount, currency) : null;
+
+  // The window is open but nothing can be bought yet. Keep the hook, drop the
+  // number: promise the discount at launch rather than showing a price nobody
+  // can pay today.
+  const showUpcomingOffer =
+    Boolean(plan.launchOfferPct) && isLaunchOfferActive() && !isLaunchOfferLive();
 
   return (
     <div
@@ -98,6 +109,10 @@ export function PricingCard({
           <span className="ml-2 font-semibold text-emerald-700">
             Launch offer: save {plan.launchOfferPct}%
           </span>
+        </p>
+      ) : showUpcomingOffer ? (
+        <p className="mt-1 text-xs font-semibold text-emerald-700">
+          {plan.launchOfferPct}% off for the first 100 couples at launch
         </p>
       ) : null}
 
@@ -150,9 +165,10 @@ export function PricingCard({
         ) : null}
       </div>
 
-      {plan.key === "forever" && isLaunchOfferActive() ? (
-        <LaunchOfferCountdown />
-      ) : null}
+      {/* Only once the discount is chargeable. A deadline on an offer that
+          cannot be taken is manufactured urgency toward a date on which
+          nothing would have changed. */}
+      {plan.key === "forever" && isLaunchOfferLive() ? <LaunchOfferCountdown /> : null}
     </div>
   );
 }
@@ -161,9 +177,12 @@ export function PricingCard({
 // For a live ticker we'd hydrate this, but a date-anchored line works fine
 // for the launch-offer urgency cue without bloating the client bundle.
 function LaunchOfferCountdown() {
+  // Formatted from launchOffer.endsAt. This was hardcoded "Ends 31 Jul" while
+  // the date in pricing.ts said 31 December, so the page stated a deadline that
+  // had no relationship to the one being enforced.
   return (
     <p className="mt-3 text-center text-[11px] uppercase tracking-[0.22em] text-emerald-700">
-      Ends 31 Jul · first 100 couples
+      Ends {formatLaunchOfferEnd()} · first 100 couples
     </p>
   );
 }

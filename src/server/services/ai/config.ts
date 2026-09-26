@@ -26,7 +26,15 @@ export function getAnthropicClient(): Anthropic {
     throw new Error("AI drafting is enabled, but ANTHROPIC_API_KEY is missing.");
   }
   if (!anthropicClient) {
-    anthropicClient = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+    anthropicClient = new Anthropic({
+      apiKey: env.ANTHROPIC_API_KEY,
+      // The SDK default is 2, so every unit of quota a user spends could become
+      // three billed upstream requests, and the 15s timeout in draft.ts applies
+      // per attempt rather than to the call as a whole. One retry absorbs a
+      // genuine blip; beyond that the user can press the button again, which
+      // costs them quota rather than costing us silently.
+      maxRetries: 1,
+    });
   }
   return anthropicClient;
 }

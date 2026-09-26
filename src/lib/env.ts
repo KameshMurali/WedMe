@@ -40,15 +40,29 @@ const environmentSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.string().optional(),
   ),
+  // Allowlisted rather than a bare string. This is a per-call COST control: a
+  // one-word edit in the Vercel dashboard could previously swap Haiku for an
+  // Opus-class model and raise the bill by an order of magnitude, with no code
+  // review, no deploy, and no other limit changing to compensate. Adding a
+  // model here is a deliberate, reviewable act.
   AI_DRAFT_MODEL: z.preprocess(
     (value) => (value === "" ? undefined : value),
-    z.string().default("claude-haiku-4-5-20251001"),
+    z
+      .enum([
+        "claude-haiku-4-5-20251001",
+        "claude-sonnet-5",
+        "claude-opus-5",
+      ])
+      .default("claude-haiku-4-5-20251001"),
   ),
   // Per-user daily cap on AI draft attempts (paid abuse guard + free-tier
   // daily ceiling). Owner-tunable without a deploy.
+  //
+  // Capped at 200. "positive()" alone accepted 100000, which is not a tuning
+  // knob but an outage with a bill attached.
   AI_DRAFT_DAILY_LIMIT: z.preprocess(
     (value) => (value === "" ? undefined : value),
-    z.coerce.number().int().positive().default(20),
+    z.coerce.number().int().positive().max(200).default(20),
   ),
   // Paddle (Merchant of Record) checkout. Server-only secrets; the public
   // client token and price IDs are read straight from process.env.NEXT_PUBLIC_*
