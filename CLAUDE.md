@@ -11,16 +11,39 @@ WedMe is a multi-tenant wedding website SaaS platform. Couples register, pick a 
 ```bash
 # Development
 npm run dev               # Start Next.js dev server (port 3000)
-npm run build             # Run prisma migrate deploy + prisma generate + next build
+npm run build             # Run prisma migrate deploy + prisma generate + next build --webpack
 npm run lint              # ESLint (quiet mode)
 npx tsc --noEmit          # Type-check without emitting
 
 # Database
+
 npm run db:migrate        # Interactive migration (prisma migrate dev)
 npm run db:push           # Push schema changes without migration files
 npm run db:generate       # Regenerate Prisma client after schema changes
 npm run db:seed           # Seed demo data (KamMonBeginnings couple)
 ```
+
+**Why `--webpack`.** Next 16 builds with Turbopack by default, and Turbopack's
+`next/font/google` handling fails intermittently here:
+
+```
+Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'
+Error while looking up import map: next/font/google queries have exactly one entry
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+```
+
+It is nondeterministic and it broke real production deploys. It hit
+`Noto_Serif_SC` once and `Cormorant_Garamond` another time, so it is not about
+one font or about how many `@font-face` blocks a font generates. Two theories
+were tested and disproved: a warm `.next` cache does not reproduce it (three
+cold/warm build pairs, all clean), and the lockfile rules out dependency drift.
+It appears more often on Vercel's 2-core build machine than locally, which fits
+a race in that resolver.
+
+`--webpack` uses a different `next/font` implementation and does not execute
+that code path at all, so this avoids the bug by construction rather than by
+luck. Builds are slower. Revisit when Next ships a fix; check by running
+several clean `next build` (no flag) in a row before switching back.
 
 ### Tests
 
