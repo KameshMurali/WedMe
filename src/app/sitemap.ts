@@ -19,8 +19,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let weddingRoutes: MetadataRoute.Sitemap = [];
   try {
+    // visibility must be PUBLIC, not just published and indexable. A couple who
+    // sets their site to password-protected or invite-only has asked for it not
+    // to be found; listing its slug and all nine sub-pages in a public sitemap
+    // hands search engines the exact thing they were hiding. noIndex defaults to
+    // false, so the previous filter did not catch them.
     const publishedSites = await prisma.weddingSite.findMany({
-      where: { publishSettings: { status: "PUBLISHED", noIndex: false } },
+      where: {
+        publishSettings: { status: "PUBLISHED", noIndex: false, visibility: "PUBLIC" },
+      },
       select: {
         slug: true,
         publishSettings: { select: { publishedAt: true } },

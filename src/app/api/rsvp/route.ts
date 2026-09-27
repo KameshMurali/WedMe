@@ -48,13 +48,25 @@ export async function POST(request: Request) {
       include: { publishSettings: true },
     });
 
-    if (!site || !site.publishSettings?.isRsvpOpen) {
+    // The slug is attacker-supplied, so this must also require the site to be
+    // PUBLISHED. Checking isRsvpOpen alone let anyone write RSVPs into a
+    // couple's unpublished draft.
+    if (
+      !site ||
+      site.publishSettings?.status !== "PUBLISHED" ||
+      !site.publishSettings?.isRsvpOpen
+    ) {
       return NextResponse.json({ error: "RSVPs are currently closed for this wedding." }, { status: 400 });
     }
 
+    // Scoped to THIS site. InviteGroup.code is globally unique, so an unscoped
+    // findUnique resolved a code belonging to another couple entirely: their
+    // maxAttendees then governed this RSVP, and their InviteGroup id was
+    // persisted onto a row owned by this site. A guest guessing any valid code
+    // from any wedding on the platform was enough to trigger it.
     const inviteGroup = parsed.data.inviteCode
-      ? await prisma.inviteGroup.findUnique({
-          where: { code: parsed.data.inviteCode },
+      ? await prisma.inviteGroup.findFirst({
+          where: { code: parsed.data.inviteCode, weddingSiteId: site.id },
         })
       : null;
 
