@@ -160,7 +160,14 @@ export const plans: Plan[] = [
     highlights: [
       "AI-assisted content drafting",
       "Unlimited events, RSVPs, uploads",
-      "Password protection + invite codes",
+      // "Password protection + invite codes" was advertised here while no
+      // password gate existed anywhere in the codebase. sitePasswordHash was
+      // written and never read; every public route served a PASSWORD_PROTECTED
+      // site in full to anonymous visitors, and the header printed the words
+      // "Password Protected" to them while they read it. Selling a privacy
+      // guarantee the product does not provide is the one claim that cannot
+      // wait for the feature, so it comes out until the gate is real. Restore
+      // it only once a locked site actually refuses to render.
       "Priority email support",
     ],
     badge: "Most chosen",

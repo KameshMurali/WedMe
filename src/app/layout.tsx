@@ -52,20 +52,15 @@ const notoArabic = Noto_Naskh_Arabic({
   variable: "--font-arabic",
 });
 
-// ONE weight, deliberately. Noto Serif SC covers CJK through unicode-range
-// slicing, so Google serves it as well over a hundred @font-face blocks PER
-// WEIGHT. At three weights that is 300-plus, and Turbopack's font-file resolver
-// intermittently fails on it:
+// ONE weight. Noto Serif SC covers CJK through unicode-range slicing, so Google
+// serves it as well over a hundred @font-face blocks per weight; one weight
+// keeps that payload down, and Cinzel already ships single-weight here.
 //
-//   Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'
-//   Error while looking up import map: next/font/google queries have exactly one entry
-//
-// It is nondeterministic — the same commit failed one production deploy, built
-// clean on retry, then failed again locally and passed on the next attempt. A
-// deploy that randomly fails roughly a third of the time is worse than a
-// heading rendered at regular weight, and Cinzel already ships single-weight
-// here, so this is not a new compromise. Do not add weights back without
-// running several clean builds in a row.
+// This was first introduced as a fix for the intermittent Turbopack font
+// resolver failure. That was wrong: the same failure later hit Cormorant
+// Garamond, a small Latin face with a handful of blocks, so block count was
+// never the cause. The real mitigation is the --webpack flag on the build
+// script. Kept only because a smaller payload is worth having on its own.
 const notoSC = Noto_Serif_SC({
   subsets: ["latin"],
   weight: ["400"],
