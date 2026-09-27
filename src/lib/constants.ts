@@ -31,6 +31,10 @@ export const reservedSlugs = [
   "pricing",
   "admin",
   "api",
+  // The password / invite-code gate lives at /unlock/[slug]. It is a top-level
+  // route rather than /[slug]/unlock so that the gate in [slug]/layout.tsx
+  // cannot redirect to a page it also guards, which would loop forever.
+  "unlock",
   "kammonbeginnings",
 ];
 

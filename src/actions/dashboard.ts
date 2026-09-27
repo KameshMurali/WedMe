@@ -229,7 +229,13 @@ export async function updatePublishSettingsAction(
   // Only gate the *change into* a protected visibility — a site whose stored
   // visibility is already protected keeps working (grandfathered) so a plan
   // expiry never bricks an existing settings save.
-  if (parsed.data.visibility !== "PUBLIC") {
+  // Setting a password is also a change INTO protection, so it is gated on the
+  // same terms. Previously only the visibility dropdown was checked while the
+  // password write sat outside this block entirely, so a free account could
+  // still set one.
+  const isProtecting = parsed.data.visibility !== "PUBLIC" || Boolean(parsed.data.sitePassword);
+
+  if (isProtecting) {
     const [planKey, currentSettings] = await Promise.all([
       getEffectivePlanForUser(user, site.id),
       prisma.publishSettings.findUnique({
@@ -237,7 +243,8 @@ export async function updatePublishSettingsAction(
         select: { visibility: true },
       }),
     ]);
-    if (planKey === "hello" && currentSettings?.visibility !== parsed.data.visibility) {
+    const changingVisibility = currentSettings?.visibility !== parsed.data.visibility;
+    if (planKey === "hello" && (changingVisibility || parsed.data.sitePassword)) {
       return {
         error:
           "Password protection and invite-only access are part of the Together plan. Upgrade to protect your site.",
@@ -254,7 +261,23 @@ export async function updatePublishSettingsAction(
       isRsvpOpen: parsed.data.isRsvpOpen,
       isUploadsOpen: parsed.data.isUploadsOpen,
       isMessagesOpen: parsed.data.isMessagesOpen,
-      sitePasswordHash: parsed.data.sitePassword ? await hashPassword(parsed.data.sitePassword) : undefined,
+      // Three cases, and the middle one used to be missing.
+      //
+      //   a password was typed        -> hash and store it
+      //   blank, site not protected   -> CLEAR it
+      //   blank, site still protected -> leave it alone
+      //
+      // This was previously `... : undefined` in every blank case, and Prisma
+      // treats undefined as "don't touch", so once a password was set there was
+      // no way for a couple to remove it: switching back to Public left the
+      // hash sitting in the row forever. Leaving it alone while the site is
+      // still protected is deliberate, so that saving an unrelated setting can
+      // never silently unlock a site.
+      sitePasswordHash: parsed.data.sitePassword
+        ? await hashPassword(parsed.data.sitePassword)
+        : parsed.data.visibility === "PASSWORD_PROTECTED"
+          ? undefined
+          : null,
       lastDraftSavedAt: new Date(),
     },
   });

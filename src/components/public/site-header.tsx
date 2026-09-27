@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { findTemplateByKey } from "@/lib/template-registry";
-import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 type NavItem = { href: string; label: string; sectionType?: string };
 
@@ -79,7 +79,6 @@ export function SiteHeader({
   weddingDate,
   locationSummary,
   slug,
-  visibility,
   visibleNavItems,
   activeHref,
   showBackToPlatformHome,
@@ -91,7 +90,6 @@ export function SiteHeader({
   weddingDate: string;
   locationSummary: string | null;
   slug: string;
-  visibility: string;
   visibleNavItems: NavItem[];
   activeHref?: string;
   showBackToPlatformHome: boolean;
@@ -184,10 +182,13 @@ export function SiteHeader({
                 </div>
               </div>
 
+              {/* The visibility pill used to render here. It told a guest
+                  "Password Protected" on a site they were reading without a
+                  password, which was both useless to them and an advertisement
+                  that the couple believed they were private. Visibility is an
+                  owner setting; it belongs in the dashboard, not on the guest
+                  page. */}
               <div className="flex shrink-0 items-center gap-3">
-                <div className="hidden rounded-full panel-faint border border-[color:var(--accent)]/18 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
-                  {formatEnumLabel(visibility, "PUBLIC")}
-                </div>
                 <Button asChild size="sm">
                   <Link href={`/${slug}/rsvp` as Route}>Reply to Invite</Link>
                 </Button>
