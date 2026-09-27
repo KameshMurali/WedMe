@@ -11,7 +11,7 @@ WedMe is a multi-tenant wedding website SaaS platform. Couples register, pick a 
 ```bash
 # Development
 npm run dev               # Start Next.js dev server (port 3000)
-npm run build             # Run prisma migrate deploy + prisma generate + next build --webpack
+npm run build             # Run prisma migrate deploy + prisma generate + next build
 npm run lint              # ESLint (quiet mode)
 npx tsc --noEmit          # Type-check without emitting
 
@@ -23,27 +23,32 @@ npm run db:generate       # Regenerate Prisma client after schema changes
 npm run db:seed           # Seed demo data (KamMonBeginnings couple)
 ```
 
-**Why `--webpack`.** Next 16 builds with Turbopack by default, and Turbopack's
-`next/font/google` handling fails intermittently here:
+**Fonts are self-hosted. Keep it that way.** The faces come from `@fontsource`
+packages imported in `src/app/layout.tsx`, with the family names declared as CSS
+variables in `globals.css`. Do not move back to `next/font/google`.
+
+`next/font/google` downloads font CSS and font files *during the build*, which
+makes every build depend on a third-party network call. That call is not
+reliable, and it broke three consecutive production deploys. Turbopack reported
+it as an unresolvable module; webpack showed what was really happening:
 
 ```
-Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'
-Error while looking up import map: next/font/google queries have exactly one entry
-- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+TypeError: Cannot read properties of null (reading '1')
+  at node_modules/next/dist/compiled/@next/font/dist/google/loader.js:122:78
+  at async nextFontGoogleFontLoader
 ```
 
-It is nondeterministic and it broke real production deploys. It hit
-`Noto_Serif_SC` once and `Cormorant_Garamond` another time, so it is not about
-one font or about how many `@font-face` blocks a font generates. Two theories
-were tested and disproved: a warm `.next` cache does not reproduce it (three
-cold/warm build pairs, all clean), and the lockfile rules out dependency drift.
-It appears more often on Vercel's 2-core build machine than locally, which fits
-a race in that resolver.
+That is a regex match against the fetched CSS returning null and then being
+indexed — the response was not the CSS the parser expected. It struck a
+different font each time, which is what ruled out every font-specific theory.
 
-`--webpack` uses a different `next/font` implementation and does not execute
-that code path at all, so this avoids the bug by construction rather than by
-luck. Builds are slower. Revisit when Next ships a fix; check by running
-several clean `next build` (no flag) in a row before switching back.
+Noto Serif SC is deliberately absent: `@fontsource/noto-serif-sc` unpacks to
+87MB for full CJK coverage, against ~1MB for the others. Chinese still renders
+on `crimson-gold` through the system CJK stack in `--font-sc`.
+
+The general rule this leaves behind: **a build must not depend on a
+third-party network call.** If a dependency wants to fetch at build time, find
+one that ships its assets through npm instead.
 
 ### Tests
 
