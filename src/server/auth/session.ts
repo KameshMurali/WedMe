@@ -30,16 +30,33 @@ export async function verifySessionToken(token: string) {
   return verified.payload;
 }
 
+const sessionCookieOptions = {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+  maxAge: sessionMaxAge,
+} as const;
+
+// The cookie as data, so a Route Handler can attach it to a NextResponse.
+//
+// setSessionCookie below goes through next/headers `cookies()`, which only
+// works inside a Server Action or Route Handler. A Route Handler that returns a
+// redirect is better served setting the cookie on the response object directly,
+// and both paths must agree on the options or sessions silently differ in
+// lifetime or scope depending on how you signed in.
+export async function buildSessionCookie(payload: SessionPayload) {
+  return {
+    name: authCookieName,
+    value: await createSessionToken(payload),
+    options: sessionCookieOptions,
+  };
+}
+
 export async function setSessionCookie(payload: SessionPayload) {
-  const token = await createSessionToken(payload);
+  const cookie = await buildSessionCookie(payload);
   const cookieStore = await cookies();
-  cookieStore.set(authCookieName, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: sessionMaxAge,
-  });
+  cookieStore.set(cookie.name, cookie.value, cookie.options);
 }
 
 export async function clearSessionCookie() {

@@ -66,7 +66,15 @@ export function WaitlistForm({
           type="email"
           name="email"
           required
-          autoFocus
+          // Focus only when the visitor opened this themselves by pressing the
+          // button: they asked for the form, so focusing saves them a click.
+          //
+          // Never when it renders open by default. The homepage band sits at
+          // the foot of a long page, and a browser scrolls a focused element
+          // into view, so an unconditional autoFocus threw the viewport 11,628px
+          // down on a phone. Arriving on the site meant being asked for your
+          // email before you had seen a single word of it.
+          autoFocus={!defaultOpen}
           placeholder="you@email.com"
           aria-label="Email address"
           className="h-11"
