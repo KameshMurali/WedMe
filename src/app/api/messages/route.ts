@@ -41,7 +41,14 @@ export async function POST(request: Request) {
       include: { publishSettings: true },
     });
 
-    if (!site || !site.publishSettings?.isMessagesOpen) {
+    // PUBLISHED required as well as the open flag. The slug comes from the
+    // caller, so checking isMessagesOpen alone accepted guestbook posts into a
+    // couple's unpublished draft.
+    if (
+      !site ||
+      site.publishSettings?.status !== "PUBLISHED" ||
+      !site.publishSettings?.isMessagesOpen
+    ) {
       return NextResponse.json({ error: "Messages are currently closed." }, { status: 400 });
     }
 

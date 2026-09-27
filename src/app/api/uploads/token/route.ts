@@ -122,7 +122,14 @@ export async function POST(request: Request) {
           include: { publishSettings: true },
         });
 
-        if (!site || !site.publishSettings?.isUploadsOpen) {
+        // PUBLISHED required as well as the open flag. This issues a signed
+        // upload URL into the site's storage folder, so an unpublished draft
+        // must not be a valid target.
+        if (
+          !site ||
+          site.publishSettings?.status !== "PUBLISHED" ||
+          !site.publishSettings?.isUploadsOpen
+        ) {
           throw new Error("Guest uploads are currently closed.");
         }
 

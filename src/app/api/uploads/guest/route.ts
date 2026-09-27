@@ -50,7 +50,14 @@ export async function POST(request: Request) {
       include: { publishSettings: true },
     });
 
-    if (!site || !site.publishSettings?.isUploadsOpen) {
+    // PUBLISHED required as well as the open flag, for the same reason as the
+    // RSVP and message routes: the slug is caller-supplied, so this otherwise
+    // accepted uploads into an unpublished draft.
+    if (
+      !site ||
+      site.publishSettings?.status !== "PUBLISHED" ||
+      !site.publishSettings?.isUploadsOpen
+    ) {
       return NextResponse.json({ error: "Guest uploads are currently closed." }, { status: 400 });
     }
 
