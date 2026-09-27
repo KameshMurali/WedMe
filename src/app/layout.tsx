@@ -1,79 +1,48 @@
 import type { Metadata } from "next";
-import {
-  Cinzel,
-  Cormorant_Garamond,
-  Manrope,
-  Noto_Naskh_Arabic,
-  Noto_Serif_SC,
-  Noto_Serif_Tamil,
-} from "next/font/google";
 import { Toaster } from "sonner";
+
+// Self-hosted through npm, NOT next/font/google.
+//
+// next/font/google downloads font CSS and font files during the build, and that
+// network call is not reliable. It broke three consecutive production deploys.
+// Turbopack reported it as an unresolvable module; switching to webpack exposed
+// what was actually happening:
+//
+//   TypeError: Cannot read properties of null (reading '1')
+//     at node_modules/next/dist/compiled/@next/font/dist/google/loader.js:122:78
+//     at async nextFontGoogleFontLoader
+//
+// That is a regex match against the fetched CSS returning null and then being
+// indexed: the response was not the CSS the parser expected. It struck a
+// different font each time (Noto Serif SC once, Cormorant Garamond the next),
+// which is what finally ruled out every font-specific theory.
+//
+// @fontsource ships the files as ordinary dependencies, so a build needs no
+// third-party network at all. The weight files below carry every subset with
+// unicode-range, so a mixed "Kamesh & கமலா" heading still holds one face rather
+// than falling back mid-string, exactly as the subsets option did before.
+//
+// Family names become CSS variables in globals.css; tailwind.config.ts already
+// reads those variables and needed no change.
+import "@fontsource/manrope/400.css";
+import "@fontsource/manrope/500.css";
+import "@fontsource/manrope/600.css";
+import "@fontsource/manrope/700.css";
+import "@fontsource/cormorant-garamond/400.css";
+import "@fontsource/cormorant-garamond/500.css";
+import "@fontsource/cormorant-garamond/600.css";
+import "@fontsource/cinzel/600.css";
+import "@fontsource/noto-serif-tamil/400.css";
+import "@fontsource/noto-serif-tamil/500.css";
+import "@fontsource/noto-serif-tamil/600.css";
+import "@fontsource/noto-naskh-arabic/400.css";
+import "@fontsource/noto-naskh-arabic/500.css";
+import "@fontsource/noto-naskh-arabic/600.css";
 
 import { NavProgress } from "@/components/ui/nav-progress";
 import "@/app/globals.css";
 import { siteUrl } from "@/lib/constants";
 import { env } from "@/lib/env";
-
-// next/font self-hosts these at build time, generates <link rel="preload">,
-// and applies font-display: swap — replacing the render-blocking @fontsource
-// CSS @import approach that was loading all Manrope weights (~200KB+).
-const manrope = Manrope({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-manrope",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  variable: "--font-cormorant",
-});
-
-// Tamil script support. The other three faces are subsets: ["latin"] only, so
-// a couple writing their names in Tamil rendered as tofu boxes. Latin is kept
-// in the subset list so a mixed "Kamesh & கமலா" heading stays in one face
-// instead of silently falling back mid-string.
-const notoTamil = Noto_Serif_Tamil({
-  subsets: ["tamil", "latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  variable: "--font-tamil",
-});
-
-// Arabic and Chinese faces, for the same reason as the Tamil one: a template
-// named for a script that cannot render that script is a contradiction. Latin
-// stays in each subset so a mixed heading holds one face rather than falling
-// back mid-string.
-const notoArabic = Noto_Naskh_Arabic({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  variable: "--font-arabic",
-});
-
-// ONE weight. Noto Serif SC covers CJK through unicode-range slicing, so Google
-// serves it as well over a hundred @font-face blocks per weight; one weight
-// keeps that payload down, and Cinzel already ships single-weight here.
-//
-// This was first introduced as a fix for the intermittent Turbopack font
-// resolver failure. That was wrong: the same failure later hit Cormorant
-// Garamond, a small Latin face with a handful of blocks, so block count was
-// never the cause. The real mitigation is the --webpack flag on the build
-// script. Kept only because a smaller payload is worth having on its own.
-const notoSC = Noto_Serif_SC({
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-  variable: "--font-sc",
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  weight: ["600"],
-  display: "swap",
-  variable: "--font-cinzel",
-});
 
 const siteDescription =
   "ToNewBeginning.com is a multi-event wedding website builder for every celebration, including Indian, South Asian, fusion, and Western multi-day weddings: multi-event timelines, RSVP management, photo galleries, and a polished guest experience.";
@@ -127,7 +96,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${cormorant.variable} ${cinzel.variable} ${notoTamil.variable} ${notoArabic.variable} ${notoSC.variable}`}>
+    <html lang="en">
       <body>
         <NavProgress />
         {children}
