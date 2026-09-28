@@ -52,7 +52,7 @@ const pricingFaqSchema = {
       name: "Can someone else gift me Forever?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. A parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt.",
+        text: "Yes. A parent or sibling can buy Forever and apply it to your wedding website. We send a card-style email so it feels like a real gift, not a billing receipt.",
       },
     },
     {
@@ -173,7 +173,7 @@ export default async function PricingPage() {
           />
           <Faq
             q="Can someone else gift me Forever?"
-            a="Yes. A parent or sibling can buy Forever and apply it to your slug. We send a card-style email so it feels like a real gift, not a billing receipt."
+            a="Yes. A parent or sibling can buy Forever and apply it to your wedding website. We send a card-style email so it feels like a real gift, not a billing receipt."
           />
           <Faq
             q="Why are prices different in different countries?"

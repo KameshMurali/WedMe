@@ -91,7 +91,19 @@ export async function registerAction(
     };
   }
 
-  const { email, partnerOneName, partnerTwoName, brandName, slug, weddingDate, password } = parsed.data;
+  const {
+    email,
+    partnerOneName,
+    partnerTwoName,
+    brandName: providedBrandName,
+    slug,
+    weddingDate,
+    password,
+  } = parsed.data;
+
+  // The website name is optional at signup. Resolved once here so the couple
+  // row, the site row and the welcome email all get the same value.
+  const brandName = providedBrandName?.trim() || `${partnerOneName} & ${partnerTwoName}`;
 
   if (reservedSlugs.includes(slug)) {
     return {

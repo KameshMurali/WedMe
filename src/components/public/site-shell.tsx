@@ -167,12 +167,10 @@ export function SiteShell({
 
       <SiteHeader
         templateKey={template.key}
-        brandName={snapshot.site.brandName}
         coupleNames={snapshot.site.coupleNames}
         weddingDate={snapshot.site.weddingDate}
         locationSummary={snapshot.site.locationSummary ?? null}
         slug={snapshot.site.slug}
-        visibility={snapshot.publish.visibility}
         visibleNavItems={visibleNavItems}
         activeHref={activeHref}
         showBackToPlatformHome={showBackToPlatformHome}
