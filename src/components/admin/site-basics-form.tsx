@@ -13,6 +13,7 @@ import { SiteAssetUploadField } from "@/components/admin/site-asset-upload-field
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { publicSiteDomain } from "@/lib/constants";
 import { deriveCanonicalUrl, deriveSeoDescription, deriveSeoTitle } from "@/lib/site-metadata";
 import { cn } from "@/lib/utils";
 import { siteBasicsSchema } from "@/lib/validations/engagement";
@@ -176,10 +177,17 @@ export function SiteBasicsForm({
         <Field label="Brand name" error={errors.brandName?.message}>
           <Input aria-invalid={Boolean(errors.brandName)} placeholder="Brand name" {...register("brandName")} />
         </Field>
-        <Field label="Slug" error={errors.slug?.message}>
-          <Input aria-invalid={Boolean(errors.slug)} placeholder="Slug" {...register("slug")} />
+        {/* Was labelled "Slug", with "Slug" as the placeholder and a helper
+            line that explained slugs using the word slug. Nobody planning a
+            wedding knows that word, and this field decides the link they will
+            send to every guest they have. */}
+        <Field label="Website address" error={errors.slug?.message}>
+          <Input aria-invalid={Boolean(errors.slug)} placeholder="yourwedding" {...register("slug")} />
           <p className="text-xs leading-6 text-[color:var(--muted)]">
-            If you change the slug, save site basics first before uploading new local media files.
+            The last part of your link: {publicSiteDomain}/
+            <strong className="text-[color:var(--text)]">yourwedding</strong>. Lowercase letters,
+            numbers and hyphens. Changing it changes the link you have shared, so save this before
+            uploading new photos or they will be filed under the old address.
           </p>
         </Field>
       </div>

@@ -8,6 +8,7 @@ import { FormMessage } from "@/components/forms/form-message";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { initialActionState } from "@/lib/action-state";
+import { publicSiteDomain } from "@/lib/constants";
 import {
   mapRegisterValidationErrors,
   registerFieldMessages,
@@ -225,10 +226,14 @@ export function RegisterForm() {
           <FieldError id="email-error" message={fieldErrors.email} />
         </div>
         <div>
-          <FieldLabel htmlFor="register-slug">Custom URL slug</FieldLabel>
+          {/* Was "Custom URL slug". Nobody signing up for a wedding website
+              knows what a slug is, and this is the link they will send to
+              every guest. The preview below does the explaining: seeing the
+              address assemble as you type is clearer than any label. */}
+          <FieldLabel htmlFor="register-slug">Your website address</FieldLabel>
           <Input
             id="register-slug"
-            aria-describedby={fieldErrors.slug ? "slug-error" : undefined}
+            aria-describedby={fieldErrors.slug ? "slug-error" : "slug-preview"}
             aria-invalid={Boolean(fieldErrors.slug)}
             autoCapitalize="none"
             name="slug"
@@ -238,6 +243,12 @@ export function RegisterForm() {
             onChange={(event) => updateField("slug", event.target.value)}
             onBlur={() => validateSingleField("slug")}
           />
+          <p id="slug-preview" className="mt-2 break-words text-xs leading-6 text-stone-500">
+            Your guests will visit{" "}
+            <span className="font-medium text-stone-800">
+              {publicSiteDomain}/{formValues.slug.trim() || "yourwedding"}
+            </span>
+          </p>
           <FieldError id="slug-error" message={fieldErrors.slug} />
         </div>
       </div>
