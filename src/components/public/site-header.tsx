@@ -5,7 +5,6 @@ import type { Route } from "next";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { findTemplateByKey } from "@/lib/template-registry";
@@ -74,7 +73,6 @@ function getNavRailClasses(isDark: boolean) {
 
 export function SiteHeader({
   templateKey,
-  brandName,
   coupleNames,
   weddingDate,
   locationSummary,
@@ -85,7 +83,6 @@ export function SiteHeader({
   isDark,
 }: {
   templateKey: string;
-  brandName: string;
   coupleNames: string;
   weddingDate: string;
   locationSummary: string | null;
@@ -163,8 +160,10 @@ export function SiteHeader({
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div className="space-y-2">
+                  {/* The brand-name badge sat here, directly above the couple's
+                      names below, so a guest read "KAMMONBEGINNINGS" and then
+                      "Kamesh & Monisha". The names are the better version. */}
                   <div className="flex flex-wrap items-center gap-3">
-                    <Badge>{brandName}</Badge>
                     <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
                       <CalendarDays className="h-3.5 w-3.5" />
                       {formatDate(weddingDate)}

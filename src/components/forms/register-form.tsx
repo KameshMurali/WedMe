@@ -26,10 +26,27 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
+function FieldLabel({
+  htmlFor,
+  children,
+  optional = false,
+}: {
+  htmlFor: string;
+  children: React.ReactNode;
+  // Every field carried the red asterisk unconditionally. Now that one of them
+  // genuinely is optional, the marker has to be able to tell the truth.
+  optional?: boolean;
+}) {
   return (
     <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-stone-900">
-      {children} <span aria-hidden="true" className="text-rose-600">*</span>
+      {children}{" "}
+      {optional ? (
+        <span className="font-normal text-stone-500">(optional)</span>
+      ) : (
+        <span aria-hidden="true" className="text-rose-600">
+          *
+        </span>
+      )}
     </label>
   );
 }
@@ -192,18 +209,27 @@ export function RegisterForm() {
         </div>
       </div>
       <div>
-        <FieldLabel htmlFor="register-brand">Wedding brand name</FieldLabel>
+        {/* Was "Wedding brand name", and required. Asking someone to invent a
+            brand for their own wedding before they have typed anything else is
+            a strange first question, and most answered it with their names a
+            third time. It is a short label for the footer and the browser tab,
+            so it defaults to the couple's names when left blank. */}
+        <FieldLabel htmlFor="register-brand" optional>
+          Website name
+        </FieldLabel>
         <Input
           id="register-brand"
-          aria-describedby={fieldErrors.brandName ? "brandName-error" : undefined}
+          aria-describedby="brandName-help"
           aria-invalid={Boolean(fieldErrors.brandName)}
           name="brandName"
-          placeholder="e.g. KamMonBeginnings"
-          required
+          placeholder="e.g. The Murali Wedding"
           value={formValues.brandName}
           onChange={(event) => updateField("brandName", event.target.value)}
           onBlur={() => validateSingleField("brandName")}
         />
+        <p id="brandName-help" className="mt-2 text-xs leading-6 text-stone-500">
+          A short name for your site. Leave it blank and we will use your names.
+        </p>
         <FieldError id="brandName-error" message={fieldErrors.brandName} />
       </div>
       <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">

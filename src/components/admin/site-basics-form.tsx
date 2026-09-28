@@ -174,8 +174,19 @@ export function SiteBasicsForm({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Brand name" error={errors.brandName?.message}>
-          <Input aria-invalid={Boolean(errors.brandName)} placeholder="Brand name" {...register("brandName")} />
+        {/* Was "Brand name". A wedding is not a brand, and the field is a
+            short label for the footer and the browser tab, not a second copy
+            of the couple's names. Optional: blank resolves to their names on
+            save, in updateSiteBasicsAction. */}
+        <Field label="Website name" error={errors.brandName?.message}>
+          <Input
+            aria-invalid={Boolean(errors.brandName)}
+            placeholder="e.g. The Murali Wedding"
+            {...register("brandName")}
+          />
+          <p className="text-xs leading-6 text-[color:var(--muted)]">
+            A short name for your site. Leave it blank to use your names.
+          </p>
         </Field>
         {/* Was labelled "Slug", with "Slug" as the placeholder and a helper
             line that explained slugs using the word slug. Nobody planning a

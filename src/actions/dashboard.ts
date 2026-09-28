@@ -112,20 +112,30 @@ export async function updateSiteBasicsAction(
   const resolvedHeadline =
     parsed.data.headline === currentDefaultHeadline ? nextDefaultHeadline : parsed.data.headline;
 
+  // Same shape as the headline above, for the same reason. The website name is
+  // optional now, so blank falls back to the couple's names — and a name that
+  // still matches the OLD default follows a partner rename instead of being
+  // left stale, while anything the couple actually chose is left alone.
+  const currentDefaultBrand = `${site.couple.partnerOneName} & ${site.couple.partnerTwoName}`;
+  const nextDefaultBrand = `${parsed.data.partnerOneName} & ${parsed.data.partnerTwoName}`;
+  const typedBrand = parsed.data.brandName.trim();
+  const resolvedBrandName =
+    !typedBrand || typedBrand === currentDefaultBrand ? nextDefaultBrand : typedBrand;
+
   await prisma.$transaction([
     prisma.couple.update({
       where: { id: site.couple.id },
       data: {
         partnerOneName: parsed.data.partnerOneName,
         partnerTwoName: parsed.data.partnerTwoName,
-        brandName: parsed.data.brandName,
+        brandName: resolvedBrandName,
         weddingDate: new Date(parsed.data.weddingDate),
       },
     }),
     prisma.weddingSite.update({
       where: { id: site.id },
       data: {
-        brandName: parsed.data.brandName,
+        brandName: resolvedBrandName,
         headline: resolvedHeadline,
         subtitle: parsed.data.subtitle || null,
         tagline: parsed.data.tagline || null,
