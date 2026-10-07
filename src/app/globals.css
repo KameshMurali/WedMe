@@ -38,6 +38,14 @@
   --radius: 28px;
   --border: color-mix(in srgb, var(--primary) 16%, transparent);
   --elevation: color-mix(in srgb, var(--primary) 18%, transparent);
+
+  /* Motion tokens. Named once here rather than retyped as magic numbers at
+     every call site, so the page's motion reads as one hand.
+     --ease-settle overshoots very slightly before resting: an entrance that
+     eases flat to a stop looks like a transition, one that settles looks like
+     an object arriving. */
+  --ease-settle: cubic-bezier(0.22, 1, 0.3, 1);
+  --dur-enter: 0.85s;
 }
 
 /* The per-template scope. site-shell sets --primary/--accent/--surface/etc as
@@ -356,6 +364,16 @@ a {
   .marquee-track {
     animation: none;
   }
+
+  /* Every scroll-driven rule below is also nulled here. These classes all
+     start from the FINAL state and are only moved by a timeline, so removing
+     the animation leaves the content fully visible — nothing can get stranded
+     at opacity 0. */
+  .scroll-reveal,
+  .hero-media-drift,
+  .card-unsheathe {
+    animation: none !important;
+  }
 }
 
 @keyframes marquee {
@@ -400,4 +418,120 @@ input[type="time"]::-webkit-inner-spin-button {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll-driven motion.
+
+   Why CSS and not `motion`: these are CONTINUOUS, scroll-linked effects. A JS
+   scroll listener (or motion's useScroll) does this work on the main thread —
+   the same thread that has to answer when someone taps a button. A CSS
+   scroll timeline runs off it. `motion` stays for the enter-once work it is
+   already doing (Reveal, HeroShowcase, the drawn ornaments); nothing here
+   duplicates that.
+
+   Every rule is behind @supports. animation-timeline is unflagged in Chromium
+   and recent Safari, but Firefox is still the gap, so this must be additive:
+   each class is written so the UNANIMATED state is the finished state. A
+   browser without timeline support, or a visitor who has asked for reduced
+   motion, sees the content exactly as it should end up — just without the
+   movement. Nothing on this page is gated behind an animation running.
+   --------------------------------------------------------------------------- */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Sections that previously had no entrance at all. `entry 0% cover 30%`
+       means the animation completes shortly after the element is fully in
+       view, so content is never left half-faded while you read it. */
+    .scroll-reveal {
+      animation: scroll-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+
+    /* The hero media drifts and swells as the band scrolls away, which is what
+       gives the hero depth. Driven by the ROOT scroller rather than view(),
+       because the hero starts already in view and a view() timeline would have
+       no entry phase to animate over. */
+    .hero-media-drift {
+      animation: hero-media-drift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+
+    /* The template preview strip wipes upward as its card arrives, like an
+       invitation sliding out of its envelope. clip-path rather than height so
+       the card's layout never changes and this cannot contribute to CLS. */
+    .card-unsheathe {
+      animation: card-unsheathe linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 90%;
+    }
+  }
+}
+
+/* Keyframes run from the start state TO the resting state, so the resting
+   state is what the element has when nothing animates it. */
+@keyframes scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-media-drift {
+  from {
+    transform: scale(1) translateY(0);
+  }
+  to {
+    transform: scale(1.07) translateY(3.5vh);
+  }
+}
+
+@keyframes card-unsheathe {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* The FAQ list is bare <details>, which snaps open. ::details-content plus
+   interpolate-size lets it grow, with transition-behavior carrying the
+   discrete content-visibility flip along for the ride. Separate @supports from
+   the block above: a browser can have scroll timelines without this, and vice
+   versa, and a closed <details> must keep working either way.
+
+   The condition deliberately tests only interpolate-size and NOT
+   `selector(::details-content)`, even though the rule needs both. Autoprefixer
+   cannot parse a selector() condition — it throws "Unknown node type in node
+   creation" and fails the build outright. Testing the property alone is a safe
+   proxy: a browser with interpolate-size but no ::details-content simply drops
+   the rule below and the <details> snaps open exactly as it did before. */
+@supports (interpolate-size: allow-keywords) {
+  @media (prefers-reduced-motion: no-preference) {
+    :root {
+      interpolate-size: allow-keywords;
+    }
+
+    .faq-item::details-content {
+      block-size: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition:
+        block-size 0.35s var(--ease-settle),
+        opacity 0.25s ease-out,
+        content-visibility 0.35s allow-discrete;
+    }
+
+    .faq-item[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
 }

@@ -17,6 +17,12 @@ import { cn } from "@/lib/utils";
 // All are single <path> elements (multiple subpaths are fine) so `pathLength`
 // animates as one continuous stroke rather than several racing each other.
 
+// DrawnFigure is exported so the marketing homepage can draw these same
+// figures without a templateKey to resolve. It sells sixteen culturally
+// specific designs, so its section dividers rotate through the traditions
+// rather than picking one — copying the paths over there would have been a
+// second place for them to drift.
+
 // Eight-point girih star, drawn as one closed polygon.
 function girihStarPath(cx: number, cy: number, outer: number, inner: number, points: number) {
   const coords: string[] = [];
@@ -65,7 +71,7 @@ const FORMS: Record<string, { path: string; dots: Array<[number, number]> }> = {
   },
 };
 
-function DrawnFigure({ kind, className }: { kind: keyof typeof FORMS | string; className?: string }) {
+export function DrawnFigure({ kind, className }: { kind: keyof typeof FORMS | string; className?: string }) {
   const reduceMotion = useReducedMotion();
   const form = FORMS[kind];
   if (!form) return null;

@@ -17,8 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
+import { HeroVideoLayer } from "@/components/marketing/hero-video-layer";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
+import { OrnamentDivider } from "@/components/marketing/ornament-divider";
 import { Reveal } from "@/components/marketing/reveal";
+import { RevealText, ScrollProgressBar } from "@/components/public/motion-primitives";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { buildOfferSchema } from "@/lib/pricing";
@@ -59,6 +62,15 @@ export const metadata: Metadata = {
 };
 
 const BASE_URL = "https://wed.tonewbeginning.com";
+
+// The editorial hero's media, or null while there is none.
+//
+// The band renders complete without it — bg-hero-mesh is the base layer and the
+// poster and video only ever sit ON TOP of a finished hero. So this is a flag
+// rather than a fallback: pointing it at files that are not in public/hero yet
+// would ship a homepage firing two 404s on every visit, which is worse than
+// shipping the gradient. Flip it on in the same commit that adds the files.
+const heroMedia: { poster: string; mp4: string; webm?: string } | null = null;
 
 const websiteSchema = {
   "@context": "https://schema.org",
@@ -196,11 +208,15 @@ export default async function HomePage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+    <ScrollProgressBar />
     <main className="pb-24">
+      {/* Site chrome. This used to live inside the hero panel, above a divider
+          rule. The hero is now a full-bleed band, so the chrome sits in its own
+          shell above it rather than being furniture inside the artwork. */}
       <section className="section-shell pt-6">
-        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-6 py-6 rich-shadow sm:px-10 lg:px-14 lg:py-10">
+        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-6 py-5 rich-shadow sm:px-10">
           <div className="absolute inset-0 bg-hero-mesh opacity-90" />
-          <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/60 pb-6">
+          <div className="relative flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="font-display text-2xl text-[#1f1117]">ToNewBeginning.com</p>
               <p className="mt-2 text-sm text-stone-700">
@@ -236,24 +252,92 @@ export default async function HomePage() {
               )}
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="relative mt-8 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+      {/* The editorial hero.
+          The height subtracts the chrome panel above rather than being a flat
+          fraction of the screen, so the band ends AT the fold and the marquee
+          reads as the bottom rule instead of being sliced through.
+
+          svh, not vh: vh is the LARGE viewport on mobile, so a vh band stays
+          taller than the screen until the browser chrome retracts.
+
+          And it only claims a full screen when there is media to fill it. A
+          tall band is composed around a picture; with nothing but the gradient
+          behind, the same band is just a column of text with an empty half
+          beside it. Without media it takes its natural height. */}
+      <section
+        className={`relative isolate mt-6 flex items-end overflow-hidden ${
+          heroMedia ? "min-h-[calc(100svh-10rem)] lg:min-h-[calc(100svh-11rem)]" : ""
+        }`}
+      >
+        {/* Media stack. bg-hero-mesh is the BASE, always painted, so the band is
+            finished before any image or video arrives — the drift wrapper only
+            ever moves a layer that is already complete. */}
+        <div className="hero-media-drift absolute inset-0 -z-10 will-change-transform">
+          <div className="absolute inset-0 bg-hero-mesh" />
+          {heroMedia ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- the LCP
+                  element: a plain img with an explicit fetchPriority, not routed
+                  through the optimizer, so nothing sits between the HTML and
+                  the first paint. */}
+              <img
+                src={heroMedia.poster}
+                alt=""
+                aria-hidden="true"
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <HeroVideoLayer
+                mp4={heroMedia.mp4}
+                webm={heroMedia.webm}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </>
+          ) : null}
+        </div>
+
+        {/* Scrim. The media is saturated and its framing is not known in
+            advance, so the type carries its own contrast rather than borrowing
+            it from whatever happens to be behind a given frame. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10"
+          style={{
+            backgroundImage:
+              "linear-gradient(to top, color-mix(in srgb, var(--background) 94%, transparent) 0%, color-mix(in srgb, var(--background) 80%, transparent) 38%, color-mix(in srgb, var(--background) 30%, transparent) 100%)",
+          }}
+        />
+
+        <div className="section-shell relative w-full pb-10 pt-20 sm:pt-24">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="animate-fade-up">
+              <div className="animate-fade-rise">
                 <Badge>Craft Your Celebration</Badge>
               </div>
+              {/* Lines one and two paint immediately: they are the LCP text, and
+                  starting a heading at opacity 0 trades a measurable metric for
+                  a flourish. The per-character reveal goes on the payoff line
+                  only, which is the line that earns it. */}
               <h1
-                className="mt-5 max-w-3xl animate-fade-up font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-6xl"
+                className="mt-5 max-w-3xl animate-fade-rise font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-7xl"
                 style={{ animationDelay: "120ms" }}
               >
                 Five ceremonies.
                 <br />
                 Two hundred guests.
                 <br />
-                <span className="text-[color:var(--primary)]">One beautiful link.</span>
+                <RevealText
+                  text="One beautiful link."
+                  delay={0.75}
+                  className="text-[color:var(--primary)]"
+                />
               </h1>
               <p
-                className="mt-6 max-w-2xl animate-fade-up text-base leading-8 text-stone-800 sm:text-lg"
+                className="mt-6 max-w-2xl animate-fade-rise text-base leading-8 text-stone-800 sm:text-lg"
                 style={{ animationDelay: "240ms" }}
               >
                 Your family is planning five events across three venues, and every guest has the
@@ -263,7 +347,7 @@ export default async function HomePage() {
               </p>
               {hasWorkspace ? (
                 <div
-                  className="mt-6 animate-fade-up rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur"
+                  className="mt-6 animate-fade-rise rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur"
                   style={{ animationDelay: "320ms" }}
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
@@ -272,7 +356,7 @@ export default async function HomePage() {
                   <p className="mt-2 text-base font-semibold text-[#1f1117]">Continue from {resumeLabel}</p>
                 </div>
               ) : null}
-              <div className="mt-8 flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "360ms" }}>
+              <div className="mt-8 flex flex-wrap gap-3 animate-fade-rise" style={{ animationDelay: "360ms" }}>
                 <Button asChild>
                   <Link href="/kammonbeginnings">
                     See a real wedding site <ArrowRight className="h-4 w-4" />
@@ -291,14 +375,14 @@ export default async function HomePage() {
                 </Button>
               </div>
             </div>
-            <div className="flex w-full justify-center lg:w-auto lg:justify-end">
-              <HeroShowcaseLazy />
-            </div>
           </div>
 
-          {/* Ceremony marquee — quiet motion that says "we know your wedding". */}
+          {/* Ceremony marquee — now the band's bottom rule rather than a strip
+              inside a card. It arrives on the sequence's last beat (480ms)
+              instead of simply being there from the first frame. */}
           <div
-            className="relative mt-10 overflow-hidden border-t border-white/60 pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]"
+            className="animate-fade-rise relative mt-12 overflow-hidden border-t border-white/60 pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]"
+            style={{ animationDelay: "480ms" }}
             aria-hidden="true"
           >
             <div className="marquee-track">
@@ -317,6 +401,28 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* The showcase cards used to sit inside the hero, to the right of the
+          headline. Against a full-bleed band they read as a second hero
+          competing with the first, so they get their own stage directly below —
+          the first thing a scroll reveals, rather than something already seen. */}
+      <section className="section-shell mt-16 flex justify-center lg:mt-20">
+        {/* The px-6 is load-bearing, not spacing. HeroShowcase draws its glow
+            with `-inset-6`, i.e. 24px OUTSIDE its own box, and it used to sit
+            inside the hero's overflow-hidden panel, which clipped that bleed.
+            Out here nothing clips it, so at 320 and 390 it pushed the document
+            8px wider and the whole page scrolled sideways. This gutter gives
+            the bleed exactly the room it needs.
+
+            Worth knowing: `npm run test:layout` does NOT catch this. It runs
+            against `next dev`, and this container's CSP blocks the eval() the
+            React dev build needs, so hydration never completes and the lazily
+            loaded showcase never mounts — the offending element simply is not
+            on the page. Only a production build shows it. */}
+        <div className="px-6">
+          <HeroShowcaseLazy />
         </div>
       </section>
 
@@ -346,17 +452,25 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <OrnamentDivider kind="kolam" />
+
       <section className="section-shell mt-20">
+        <div className="scroll-reveal">
         <SectionHeading
           eyebrow="Five moods, one wedding"
           title="Pick a feeling. Change your mind whenever."
           description="Romantic florals or cinematic drama: every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
+        </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-5">
           {templateRegistry.map((template, index) => (
             <Reveal key={template.key} delay={index * 0.08}>
               <Card className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
-                <div className="h-40 w-full overflow-hidden">
+                {/* The strip wipes up as the card arrives, like an invitation
+                    coming out of its envelope. clip-path, not height — the
+                    card's box never changes, so this cannot cause layout
+                    shift. */}
+                <div className="card-unsheathe h-40 w-full overflow-hidden">
                   <div
                     className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-110"
                     style={{ background: template.previewGradient }}
@@ -376,7 +490,7 @@ export default async function HomePage() {
       </section>
 
       <section className="section-shell mt-20">
-        <Card className="grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
+        <Card className="scroll-reveal grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
           <div>
             <SectionHeading
               eyebrow="Demo Site : KamMonBeginnings"
@@ -411,15 +525,19 @@ export default async function HomePage() {
         </Card>
       </section>
 
+      <OrnamentDivider kind="girih" />
+
       <section className="section-shell mt-20">
+        <div className="scroll-reveal">
         <SectionHeading
           eyebrow="Common questions"
           title="Everything couples ask before choosing a wedding website builder."
           description="Answers to the questions we hear most from couples planning multi-event weddings, whether Indian, South Asian, fusion, or Western multi-day celebrations."
         />
+        </div>
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {homepageFaqs.map(({ q, a }) => (
-            <details key={q} className="group rounded-[1.4rem] border border-black/8 bg-white/70 p-5 transition open:bg-white">
+            <details key={q} className="faq-item group rounded-[1.4rem] border border-black/8 bg-white/70 p-5 transition open:bg-white">
               <summary className="cursor-pointer list-none font-semibold text-[color:var(--text)] [&::-webkit-details-marker]:hidden">
                 <span className="mr-3 inline-block text-[color:var(--primary)] transition group-open:rotate-90">›</span>
                 {q}
@@ -433,8 +551,10 @@ export default async function HomePage() {
       {/* Closing waitlist band. Until this existed, the only way to join was
           inside a pricing card on /pricing — so anyone arriving on the bare
           domain from a link or a post had no way in and simply left. */}
+      <OrnamentDivider kind="chapel" />
+
       <section className="section-shell mt-20">
-        <Card className="mx-auto max-w-3xl text-center">
+        <Card className="scroll-reveal mx-auto max-w-3xl text-center">
           <SectionHeading
             align="center"
             eyebrow="Founding couples"
