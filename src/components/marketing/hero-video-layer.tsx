@@ -17,10 +17,22 @@ import { useInView, useReducedMotion } from "motion/react";
 //     Those visitors keep the poster, which is the whole picture anyway.
 //   - paused off-screen (the same useInView pattern hero-showcase.tsx uses for
 //     its float loops) so scrolling past returns the page to idle.
+//   - sized to the screen. A phone has no use for the 1920 master, and on a
+//     mobile data plan the difference between the two tiers is most of the
+//     cost of the feature.
 //   - opacity 0 until `canplay`, so it cross-fades up from the poster instead
 //     of flashing a black frame.
 
 type Connection = { saveData?: boolean; effectiveType?: string };
+
+export type HeroVideoTier = { mp4: string; webm?: string };
+
+// Device pixels, not CSS pixels. A 390px phone at DPR 3 needs 1170 real pixels
+// and a 768px tablet at DPR 2 needs 1536, so a CSS-width breakpoint would hand
+// the phone the smaller file and the tablet the same one — backwards. Comparing
+// against the narrow tier's own width is the question actually being asked:
+// "is this screen bigger than the smaller file?"
+const NARROW_TIER_WIDTH = 1280;
 
 function prefersLightweight() {
   const connection = (navigator as Navigator & { connection?: Connection }).connection;
@@ -29,13 +41,18 @@ function prefersLightweight() {
   return connection.effectiveType === "2g" || connection.effectiveType === "slow-2g";
 }
 
+function pickTier(wide: HeroVideoTier, narrow: HeroVideoTier): HeroVideoTier {
+  const devicePixels = window.innerWidth * (window.devicePixelRatio || 1);
+  return devicePixels > NARROW_TIER_WIDTH ? wide : narrow;
+}
+
 export function HeroVideoLayer({
-  mp4,
-  webm,
+  wide,
+  narrow,
   className,
 }: {
-  mp4: string;
-  webm?: string;
+  wide: HeroVideoTier;
+  narrow: HeroVideoTier;
   className?: string;
 }) {
   const reduceMotion = useReducedMotion();
@@ -56,10 +73,11 @@ export function HeroVideoLayer({
     if (!video || reduceMotion !== false || prefersLightweight()) return;
     if (video.src) return;
 
-    const preferWebm = Boolean(webm) && video.canPlayType("video/webm") !== "";
-    video.src = preferWebm && webm ? webm : mp4;
+    const tier = pickTier(wide, narrow);
+    const preferWebm = Boolean(tier.webm) && video.canPlayType("video/webm") !== "";
+    video.src = preferWebm && tier.webm ? tier.webm : tier.mp4;
     video.load();
-  }, [mp4, webm, reduceMotion]);
+  }, [wide, narrow, reduceMotion]);
 
   useEffect(() => {
     const video = ref.current;

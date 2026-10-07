@@ -68,9 +68,24 @@ const BASE_URL = "https://wed.tonewbeginning.com";
 // The band renders complete without it — bg-hero-mesh is the base layer and the
 // poster and video only ever sit ON TOP of a finished hero. So this is a flag
 // rather than a fallback: pointing it at files that are not in public/hero yet
-// would ship a homepage firing two 404s on every visit, which is worse than
+// would ship a homepage firing 404s on every visit, which is worse than
 // shipping the gradient. Flip it on in the same commit that adds the files.
-const heroMedia: { poster: string; mp4: string; webm?: string } | null = null;
+//
+// Two tiers of each, because a phone has no use for the 1920 master: see
+// public/hero/README.md for how they are produced and what they must weigh.
+type HeroMedia = {
+  poster: string;
+  posterNarrow: string;
+  wide: { mp4: string; webm?: string };
+  narrow: { mp4: string; webm?: string };
+};
+
+const heroMedia: HeroMedia | null = {
+  poster: "/hero/hero-poster.jpg",
+  posterNarrow: "/hero/hero-poster-sm.jpg",
+  wide: { mp4: "/hero/hero-1080.mp4", webm: "/hero/hero-1080.webm" },
+  narrow: { mp4: "/hero/hero-720.mp4", webm: "/hero/hero-720.webm" },
+};
 
 const websiteSchema = {
   "@context": "https://schema.org",
@@ -214,16 +229,19 @@ export default async function HomePage() {
           rule. The hero is now a full-bleed band, so the chrome sits in its own
           shell above it rather than being furniture inside the artwork. */}
       <section className="section-shell pt-6">
-        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-6 py-5 rich-shadow sm:px-10">
+        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-5 py-4 rich-shadow sm:px-10 sm:py-5">
           <div className="absolute inset-0 bg-hero-mesh opacity-90" />
-          <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div className="relative flex flex-wrap items-center justify-between gap-3 sm:gap-4">
             <div>
               <p className="font-display text-2xl text-[#1f1117]">ToNewBeginning.com</p>
-              <p className="mt-2 text-sm text-stone-700">
+              {/* Hidden on phones. It was taking a quarter of the first screen
+                  between the wordmark and a headline that says the same thing
+                  better, so the hero began a thousand pixels down. */}
+              <p className="mt-2 hidden text-sm text-stone-700 sm:block">
                 A premium wedding platform with a calm couple workspace and polished guest journey.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button asChild variant="ghost">
                 <Link href="/pricing">Pricing</Link>
               </Button>
@@ -235,7 +253,11 @@ export default async function HomePage() {
               </Button>
               {hasWorkspace ? (
                 <>
-                  <div className="rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm text-stone-700">
+                  {/* An email address is wide and this pill does not truncate,
+                      so on a phone it either wraps the row or runs off it. The
+                      Log out control beside it is the part that has to be
+                      reachable. */}
+                  <div className="hidden rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm text-stone-700 sm:block">
                     Signed in as {user?.email}
                   </div>
                   <form action={logoutAction}>
@@ -246,7 +268,10 @@ export default async function HomePage() {
                   </form>
                 </>
               ) : (
-                <Button asChild variant="ghost">
+                /* Hidden on phones: it wrapped the chrome onto a second row
+                   to offer the same action as "Start yours free", which is a
+                   few hundred pixels below it in the hero. */
+                <Button asChild variant="ghost" className="hidden sm:inline-flex">
                   <Link href="/register">Create Couple Account</Link>
                 </Button>
               )}
@@ -285,6 +310,8 @@ export default async function HomePage() {
                   the first paint. */}
               <img
                 src={heroMedia.poster}
+                srcSet={`${heroMedia.posterNarrow} 960w, ${heroMedia.poster} 1920w`}
+                sizes="100vw"
                 alt=""
                 aria-hidden="true"
                 fetchPriority="high"
@@ -292,38 +319,68 @@ export default async function HomePage() {
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <HeroVideoLayer
-                mp4={heroMedia.mp4}
-                webm={heroMedia.webm}
+                wide={heroMedia.wide}
+                narrow={heroMedia.narrow}
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </>
           ) : null}
         </div>
 
-        {/* Scrim. The media is saturated and its framing is not known in
-            advance, so the type carries its own contrast rather than borrowing
-            it from whatever happens to be behind a given frame. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-10"
-          style={{
-            backgroundImage:
-              "linear-gradient(to top, color-mix(in srgb, var(--background) 94%, transparent) 0%, color-mix(in srgb, var(--background) 80%, transparent) 38%, color-mix(in srgb, var(--background) 30%, transparent) 100%)",
-          }}
-        />
+        {/* Scrim.
+            The first attempt was a PALE scrim with the page's dark type on top,
+            and it failed twice over: it washed the colour out of the footage
+            AND still left near-black Cormorant sitting on mid-tone marigold and
+            teal, which is unreadable at any size. Saturated media wants light
+            type on a dark scrim — it is more legible and it lets the video keep
+            its colour, which is the whole reason for having it.
+
+            Two layers, because the text sits in different places at different
+            widths: a vertical wash that covers the phone, where the column runs
+            the full width, and a left-to-right wash that covers the desktop,
+            where it occupies the left half. */}
+        {heroMedia ? (
+          <>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to top, rgba(22,12,15,0.92) 0%, rgba(22,12,15,0.72) 45%, rgba(22,12,15,0.42) 100%)",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 hidden lg:block"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(22,12,15,0.80) 0%, rgba(22,12,15,0.45) 55%, transparent 85%)",
+              }}
+            />
+          </>
+        ) : null}
 
         <div className="section-shell relative w-full pb-10 pt-20 sm:pt-24">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
+              {/* Every colour below switches on whether there is media behind
+                  it. On the bare gradient the page's own dark ink is correct;
+                  over the footage it would be unreadable, and white would be
+                  unreadable on the gradient. One condition, applied
+                  consistently, rather than a second hero component. */}
               <div className="animate-fade-rise">
-                <Badge>Craft Your Celebration</Badge>
+                <Badge className={heroMedia ? "bg-white/15 text-white/90 backdrop-blur-sm" : undefined}>
+                  Craft Your Celebration
+                </Badge>
               </div>
               {/* Lines one and two paint immediately: they are the LCP text, and
                   starting a heading at opacity 0 trades a measurable metric for
                   a flourish. The per-character reveal goes on the payoff line
                   only, which is the line that earns it. */}
               <h1
-                className="mt-5 max-w-3xl animate-fade-rise font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-7xl"
+                className={`mt-5 max-w-3xl animate-fade-rise font-display text-4xl leading-[1.04] sm:text-5xl lg:text-7xl ${
+                  heroMedia ? "text-white [text-shadow:0_2px_24px_rgba(22,12,15,0.5)]" : "text-[#1f1117]"
+                }`}
                 style={{ animationDelay: "120ms" }}
               >
                 Five ceremonies.
@@ -333,11 +390,13 @@ export default async function HomePage() {
                 <RevealText
                   text="One beautiful link."
                   delay={0.75}
-                  className="text-[color:var(--primary)]"
+                  className={heroMedia ? "text-[color:var(--accent)]" : "text-[color:var(--primary)]"}
                 />
               </h1>
               <p
-                className="mt-6 max-w-2xl animate-fade-rise text-base leading-8 text-stone-800 sm:text-lg"
+                className={`mt-6 max-w-2xl animate-fade-rise text-base leading-8 sm:text-lg ${
+                  heroMedia ? "text-white/85 [text-shadow:0_1px_12px_rgba(22,12,15,0.55)]" : "text-stone-800"
+                }`}
                 style={{ animationDelay: "240ms" }}
               >
                 Your family is planning five events across three venues, and every guest has the
@@ -357,12 +416,19 @@ export default async function HomePage() {
                 </div>
               ) : null}
               <div className="mt-8 flex flex-wrap gap-3 animate-fade-rise" style={{ animationDelay: "360ms" }}>
-                <Button asChild>
+                <Button
+                  asChild
+                  className={heroMedia ? "bg-white text-[#1f1117] hover:bg-[color:var(--accent)] hover:text-white" : undefined}
+                >
                   <Link href="/kammonbeginnings">
                     See a real wedding site <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline">
+                <Button
+                  asChild
+                  variant="outline"
+                  className={heroMedia ? "border-white/40 bg-white/10 text-white backdrop-blur hover:border-white hover:bg-white/20" : undefined}
+                >
                   <Link href={hasWorkspace ? workspaceHref : "/register"}>
                     {hasWorkspace ? (
                       <>
@@ -381,7 +447,9 @@ export default async function HomePage() {
               inside a card. It arrives on the sequence's last beat (480ms)
               instead of simply being there from the first frame. */}
           <div
-            className="animate-fade-rise relative mt-12 overflow-hidden border-t border-white/60 pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]"
+            className={`animate-fade-rise relative mt-12 overflow-hidden border-t pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)] ${
+              heroMedia ? "border-white/20" : "border-white/60"
+            }`}
             style={{ animationDelay: "480ms" }}
             aria-hidden="true"
           >
@@ -391,7 +459,9 @@ export default async function HomePage() {
                   {ceremonyMarquee.map((ceremony) => (
                     <span
                       key={`${copy}-${ceremony}`}
-                      className="flex items-center whitespace-nowrap px-5 font-display text-xl text-stone-500 sm:text-2xl"
+                      className={`flex items-center whitespace-nowrap px-5 font-display text-xl sm:text-2xl ${
+                        heroMedia ? "text-white/65" : "text-stone-500"
+                      }`}
                     >
                       {ceremony}
                       <span className="ml-10 h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]/60" />
