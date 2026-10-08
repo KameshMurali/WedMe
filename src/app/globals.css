@@ -535,3 +535,508 @@ input[type="time"]::-webkit-inner-spin-button {
     }
   }
 }
+
+/* ===========================================================================
+   The scroll-driven homepage beats.
+   Each block below belongs to one component in src/components/marketing/ and
+   is kept here rather than co-located because this file is where the motion
+   contract lives — the @supports gate, the reduced-motion null, and the rule
+   that an unanimated page must still be a finished page.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Hero overture (components/marketing/hero-overlay.tsx).
+
+   Two planes over the hero, receding at DIFFERENT rates so the effect reads as
+   depth rather than as a fade. Driven by scroll(root block), not view(), for
+   the same reason .hero-media-drift is: the overlay is already on screen at
+   load, so a view() timeline has no entry phase to animate over.
+
+   Lengths are svh, not vh: vh is the LARGE viewport on mobile, so a vh range
+   would be longer than the screen until the URL bar retracts and would then
+   re-time the recession mid-scroll.
+   --------------------------------------------------------------------------- */
+.hero-overture {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+
+  /* The vanishing point sits on the CORNER the planes occupy, not at the
+     container's centre. With the default 50% 50% the magnified wordmark is
+     dragged toward the middle of a full-height band, which at 320px pushes its
+     left edge off the gutter — the hero's overflow-hidden eats it, so there is
+     no sideways scroll, but the wordmark is visibly cropped. From the corner
+     the magnification grows into the empty space to the right instead. */
+  perspective-origin: 0 0;
+
+  /* Read by the keyframes below. Declared on the parent so one media query
+     re-times both planes, and so the keyframes carry no magic numbers. */
+  --overture-drop: 6svh;
+  --overture-drop-far: 8.5svh;
+  --overture-near-z: 140px;
+  --overture-far-z: 30px;
+}
+
+/* A phone has only ~80px of empty band above the headline, so the overture
+   drops less far there — enough to read as an arrival, not far enough to bury
+   the headline it is sitting on top of. */
+@media (min-width: 640px) {
+  .hero-overture {
+    --overture-drop: 9svh;
+    --overture-drop-far: 12svh;
+    --overture-near-z: 170px;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The near plane finishes 14svh of scroll before the far one. That
+       difference IS the effect: both planes arriving at rest together would
+       read as one flat layer sliding up. */
+    .hero-overture-near {
+      animation: hero-overture-near linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 8svh 34svh;
+    }
+
+    .hero-overture-far {
+      animation: hero-overture-far linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 8svh 48svh;
+    }
+  }
+}
+
+/* Both keyframes run from the overture TO the resting state, so the resting
+   state is what the element has when nothing animates it: a compact brand strip
+   in the band's top padding, above the bottom-aligned headline. Firefox has no
+   scroll timelines and a visitor who asked for reduced motion gets no
+   animation; both see exactly that strip — readable, correctly placed, not
+   stranded at opacity 0 and not parked over the headline.
+
+   Neither keyframe touches opacity, for the same reason: there is no value of
+   it that is both "gone" at the end of the recession and safe as a resting
+   state. The planes resolve INTO the strip instead of fading out, and the strip
+   leaves the screen with the band it is pinned inside. */
+@keyframes hero-overture-near {
+  from {
+    transform: translate3d(0, var(--overture-drop), var(--overture-near-z));
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-overture-far {
+  from {
+    transform: translate3d(0, var(--overture-drop-far), var(--overture-far-z));
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+/* ---------------------------------------------------------------------------
+   Ceremony sequence — the pinned stage the eight ceremonies are scrolled
+   through (src/components/marketing/ceremony-sequence.tsx).
+
+   Base styles first, and they describe the PLAIN VERTICAL SEQUENCE: that is
+   what phones, Firefox and anyone who asked for reduced motion get, and it is
+   the finished, readable state. The pinned stage is added later, inside the
+   motion gate, and the layout that makes it work is declared in the SAME block
+   as the animation that drives it — deliberately inseparable. A conveyor's last
+   keyframe cannot be its resting state (it ends seven slots up), so the house
+   rule is satisfied the only way it can be here: the layout that needs the
+   animation does not exist unless the animation runs.
+   --------------------------------------------------------------------------- */
+
+/* The ceremony's own colour, mixed down into the template's material so it
+   reads as a tint of the page rather than a swatch dropped on it. --ceremony-tint
+   is set inline per item; the fallback keeps the block from going transparent if
+   it is ever rendered without one. */
+.ceremony-field {
+  border-radius: var(--radius);
+  background:
+    radial-gradient(
+      120% 90% at 18% 14%,
+      color-mix(in srgb, var(--ceremony-tint, var(--accent)) 58%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      90% 120% at 86% 86%,
+      color-mix(in srgb, var(--accent) 30%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--ceremony-tint, var(--accent)) 24%, var(--surface)),
+      color-mix(in srgb, var(--primary) 10%, var(--surface))
+    );
+  box-shadow: 0 18px 60px var(--elevation);
+}
+
+/* Progress through the eight holds. Meaningless without the conveyor — a bar
+   that is simply full — so it does not exist until the conveyor does. */
+.ceremony-rail {
+  display: none;
+  height: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.ceremony-rail-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Phone and tablet: one entrance each, as asked. A pinned stage at 390px is
+       miserable — the two columns collapse, the copy is cramped, and the pin
+       fights the thumb for the whole section. Same DOM, same text, read as a
+       list instead. */
+    .ceremony-step {
+      animation: ceremony-step-enter linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+
+    /* min-height as well as min-width: a 1024x500 landscape tablet would get a
+       500px stage holding a two-column slide, which is the cramped failure the
+       mobile fallback exists to avoid. It takes the list instead. */
+    @media (min-width: 1024px) and (min-height: 620px) {
+      .ceremony-track {
+        view-timeline-name: --ceremony-track;
+        view-timeline-axis: block;
+        min-height: 280svh;
+      }
+
+      /* svh, not vh: vh is the LARGE viewport on mobile, so a vh-sized sticky
+         stage is taller than the visible area whenever the browser chrome is
+         showing and the bottom of every slide sits under it. */
+      .ceremony-stage {
+        position: sticky;
+        top: 0;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 2rem;
+        height: min(100svh, 46rem);
+        padding-block: 2.5rem;
+      }
+
+      /* overflow: clip rather than hidden — hidden creates a scroll container,
+         and a browser scrolling focus into view inside one would fight the
+         transform below. clip cannot be scrolled, so focus moves the document
+         instead. The mask softens the two edges the clip would otherwise cut a
+         word in half on; it is static, so it costs one layer and nothing per
+         frame. */
+      .ceremony-viewport {
+        position: relative;
+        min-height: 0;
+        overflow: clip;
+        mask-image: linear-gradient(180deg, transparent 0%, #000 11%, #000 89%, transparent 100%);
+        mask-repeat: no-repeat;
+        mask-size: 100% 100%;
+      }
+
+      /* inset: 0 gives the list a definite height, which is what lets
+         grid-auto-rows: 100% size every slide to exactly one stage and lets the
+         conveyor below translate in whole slides (-100% per ceremony) with no
+         calc and no length to keep in sync. */
+      .ceremony-list {
+        position: absolute;
+        inset: 0;
+        grid-auto-rows: 100%;
+        gap: 0;
+        animation: ceremony-conveyor linear both;
+        animation-timeline: --ceremony-track;
+        animation-range: contain 0% contain 100%;
+      }
+
+      /* The per-item entrance is replaced, not layered: the conveyor is now
+         what moves these, and a view()-driven fade on top of it would be the
+         "eight fade-ups" this section exists to not be. The mobile hairline and
+         its padding go with it — the slides no longer stack. */
+      .ceremony-step {
+        align-content: center;
+        border-top-width: 0;
+        padding-top: 0;
+        animation: none;
+      }
+
+      /* The colour fields drift against the conveyor, so the left of the stage
+         has depth rather than sliding as one flat sheet. One rule for all eight:
+         they share the range, which is what makes the offset read as parallax. */
+      .ceremony-field {
+        animation: ceremony-field-drift linear both;
+        animation-timeline: --ceremony-track;
+        animation-range: contain 0% contain 100%;
+      }
+
+      .ceremony-rail {
+        display: block;
+      }
+
+      .ceremony-rail-fill {
+        animation: ceremony-rail-fill linear both;
+        animation-timeline: --ceremony-track;
+        animation-range: contain 0% contain 100%;
+      }
+    }
+  }
+}
+
+@keyframes ceremony-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Eight holds, not a glide. Each ceremony is still for 7.5% of the pin and the
+   list moves a whole slide over the next 5%, so the stage HOLDS and then SWAPS
+   — the change is caused by scrolling rather than revealed by it. The timing
+   function sits on the keyframe that starts each move (CSS applies it to the
+   segment following that keyframe), so the slide accelerates out of one hold
+   and settles into the next; linear over a 5% window reads as a lurch. The
+   paired selectors are the hold: same transform at both ends. */
+@keyframes ceremony-conveyor {
+  0% {
+    transform: translateY(0);
+  }
+  7.5% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  12.5%,
+  20% {
+    transform: translateY(-100%);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  25%,
+  32.5% {
+    transform: translateY(-200%);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  37.5%,
+  45% {
+    transform: translateY(-300%);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  50%,
+  57.5% {
+    transform: translateY(-400%);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  62.5%,
+  70% {
+    transform: translateY(-500%);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  75%,
+  82.5% {
+    transform: translateY(-600%);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  87.5%,
+  100% {
+    transform: translateY(-700%);
+  }
+}
+
+@keyframes ceremony-field-drift {
+  from {
+    transform: translateY(-26%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ceremony-rail-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   Guest stack (src/components/marketing/guest-stack.tsx). Three sticky
+   siblings pile into a deck; the sticking itself is plain CSS positioning and
+   needs nothing here. All that lives below is the depth cue — a covered card
+   sits slightly back. --i and --recede are set inline, per card.
+
+   The timeline hangs on the WRAPPER, not on the cards, and that is the whole
+   trick. A view progress timeline measures its subject's position inside the
+   scrollport; a pinned element stops moving inside the scrollport, so a view()
+   timeline on a sticky card freezes the instant it pins and strands its
+   animation at partial progress. The wrapper never pins, so it is the only
+   honest source here. Same reason the deck cards do not take .scroll-reveal.
+
+   lg-only throughout: below that breakpoint the cards are a plain list, so
+   nothing covers them and nothing should look covered.
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 1024px) {
+  /* The RESTING state, deliberately outside the @supports/@media guards below:
+     an assembled deck has its lower cards recessed, and that is the finished
+     page, not an effect. Firefox has no scroll timelines and a reduced-motion
+     visitor gets no animation; both must land here. The keyframe only ever
+     travels TO this value.
+
+     This beats any Tailwind transform utility a caller puts on a deck card,
+     because it is a plain rule after @tailwind utilities. Deck cards therefore
+     must not carry hover:-translate-y-* the way the other marketing cards do. */
+  .guest-deck-card {
+    transform: scale(var(--recede, 1));
+    /* Scaling from the top keeps the visible sliver of each covered card
+       exactly where sticky put it; the sides inset, the stack does not drift. */
+    transform-origin: top center;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+    .guest-deck {
+      view-timeline-name: --guest-deck;
+    }
+
+    /* Staggered by --i so each card recedes as the next one arrives over it,
+       rather than all three settling together.
+
+       These percentages are approximate by nature — where a card is covered
+       depends on the viewport height and on how far the copy wraps, which CSS
+       cannot know. That is affordable because the travel is ~3.6% of scale at
+       most: mistimed by a few percent it is invisible, and either end of the
+       range is a correct state. If a browser cannot parse the calc() in a
+       range the declaration drops and the range falls back to the full `cover`
+       span, which still completes on the resting state. */
+    .guest-deck-card {
+      animation: guest-deck-recede linear both;
+      animation-timeline: --guest-deck;
+      animation-range: cover calc(40% + var(--i) * 13%) cover calc(58% + var(--i) * 13%);
+    }
+  }
+}
+
+@keyframes guest-deck-recede {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(var(--recede, 1));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The commit boundary: "Pick your rite" (rite-router.tsx).
+
+   There is no scroll timeline in this block, and that is the design rather than
+   an omission. Every other beat on the page is scrubbed by scroll position; a
+   scrubbed resolve runs backwards when the reader scrolls back up, so the
+   surface they are making a decision on would breathe under the trackpad. This
+   resolve is a one-shot CSS transition fired by a single data-attribute flip
+   (see the long comment in rite-router.tsx for why that flip needs script).
+
+   Everything outside the reduced-motion guard below is the RESTING state, and
+   the resting state is the finished one: neutral field, type at UI scale.
+   Firefox, a reduced-motion visitor and a crawler all land there directly.
+   --------------------------------------------------------------------------- */
+
+.rite-band {
+  position: relative;
+  /* `clip`, not `hidden`. The pre-resolve type is scaled up and reaches past
+     the text column, and `hidden` would make this band a scroll container —
+     which also silently changes how any position:sticky descendant resolves.
+     `clip` crops without creating a scrollport, so the document can never gain
+     horizontal scroll from this band at 320px. */
+  overflow: clip;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 72%, var(--background)) 0%,
+    var(--background) 100%
+  );
+}
+
+/* The colour of every tradition above this point, held as one field: haveli
+   gold, emerald, lacquer crimson, aegean blue, kolam rose, olive. Literal hex
+   rather than tokens because these are six DIFFERENT template palettes at once
+   — the point is that the page has been showing all of them and is about to
+   stop.
+
+   Resting opacity is 0, so the band is neutral when nothing animates it. */
+.rite-field {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 48% at 8% 0%, #c99029 0%, transparent 70%),
+    radial-gradient(38% 44% at 34% 6%, #0f5c46 0%, transparent 72%),
+    radial-gradient(40% 46% at 62% 0%, #b3121e 0%, transparent 70%),
+    radial-gradient(44% 50% at 88% 8%, #1d5d86 0%, transparent 72%),
+    radial-gradient(50% 46% at 24% 100%, #c2687f 0%, transparent 74%),
+    radial-gradient(46% 44% at 76% 100%, #6d7546 0%, transparent 74%);
+}
+
+/* Scaling from the left edge of the measure makes the resolve read as type
+   settling INTO the column rather than collapsing toward a centre. Declared
+   unconditionally so it is never out of step with the transform below. */
+.rite-title {
+  transform-origin: left top;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The duration lives on the RESTING rule, and the arriving rule kills it.
+     Transitions are resolved from the after-change style, so settled→arriving
+     (the effect installing the start state, off screen) is instant, and
+     arriving→settled (the reader arriving) takes the full 700ms. One
+     direction, once. Scrolling back up cannot replay or reverse it. */
+  .rite-field {
+    transition: opacity 0.7s var(--ease-settle);
+  }
+
+  .rite-band[data-rite-state="arriving"] .rite-field {
+    /* Not 1. The doors and their copy sit over this field and have to stay
+       legible for the whole 700ms — the band resolves, it does not fade in. */
+    opacity: 0.42;
+    transition: none;
+  }
+}
+
+/* No type scale below 640px. At 320px the heading already fills the column, so
+   scaling it up would push its first line under `overflow: clip` and the
+   reader would watch cropped words un-crop. On a phone the field drain carries
+   the beat alone. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 640px) {
+  .rite-title {
+    transition: transform 0.7s var(--ease-settle);
+  }
+
+  .rite-band[data-rite-state="arriving"] .rite-title {
+    transform: scale(1.5);
+    transition: none;
+  }
+}
+
+/* The mark on the three doors whose tradition has no drawn figure. The alpha is
+   color-mix and not a Tailwind opacity modifier because `/45` on an arbitrary
+   var() colour compiles to nothing in this setup — the same trap globals.css
+   records above .panel-solid. Written as `bg-[color:var(--accent)]/45` the mark
+   computed to rgba(0,0,0,0) and the tile looked like an image that had failed
+   to load, which is the thing the mark exists to prevent. */
+.rite-mark {
+  display: block;
+  height: 1px;
+  width: 1.75rem;
+  background-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}

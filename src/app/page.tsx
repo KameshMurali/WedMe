@@ -17,9 +17,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
+import { CeremonySequence } from "@/components/marketing/ceremony-sequence";
+import { GuestStack } from "@/components/marketing/guest-stack";
+import { HeroOverlay } from "@/components/marketing/hero-overlay";
 import { HeroVideoLayer } from "@/components/marketing/hero-video-layer";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { OrnamentDivider } from "@/components/marketing/ornament-divider";
+import { RiteRouter } from "@/components/marketing/rite-router";
 import { Reveal } from "@/components/marketing/reveal";
 import { RevealText, ScrollProgressBar } from "@/components/public/motion-primitives";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -178,17 +182,6 @@ const featureHighlights = [
   },
 ];
 
-// Slow marquee under the hero — grounds the brand in the ceremonies it serves.
-const ceremonyMarquee = [
-  "Mehendi",
-  "Haldi",
-  "Sangeet",
-  "Nikkah",
-  "Muhurtham",
-  "Ceremony",
-  "Reception",
-  "Walima",
-];
 
 function getResumeLabel(pathname: string) {
   const labels: Record<string, string> = {
@@ -443,35 +436,13 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Ceremony marquee — now the band's bottom rule rather than a strip
-              inside a card. It arrives on the sequence's last beat (480ms)
-              instead of simply being there from the first frame. */}
-          <div
-            className={`animate-fade-rise relative mt-12 overflow-hidden border-t pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)] ${
-              heroMedia ? "border-white/20" : "border-white/60"
-            }`}
-            style={{ animationDelay: "480ms" }}
-            aria-hidden="true"
-          >
-            <div className="marquee-track">
-              {[0, 1].map((copy) => (
-                <div key={copy} className="flex items-center">
-                  {ceremonyMarquee.map((ceremony) => (
-                    <span
-                      key={`${copy}-${ceremony}`}
-                      className={`flex items-center whitespace-nowrap px-5 font-display text-xl sm:text-2xl ${
-                        heroMedia ? "text-white/65" : "text-stone-500"
-                      }`}
-                    >
-                      {ceremony}
-                      <span className="ml-10 h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]/60" />
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
+
+        {/* Last child of the hero, deliberately unwrapped. Any ancestor that
+            sets overflow, filter, opacity or will-change forces
+            transform-style back to flat and collapses the two depth planes
+            into one, which is the whole effect. */}
+        <HeroOverlay onMedia={Boolean(heroMedia)} />
       </section>
 
       {/* The showcase cards used to sit inside the hero, to the right of the
@@ -495,6 +466,10 @@ export default async function HomePage() {
           <HeroShowcaseLazy />
         </div>
       </section>
+
+      <CeremonySequence />
+
+      <GuestStack />
 
       <section className="section-shell mt-20">
         <Reveal>
@@ -522,7 +497,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <OrnamentDivider kind="kolam" />
+      {/* The commit boundary. Everything above this moves; from here the page
+          deliberately stops, because choosing is hostile to motion. The router
+          leads into the sixteen template pages, and the grid below it is the
+          comparison view for a reader who already knows what they want. */}
+      <RiteRouter />
 
       <section className="section-shell mt-20">
         <div className="scroll-reveal">

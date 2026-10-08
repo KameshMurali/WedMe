@@ -4,8 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { SectionHeading } from "@/components/ui/section-heading";
 
-// The spine of the marketing homepage: a held stage that eight ceremonies are
-// scrolled THROUGH, one at a time.
+// A held stage that the eight ceremonies are scrolled THROUGH, one at a time.
 //
 // It replaces the looping ceremony marquee, which spent the product's best
 // structural argument — a wedding is ordered in time — on an infinite loop that
@@ -15,14 +14,13 @@ import { SectionHeading } from "@/components/ui/section-heading";
 // the stage is pinned and the LIST moves inside it, in eight discrete holds, so
 // the scroll position IS which ceremony you are looking at.
 //
-// No "use client". Every beat is CSS on a scroll timeline, so this ships zero
-// JavaScript and the eight ceremonies are real DOM text at first paint. That is
-// also why the conveyor is one transform on ONE element rather than eight
-// stacked slides cross-fading: eight absolutely-positioned slides need
-// `visibility: hidden` to stop the invisible ones swallowing taps meant for the
-// visible one's link, and anything visibility-hidden leaves the accessibility
-// tree and risks being discounted by a crawler. A conveyor keeps all eight
-// links hit-testable, focusable and indexed, and costs one composited layer.
+// No "use client": every beat is CSS on a scroll timeline. That is also why the
+// conveyor is one transform on ONE element rather than eight stacked slides
+// cross-fading — eight absolutely-positioned slides need `visibility: hidden`
+// to stop the invisible ones swallowing taps meant for the visible one's link,
+// and anything visibility-hidden leaves the accessibility tree and risks being
+// discounted by a crawler. A conveyor keeps all eight links hit-testable,
+// focusable and indexed, and costs one composited layer.
 //
 // WHY THE PINNED LAYOUT LIVES INSIDE THE MOTION GATE (see the returned CSS):
 // the house rule is that the unanimated state must be the finished state. A
@@ -45,9 +43,18 @@ type Ceremony = {
   // so the day reads as HELD while the rites pass through it. That is the
   // product's claim made visible, not a duplicate-render bug.
   day: string;
+  // The line under the day word. For the three marriage rites it names the
+  // TRADITION, not a clock position. Nikkah at midday, Muhurtham at dawn and an
+  // 11am Ceremony are alternatives a couple picks between, not a sequence, and
+  // labelling them by hour made the one column that must read forward in time
+  // run backwards through day three — breaking the single claim this whole
+  // pinned mechanic exists to make.
   slot: string;
   what: string;
   product: string;
+  // Clock times only, never relative to another day. "The afternoon before" sits
+  // 200px from a heading that says "Day one" and under a label that says
+  // "Timing", and the reader has to resolve the contradiction themselves.
   timing: string;
   venue: string;
   dress: string;
@@ -59,14 +66,19 @@ type Ceremony = {
   tint: string;
 };
 
+// EIGHT, and the CSS knows it. The conveyor keyframes in globals.css end at
+// translateY(-700%) and split the pin into eight hardcoded hold-and-swap pairs.
+// A ninth entry here does not extend the stage — it parks permanently
+// off-screen and every hold after it lands between two slides. Either change
+// those keyframes in the same commit or do not change this length.
 const ceremonies: Ceremony[] = [
   {
     name: "Mehendi",
     day: "Day one",
-    slot: "Afternoon, into the evening",
+    slot: "Afternoon",
     what: "Henna is drawn on the bride's hands and feet while the women of both families sit around her.",
-    product: "Set it for the afternoon before, at the house, and invite only the people who should be there.",
-    timing: "Afternoon, the day before",
+    product: "Set it at the house, on an afternoon of its own, with a guest list of its own — not a line buried in one wedding-day invitation.",
+    timing: "From 3pm, into the evening",
     venue: "The family home",
     dress: "Light cotton, washable",
     rsvp: "Close family and friends",
@@ -78,7 +90,7 @@ const ceremonies: Ceremony[] = [
     slot: "Morning",
     what: "Turmeric paste is put on the couple by their families — a blessing, and a mess.",
     product: "Mark it family-only and the invitation never reaches the three-hundred-person list.",
-    timing: "Mid-morning",
+    timing: "From 10am",
     venue: "At home, in the courtyard",
     dress: "Old clothes you can ruin",
     rsvp: "Family only",
@@ -99,7 +111,7 @@ const ceremonies: Ceremony[] = [
   {
     name: "Nikkah",
     day: "Day three",
-    slot: "Midday",
+    slot: "The marriage, in Islamic rite",
     what: "The Islamic marriage contract is read and signed in front of witnesses.",
     product: "Its own start time, so nobody arrives an hour after the signing.",
     timing: "Midday, prompt",
@@ -111,7 +123,7 @@ const ceremonies: Ceremony[] = [
   {
     name: "Muhurtham",
     day: "Day three",
-    slot: "The auspicious hour",
+    slot: "The marriage, in Hindu rite",
     what: "The Hindu wedding rites, performed in the auspicious hour the families have fixed.",
     product: "A dawn start time guests can add to their calendar the night before.",
     timing: "The fixed hour, often at dawn",
@@ -123,7 +135,7 @@ const ceremonies: Ceremony[] = [
   {
     name: "Ceremony",
     day: "Day three",
-    slot: "Late morning",
+    slot: "The marriage, in Western rite",
     what: "The vows themselves — church, registry, garden or shoreline, whatever form yours takes.",
     product: "One RSVP for this alone, independent of everything else that weekend.",
     timing: "11am, seated by 10:45",
@@ -150,10 +162,10 @@ const ceremonies: Ceremony[] = [
     slot: "Evening",
     what: "The reception hosted by the groom's family after the Nikkah, announcing the marriage publicly.",
     product: "Hosted by the other family, on the one site you both share.",
-    timing: "Evening, the following day",
+    timing: "From 7:30pm",
     venue: "The groom's family's hall",
     dress: "Festive formal",
-    rsvp: "Hosted by the other family",
+    rsvp: "The groom's family's list",
     tint: "#a9762f",
   },
 ];
@@ -162,17 +174,28 @@ export function CeremonySequence() {
   return (
     <section className="section-shell mt-24 lg:mt-32">
       <div className="scroll-reveal">
+        {/* Kept under ~26 characters on purpose. Badge is an inline-flex pill
+            with rounded-full, so an eyebrow wider than the 288px content box at
+            320px does not overflow — it wraps, and a two-line fully-rounded
+            pill looks broken. "Four days, eight ceremonies" measured 288/288
+            and wrapped; this is 241px. */}
         <SectionHeading
-          eyebrow="Three days, five ceremonies"
+          eyebrow="Four days, eight rites"
           title="One site, every ceremony"
-          description="A multi-day wedding is not one party with a long guest list. From Mehendi to Walima, every ceremony carries its own timing, venue, dress code and RSVP — so guests answer per event and read one multi-day timeline instead of a paragraph of dates. Few couples hold all eight; keep the ones you are holding, and the order stays."
+          description="A multi-day wedding is not one party with a long guest list. From Mehendi to Walima, every ceremony carries its own timing, venue, dress code and RSVP — so guests answer per event and read one multi-day timeline instead of a paragraph of dates. No couple holds all eight: Nikkah, Muhurtham and the Ceremony are the same moment in three traditions. Keep the ones you are holding, and the order stays."
         />
       </div>
 
       {/* The surplus height on .ceremony-track IS the scroll budget: at lg it is
           280svh of page spent on one animation, the way a product page gives up
           three screens to a single idea. Below lg it collapses to nothing and
-          the stage is ordinary flow. */}
+          the stage is ordinary flow.
+
+          gap-10 belongs on the <ol> rather than as padding on the items because
+          the pinned block resets exactly this property to 0 — the conveyor
+          translates in whole slides (-100%) and only lands on a slide boundary
+          if the rows are flush. A margin here would survive that reset and
+          desynchronise every hold after the first. */}
       <div className="ceremony-track mt-10 lg:mt-14">
         <div className="ceremony-stage">
           <div className="ceremony-viewport">
@@ -243,9 +266,8 @@ export function CeremonySequence() {
             </ol>
           </div>
 
-          {/* Progress through the eight holds. Hidden until the pinned layout
-              exists, because without the conveyor it is a full bar that means
-              nothing. */}
+          {/* Hidden until the pinned layout exists, because without the conveyor
+              it is a full bar that reports nothing. */}
           <div className="ceremony-rail" aria-hidden="true">
             <span className="ceremony-rail-fill" />
           </div>

@@ -17,7 +17,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 // 1. Nothing between this section and the scrolling root may have
 //    `overflow: hidden`. An overflow-hidden ancestor silently turns a sticky
 //    element back into a static one — the same failure recorded at
-//    public/site-shell.tsx:136, where it un-pinned the site header. The
+//    public/site-shell.tsx:137, where it un-pinned the site header. The
 //    marketing page's <main> is clean today; a decorative clipping wrapper
 //    added around this section would break the deck with no error anywhere.
 //
@@ -87,11 +87,12 @@ export function GuestStack() {
         {steps.map((step, index) => (
           <article
             key={step.ordinal}
-            // Below lg this is a plain stacked list, on purpose. At 320px a
-            // card's copy wraps to roughly the full height of a phone
-            // viewport, so pinning it would put its last line permanently off
-            // screen — unreadable, and the 1.1rem offsets are too small at
-            // that width to read as a deck anyway. The stack is a desktop
+            // Below lg this is a plain stacked list, on purpose. Measured at
+            // 320x568 these cards render 679/591/497px tall, so the first two
+            // are taller than the viewport: pinning one would park its closing
+            // lines permanently off screen with no way to scroll to them. The
+            // 1.15rem offsets are also too small at that width to read as a
+            // deck rather than as a rendering fault. The stack is a desktop
             // affordance; the phone gets the same words in the same order.
             //
             // The opaque fill and [backdrop-filter:none] are not decoration.
@@ -105,8 +106,9 @@ export function GuestStack() {
             style={
               {
                 "--i": String(index),
-                // The pile grows downward by a constant step, so each card
-                // leaves a sliver of the one beneath it visible.
+                // 1.15rem is the sliver of each covered card left showing
+                // above the one that covers it, so it has to stay larger than
+                // a hairline and smaller than a line of body text.
                 top: "calc(var(--deck-top) + var(--i) * 1.15rem)",
                 // The resting scale of a COVERED card. The top card is never
                 // covered, so it never recedes. globals.css animates from 1 to
@@ -139,10 +141,6 @@ export function GuestStack() {
               </p>
             ))}
 
-            {/* Real anchors, because the sixteen template pages and the seeded
-                demo are the two most persuasive things the product owns and
-                both were buried. /kammonbeginnings/rsvp in particular was two
-                clicks deep from here. */}
             <div className="mt-6 flex min-w-0 flex-wrap items-center gap-x-6 gap-y-3">
               <Link
                 href={step.link.href}
@@ -155,7 +153,7 @@ export function GuestStack() {
               {index === 0 ? (
                 <Link
                   href="/templates"
-                  className="text-sm font-semibold text-[color:var(--muted)] underline-offset-4 hover:text-[color:var(--primary)] hover:underline"
+                  className="min-w-0 text-sm font-semibold text-[color:var(--muted)] underline-offset-4 hover:text-[color:var(--primary)] hover:underline"
                 >
                   Browse the sixteen designs
                 </Link>
