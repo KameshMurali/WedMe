@@ -186,6 +186,24 @@ const INTRO_PROOFS = [
   },
 ];
 
+// THE CEREMONY NAME IS NOT A LINK, AND MUST NOT BECOME ONE.
+//
+// The eight slides are absolutely positioned inside a clipped stage and seven
+// of them sit up to 2.5 screens outside it. A focusable element in there cannot
+// be scrolled into view: the browser scrolls the DOCUMENT toward it, scrolling
+// advances the view() timeline, the timeline re-translates the list, and the
+// element moves again. It is a feedback loop, and scroll-padding cannot fix it
+// because the target's position is a function of the scroll offset.
+//
+// Measured on the shipped desktop layout before this was removed: Tab hops of
+// +1041, -2069, +3246, -2226, +3525 and -2273 px, with forward Tab scrolling
+// the page BACKWARDS on three of seven hops and five of seven leaving the
+// focused link entirely off screen — one of them 2.3 screens above the
+// viewport. That is a WCAG 2.2 AA failure of SC 2.4.11, Focus Not Obscured.
+//
+// Nothing was lost by removing them: all eight pointed at the same href, and it
+// is still linked below the stage where focus behaves normally.
+
 export function CeremonySequence() {
   return (
     <section className="section-shell mt-24 lg:mt-32">
@@ -237,7 +255,10 @@ export function CeremonySequence() {
       <div className="ceremony-track mt-10 lg:mt-14">
         <div className="ceremony-stage">
           <div className="ceremony-viewport">
-            <ol className="ceremony-list grid min-w-0 gap-10">
+            <ol
+              className="ceremony-list grid min-w-0 gap-10"
+              aria-label="The eight ceremonies, in running order"
+            >
               {ceremonies.map((ceremony, index) => (
                 <li
                   key={ceremony.name}
@@ -264,14 +285,13 @@ export function CeremonySequence() {
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--accent)] tabular-nums">
                       {String(index + 1).padStart(2, "0")} / {String(ceremonies.length).padStart(2, "0")}
                     </p>
+                    {/* Plain text, NOT a link. See the note at the top of this
+                        file — a focusable element inside the pinned stage
+                        cannot be scrolled into view, and the arrow went with it
+                        because an up-right arrow on unclickable text is a false
+                        affordance. */}
                     <h3 className="mt-3 font-display text-4xl leading-tight lg:text-5xl">
-                      <Link
-                        href={DEMO_EVENTS_HREF}
-                        className="inline-flex items-baseline gap-2 rounded-md outline-none hover:text-[color:var(--primary)] focus-visible:ring-2 focus-visible:ring-[color:var(--primary)] focus-visible:ring-offset-2"
-                      >
-                        {ceremony.name}
-                        <ArrowUpRight className="h-5 w-5 shrink-0 text-[color:var(--accent)]" />
-                      </Link>
+                      {ceremony.name}
                     </h3>
                     <p className="mt-4 max-w-xl text-base leading-7 text-[color:var(--muted)]">
                       {ceremony.what}
