@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteUrl } from "@/lib/constants";
+import { templateRegistry } from "@/lib/template-registry";
 import { prisma } from "@/server/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -11,6 +12,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/templates`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
+    // The sixteen design pages. Static, databaseless and derived from the
+    // registry, so they are listed outside the try/catch below — nothing here
+    // can fail at build time the way a Prisma query can.
+    ...templateRegistry.map((template) => ({
+      url: `${base}/templates/${template.key}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
     { url: `${base}/register`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/login`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },

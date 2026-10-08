@@ -171,9 +171,9 @@ const featureHighlights = [
     icon: LayoutDashboard,
   },
   {
-    title: "Five designs, zero rebuilds",
+    title: "Sixteen designs, zero rebuilds",
     description:
-      "Switch templates any time, and your story, events, and photos flow into the new look instantly. Customise the palette until it feels like you, then publish when it's ready.",
+      "Sixteen designs, each built for a tradition rather than recoloured from one. Switch any time and your story, events, and photos flow into the new look instantly.",
     icon: Palette,
   },
 ];
@@ -527,7 +527,7 @@ export default async function HomePage() {
       <section className="section-shell mt-20">
         <div className="scroll-reveal">
         <SectionHeading
-          eyebrow="Five moods, one wedding"
+          eyebrow="Sixteen designs, one wedding"
           title="Pick a feeling. Change your mind whenever."
           description="Romantic florals or cinematic drama: every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
@@ -535,7 +535,14 @@ export default async function HomePage() {
         <div className="mt-10 grid gap-5 lg:grid-cols-5">
           {templateRegistry.map((template, index) => (
             <Reveal key={template.key} delay={index * 0.08}>
+              {/* These cards were rectangles that went nowhere. Sixteen
+                  culturally specific designs — the product's clearest
+                  differentiator — were a dead end for a reader AND invisible to
+                  a crawler, because the only route that rendered them was
+                  /dev/template-gallery, which 404s unless TEMPLATE_GALLERY=1.
+                  Each one is now a link to a real indexable page. */}
               <Card className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
+                <Link href={`/templates/${template.key}` as Route} className="block">
                 {/* The strip wipes up as the card arrives, like an invitation
                     coming out of its envelope. clip-path, not height — the
                     card's box never changes, so this cannot cause layout
@@ -553,6 +560,7 @@ export default async function HomePage() {
                   <h3 className="font-display text-2xl text-[color:var(--text)]">{template.name}</h3>
                   <p className="text-sm leading-7 text-[color:var(--muted)]">{template.description}</p>
                 </div>
+                </Link>
               </Card>
             </Reveal>
           ))}

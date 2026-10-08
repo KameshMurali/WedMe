@@ -45,6 +45,8 @@ export const reservedSlugs = [
   // route rather than /[slug]/unlock so that the gate in [slug]/layout.tsx
   // cannot redirect to a page it also guards, which would loop forever.
   "unlock",
+  // Sixteen public design pages live at /templates and /templates/[key].
+  "templates",
   "kammonbeginnings",
 ];
 
