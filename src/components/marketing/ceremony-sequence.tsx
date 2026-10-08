@@ -62,8 +62,8 @@ type Ceremony = {
   // The ceremony's own colour — henna green, turmeric yellow, kumkum red — not
   // a palette rotation. Passed as an inline custom property rather than eight
   // new tokens in globals.css because it is per-item data that nothing outside
-  // this component reads.
-  tint: string;
+  // The per-ceremony colour now lives in globals.css, keyed by nth-child, so
+  // the wash keyframes and the stage read one list instead of two.
 };
 
 // EIGHT, and the CSS knows it. The conveyor keyframes in globals.css end at
@@ -82,7 +82,6 @@ const ceremonies: Ceremony[] = [
     venue: "The family home",
     dress: "Light cotton, washable",
     rsvp: "Close family and friends",
-    tint: "#5a7247",
   },
   {
     name: "Haldi",
@@ -94,7 +93,6 @@ const ceremonies: Ceremony[] = [
     venue: "At home, in the courtyard",
     dress: "Old clothes you can ruin",
     rsvp: "Family only",
-    tint: "#e0a526",
   },
   {
     name: "Sangeet",
@@ -106,7 +104,6 @@ const ceremonies: Ceremony[] = [
     venue: "Hotel ballroom",
     dress: "Full festive",
     rsvp: "Everyone invited",
-    tint: "#b4466f",
   },
   {
     name: "Nikkah",
@@ -118,7 +115,6 @@ const ceremonies: Ceremony[] = [
     venue: "Masjid or hall",
     dress: "Modest, formal",
     rsvp: "Both families and witnesses",
-    tint: "#1f6b63",
   },
   {
     name: "Muhurtham",
@@ -130,7 +126,6 @@ const ceremonies: Ceremony[] = [
     venue: "Kalyana mandapam",
     dress: "Silk, traditional",
     rsvp: "Full guest list",
-    tint: "#b03a2e",
   },
   {
     name: "Ceremony",
@@ -142,7 +137,6 @@ const ceremonies: Ceremony[] = [
     venue: "Church, registry or garden",
     dress: "Formal",
     rsvp: "Full guest list",
-    tint: "#8e9bb0",
   },
   {
     name: "Reception",
@@ -154,7 +148,6 @@ const ceremonies: Ceremony[] = [
     venue: "Banquet hall",
     dress: "Black tie optional",
     rsvp: "Everyone, with meal choice",
-    tint: "#2d3a63",
   },
   {
     name: "Walima",
@@ -166,14 +159,43 @@ const ceremonies: Ceremony[] = [
     venue: "The groom's family's hall",
     dress: "Festive formal",
     rsvp: "The groom's family's list",
-    tint: "#a9762f",
+  },
+];
+
+// The three claims that used to be HeroShowcase — a band of floating tiles
+// between the hero and this heading, carrying feature nouns ("Structured
+// events", "Guest memories", "Template engine") and routing nowhere. They say
+// more here, flying up the right half while the headline holds on the left,
+// and deleting that band removes a screen of page nobody was reading.
+//
+// Rewritten from nouns into answers. A tile beside "One site, every ceremony"
+// has to earn that sentence, and "Structured events" restated the paragraph it
+// now sits next to.
+const INTRO_PROOFS = [
+  {
+    title: "Guests answer per event",
+    body: "One reply covers the whole wedding: a guest ticks the three functions they are coming to and skips the two they are not. You get a headcount per ceremony, not a number for the week.",
+  },
+  {
+    title: "The order survives the plan",
+    body: "Mehendi on Thursday, Walima on Sunday, and every venue, dress code and start time attached to the right one — so nobody opens WhatsApp to ask what time the Haldi is.",
+  },
+  {
+    title: "It outlives the wedding",
+    body: "The same link becomes where the photographs, the messages and the guest uploads live, so the thing you sent before the wedding is the thing you keep after it.",
   },
 ];
 
 export function CeremonySequence() {
   return (
     <section className="section-shell mt-24 lg:mt-32">
-      <div className="scroll-reveal">
+      {/* Pinned headline, scrolling proof column. The left half holds while the
+          three tiles travel up the right, which is the one shape that lets a
+          long claim and its evidence occupy the same screen instead of two.
+          Below lg there is no second column to scroll past, so the whole thing
+          collapses to heading-then-tiles in normal flow. */}
+      <div className="intro-split lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+      <div className="intro-hold scroll-reveal">
         {/* Kept under ~26 characters on purpose. Badge is an inline-flex pill
             with rounded-full, so an eyebrow wider than the 288px content box at
             320px does not overflow — it wraps, and a two-line fully-rounded
@@ -184,6 +206,22 @@ export function CeremonySequence() {
           title="One site, every ceremony"
           description="A multi-day wedding is not one party with a long guest list. From Mehendi to Walima, every ceremony carries its own timing, venue, dress code and RSVP — so guests answer per event and read one multi-day timeline instead of a paragraph of dates. No couple holds all eight: Nikkah, Muhurtham and the Ceremony are the same moment in three traditions. Keep the ones you are holding, and the order stays."
         />
+      </div>
+
+      <ol className="intro-proofs mt-10 grid min-w-0 gap-5 lg:mt-0">
+        {INTRO_PROOFS.map((proof, index) => (
+          <li
+            key={proof.title}
+            // --i drives the stagger, so one rule times all three rather than
+            // three near-identical rules with hand-written offsets.
+            style={{ "--i": index } as React.CSSProperties}
+            className="intro-proof min-w-0 rounded-[var(--radius)] border border-[color:var(--border)] panel-soft p-6 sm:p-7"
+          >
+            <h3 className="font-display text-2xl text-[color:var(--text)] sm:text-3xl">{proof.title}</h3>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{proof.body}</p>
+          </li>
+        ))}
+      </ol>
       </div>
 
       {/* The surplus height on .ceremony-track IS the scroll budget: at lg it is
@@ -210,7 +248,6 @@ export function CeremonySequence() {
                   // sideways at 320px. This repo has already shipped that bug
                   // once (see motion-primitives.tsx:56).
                   className="ceremony-step grid min-w-0 gap-6 border-t pt-10 first:border-t-0 first:pt-0 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16"
-                  style={{ "--ceremony-tint": ceremony.tint } as React.CSSProperties}
                 >
                   <div className="min-w-0">
                     <p className="font-display text-4xl leading-none text-[color:var(--primary)] sm:text-5xl lg:text-6xl">
@@ -218,7 +255,7 @@ export function CeremonySequence() {
                     </p>
                     <p className="mt-3 text-sm text-[color:var(--muted)]">{ceremony.slot}</p>
                     <div
-                      className="ceremony-field mt-6 h-20 w-full sm:h-28 lg:mt-8 lg:h-40"
+                      className="ceremony-field mt-6 h-20 w-full sm:h-28 lg:mt-8 lg:h-64 xl:h-72"
                       aria-hidden="true"
                     />
                   </div>

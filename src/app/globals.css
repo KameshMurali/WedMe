@@ -568,10 +568,16 @@ input[type="time"]::-webkit-inner-spin-button {
      the magnification grows into the empty space to the right instead. */
   perspective-origin: 0 0;
 
-  /* Read by the keyframes below. Declared on the parent so one media query
-     re-times both planes, and so the keyframes carry no magic numbers. */
-  --overture-drop: 6svh;
-  --overture-drop-far: 8.5svh;
+  /* Read by the keyframe below. NEGATIVE on purpose, and that is the whole
+     collision fix. The strip used to be an `absolute inset-0` layer dropping
+     DOWN over the hero's content, which parked it on the "Craft Your
+     Celebration" badge — 161x13px of measured overlap. It now occupies layout
+     directly above that badge, so at rest it LIFTS out of its own slot and
+     magnifies, then settles back into place as the page scrolls. A transform
+     never affects layout, so nothing below it moves, and moving upward it can
+     never cover the badge or the headline no matter how the type reflows. */
+  --overture-drop: -3.5svh;
+  --overture-drop-far: -5svh;
   --overture-near-z: 140px;
   --overture-far-z: 30px;
 }
@@ -581,8 +587,8 @@ input[type="time"]::-webkit-inner-spin-button {
    the headline it is sitting on top of. */
 @media (min-width: 640px) {
   .hero-overture {
-    --overture-drop: 9svh;
-    --overture-drop-far: 12svh;
+    --overture-drop: -5svh;
+    --overture-drop-far: -7svh;
     --overture-near-z: 170px;
   }
 }
@@ -598,11 +604,6 @@ input[type="time"]::-webkit-inner-spin-button {
       animation-range: 8svh 34svh;
     }
 
-    .hero-overture-far {
-      animation: hero-overture-far linear both;
-      animation-timeline: scroll(root block);
-      animation-range: 8svh 48svh;
-    }
   }
 }
 
@@ -626,14 +627,6 @@ input[type="time"]::-webkit-inner-spin-button {
   }
 }
 
-@keyframes hero-overture-far {
-  from {
-    transform: translate3d(0, var(--overture-drop-far), var(--overture-far-z));
-  }
-  to {
-    transform: translate3d(0, 0, 0);
-  }
-}
 /* ---------------------------------------------------------------------------
    Ceremony sequence — the pinned stage the eight ceremonies are scrolled
    through (src/components/marketing/ceremony-sequence.tsx).
@@ -850,9 +843,15 @@ input[type="time"]::-webkit-inner-spin-button {
   }
 }
 
+/* Drifts DOWN into place, never up. The first version started at
+   translateY(-26%), which at the lg field height is 41px of upward travel into
+   the slot label sitting 24-32px above it — so for most of the pin the tint
+   block sat on top of the word "Afternoon". Downward is also the correct
+   parallax direction here: the conveyor carries the ceremonies upward, so a
+   background that lags moves the other way. */
 @keyframes ceremony-field-drift {
   from {
-    transform: translateY(-26%);
+    transform: translateY(14%);
   }
   to {
     transform: translateY(0);
@@ -1039,4 +1038,175 @@ input[type="time"]::-webkit-inner-spin-button {
   height: 1px;
   width: 1.75rem;
   background-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+/* ---------------------------------------------------------------------------
+   The intro split: a held headline with its proof column travelling past.
+   Base styles describe the phone and the no-timeline case — heading, then three
+   tiles, in normal flow. That is the finished readable state; everything below
+   is additive.
+   --------------------------------------------------------------------------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The tiles rise and fade as they enter, staggered by --i rather than by
+       three hand-written rules. entry 10% cover 34% finishes each one well
+       before it reaches the middle of the screen, so nothing is still arriving
+       while it is being read. */
+    .intro-proof {
+      animation: intro-proof-rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(6% + var(--i, 0) * 4%) cover calc(30% + var(--i, 0) * 4%);
+    }
+
+    /* Only from lg, and only when the viewport is tall enough to hold a pinned
+       column without cramping it. A sticky heading on a short landscape tablet
+       leaves the proof tiles nowhere to travel. */
+    @media (min-width: 1024px) and (min-height: 620px) {
+      .intro-hold {
+        position: sticky;
+        top: 6rem;
+        align-self: start;
+        /* The hold must not outlive its own column or it detaches and drifts
+           over the ceremony stage below. */
+        max-height: calc(100svh - 8rem);
+      }
+    }
+  }
+}
+
+@keyframes intro-proof-rise {
+  from {
+    opacity: 0;
+    transform: translateY(34px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The page wash.
+
+   The page was a flat beige from the bottom of the hero to the footer, which
+   made the film look stapled on rather than like the top of one world. This
+   carries the hero's warmth down the page and lets it SHIFT with the ceremony
+   being read, then drains to neutral exactly at the commit boundary — so the
+   colour leaving is what tells you the story has ended and the choosing has
+   started. One motif in several registers is what makes a page read as authored
+   rather than as a sequence of effects.
+
+   Deliberately NOT the video's own palette across the whole page. That footage
+   is saturated magenta, emerald and gold; a page-wide version of it would fight
+   the sixteen template cards, which each carry their own palette and need
+   neutral ground to be judged against, and it would make body copy harder over
+   a long scroll. Warmth transfers; saturation does not.
+
+   Painted on a fixed pseudo-element rather than on body's background so it does
+   not scroll with the content, cannot lengthen the page, and composites as one
+   layer instead of repainting the document background.
+   --------------------------------------------------------------------------- */
+.page-wash::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      70% 55% at 12% 8%,
+      color-mix(in srgb, var(--wash-tint, var(--accent)) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      85% 60% at 88% 72%,
+      color-mix(in srgb, var(--primary) 14%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(
+      172deg,
+      color-mix(in srgb, var(--wash-tint, var(--accent)) 9%, var(--background)),
+      var(--background) 58%
+    );
+  /* The tint is swapped by the ceremony stage as it scrolls, so the change has
+     to be a transition rather than a repaint-per-frame. 1.1s is slow enough
+     that it reads as the room changing colour rather than as a flicker between
+     slides. */
+  transition: background 1.1s linear;
+}
+
+/* The drain. .rite-band is the commit boundary; from there to the footer the
+   page is neutral, because a decision should not be made inside a mood. */
+.page-wash {
+  --wash-tint: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-wash::before {
+    transition: none;
+  }
+}
+
+/* The eight ceremony tints, and the page wash that follows them.
+
+   These live here rather than inline in ceremony-sequence.tsx so there is ONE
+   copy. The wash keyframes below need the same eight colours, and two hand-kept
+   lists of hex values in two languages is a bug waiting for whoever edits one
+   of them. nth-child is safe because the order is the running order of a
+   wedding — it is the whole point of the section and will not be shuffled. */
+.ceremony-step:nth-child(1) { --ceremony-tint: #5a7247; }
+.ceremony-step:nth-child(2) { --ceremony-tint: #e0a526; }
+.ceremony-step:nth-child(3) { --ceremony-tint: #b4466f; }
+.ceremony-step:nth-child(4) { --ceremony-tint: #1f6b63; }
+.ceremony-step:nth-child(5) { --ceremony-tint: #b03a2e; }
+.ceremony-step:nth-child(6) { --ceremony-tint: #8e9bb0; }
+.ceremony-step:nth-child(7) { --ceremony-tint: #2d3a63; }
+.ceremony-step:nth-child(8) { --ceremony-tint: #a9762f; }
+
+/* A custom property is only animatable once it has a registered type — without
+   @property the browser treats --wash-tint as a string and jumps between values
+   with no interpolation at all. */
+@property --wash-tint {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #c79b66;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @media (min-width: 1024px) and (min-height: 620px) {
+      /* Driven by the ceremony stage's own timeline, so the room changes colour
+         on exactly the beat the stage swaps. The transition on .page-wash::before
+         is overridden while this runs, which is correct: the keyframes already
+         carry the easing, and a transition fighting an animation is how you get
+         a colour that lags half a ceremony behind the words. */
+      .page-wash {
+        animation: page-wash-tint linear both;
+        animation-timeline: --ceremony-track;
+        animation-range: contain 0% contain 100%;
+      }
+    }
+  }
+}
+
+/* Holds on each ceremony's colour and crosses to the next on the same beats the
+   conveyor uses, so the wash and the words move together rather than drifting
+   apart. */
+@keyframes page-wash-tint {
+  0%, 7.5%    { --wash-tint: #5a7247; }
+  12.5%, 20%  { --wash-tint: #e0a526; }
+  25%, 32.5%  { --wash-tint: #b4466f; }
+  37.5%, 45%  { --wash-tint: #1f6b63; }
+  50%, 57.5%  { --wash-tint: #b03a2e; }
+  62.5%, 70%  { --wash-tint: #8e9bb0; }
+  75%, 82.5%  { --wash-tint: #2d3a63; }
+  87.5%, 100% { --wash-tint: #a9762f; }
+}
+
+/* The drain. From the commit boundary down the page is neutral: a decision
+   should not be made inside a mood, and the sixteen template palettes below
+   need unbiased ground to be compared on. The wash is a fixed layer, so this
+   cannot be done by painting over it — the band resets the inherited tint
+   instead, and the 1.1s transition on the wash carries it out smoothly. */
+.rite-drain {
+  --wash-tint: var(--background);
 }

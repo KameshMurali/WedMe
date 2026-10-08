@@ -16,7 +16,6 @@ import { logoutAction } from "@/actions/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
 import { CeremonySequence } from "@/components/marketing/ceremony-sequence";
 import { GuestStack } from "@/components/marketing/guest-stack";
 import { HeroOverlay } from "@/components/marketing/hero-overlay";
@@ -217,7 +216,12 @@ export default async function HomePage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
     <ScrollProgressBar />
-    <main className="pb-24">
+    {/* page-wash paints a fixed, warm field behind everything, tinted by the
+        ceremony currently on the stage and drained to neutral at the commit
+        boundary. See globals.css — it is deliberately the hero's WARMTH rather
+        than the film's saturation, which would fight the sixteen template
+        palettes further down. */}
+    <main className="page-wash pb-24">
       {/* Site chrome. This used to live inside the hero panel, above a divider
           rule. The hero is now a full-bleed band, so the chrome sits in its own
           shell above it rather than being furniture inside the artwork. */}
@@ -356,6 +360,13 @@ export default async function HomePage() {
         <div className="section-shell relative w-full pb-10 pt-20 sm:pt-24">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
+              {/* The overture leads the content block rather than floating over
+                  it. Nothing between it and .hero-overture may set overflow,
+                  filter, opacity or will-change: each forces transform-style to
+                  compute flat and collapses the depth that is the whole
+                  effect. */}
+              <HeroOverlay onMedia={Boolean(heroMedia)} />
+
               {/* Every colour below switches on whether there is media behind
                   it. On the bare gradient the page's own dark ink is correct;
                   over the footage it would be unreadable, and white would be
@@ -437,35 +448,8 @@ export default async function HomePage() {
           </div>
 
         </div>
-
-        {/* Last child of the hero, deliberately unwrapped. Any ancestor that
-            sets overflow, filter, opacity or will-change forces
-            transform-style back to flat and collapses the two depth planes
-            into one, which is the whole effect. */}
-        <HeroOverlay onMedia={Boolean(heroMedia)} />
       </section>
 
-      {/* The showcase cards used to sit inside the hero, to the right of the
-          headline. Against a full-bleed band they read as a second hero
-          competing with the first, so they get their own stage directly below —
-          the first thing a scroll reveals, rather than something already seen. */}
-      <section className="section-shell mt-16 flex justify-center lg:mt-20">
-        {/* The px-6 is load-bearing, not spacing. HeroShowcase draws its glow
-            with `-inset-6`, i.e. 24px OUTSIDE its own box, and it used to sit
-            inside the hero's overflow-hidden panel, which clipped that bleed.
-            Out here nothing clips it, so at 320 and 390 it pushed the document
-            8px wider and the whole page scrolled sideways. This gutter gives
-            the bleed exactly the room it needs.
-
-            Worth knowing: `npm run test:layout` does NOT catch this. It runs
-            against `next dev`, and this container's CSP blocks the eval() the
-            React dev build needs, so hydration never completes and the lazily
-            loaded showcase never mounts — the offending element simply is not
-            on the page. Only a production build shows it. */}
-        <div className="px-6">
-          <HeroShowcaseLazy />
-        </div>
-      </section>
 
       <CeremonySequence />
 

@@ -53,11 +53,18 @@ export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
     : "border-black/10 bg-white/80 text-stone-700";
 
   return (
-    // pointer-events-none is load-bearing: this sits on top of the hero's CTAs.
-    // It also means nothing in here may be a link or a button — a focusable
-    // element under pointer-events:none still takes keyboard focus and then
-    // cannot be activated. There are none; the real links live in the hero.
-    <div className="pointer-events-none absolute inset-0 z-10">
+    // NOT absolutely positioned any more, and that is the fix rather than a
+    // refactor. As an `absolute inset-0` layer this painted at the top of the
+    // band while the hero's own content block starts 80-96px down, so the two
+    // occupied the same region and the facts strip parked on the "Craft Your
+    // Celebration" badge — measured at 161x13px of overlap. Every attempt to
+    // solve that by shrinking the strip was treating the symptom: a free
+    // floating layer over laid-out text has no way to reserve room, so any
+    // font fallback, any larger browser default, any longer word re-breaks it.
+    //
+    // Occupying layout costs the recession nothing. translateZ still moves it
+    // against the container's perspective; it simply cannot collide any more.
+    <div className="pointer-events-none relative z-10">
       {/* .hero-overture carries the perspective and transform-style. No
           overflow, filter, opacity or will-change on it or on this wrapper:
           each of those forces `transform-style: preserve-3d` to compute to
@@ -66,7 +73,7 @@ export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
           the tempting one — it would also pin a composited layer for a
           decoration that is on screen for half a viewport — so it is
           deliberately absent, here and in the CSS. */}
-      <div className="section-shell hero-overture flex h-full flex-col items-start pt-1.5 sm:pt-3">
+      <div className="hero-overture flex flex-col items-start">
         {/* The near plane. Magnified by translateZ against the container's
             perspective, never by `scale()`: text under a fractional scale
             rasterises blurry in both Blink and WebKit. At rest it carries no
@@ -78,12 +85,6 @@ export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
             ended 0.4px above the badge at 1024px and wider — a sub-pixel miss,
             which any Cormorant fallback (Georgia is 4% taller in the box) or a
             bumped browser default font size turns into an overlap. */}
-        <p
-          className={`hero-overture-near min-w-0 font-display text-base leading-none tracking-[0.01em] sm:text-2xl ${ink}`}
-        >
-          ToNewBeginning<span className="text-[color:var(--accent)]">.com</span>
-        </p>
-
         {/* The further plane. It carries its own translucent panel rather than
             bare text because during the overture it passes in front of the hero
             headline, and at 320px there is no arrangement where it does not —
@@ -100,7 +101,7 @@ export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
             reason the lg size step is gone: the padding is part of the resting
             strip's height budget against the hero's 96px of top padding. */}
         <ul
-          className={`hero-overture-far mt-1.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 rounded-[var(--radius)] border px-3 py-1.5 text-[10px] uppercase leading-tight tracking-[0.1em] sm:mt-2 sm:gap-x-3 sm:gap-y-1 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em] ${panel}`}
+          className={`hero-overture-near mb-5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 rounded-[var(--radius)] border px-3 py-1.5 text-[10px] uppercase leading-tight tracking-[0.1em] sm:mb-6 sm:gap-x-3 sm:gap-y-1 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em] ${panel}`}
         >
           {PLATFORM_FACTS.map((fact, index) => (
             // min-w-0 on the flex items, not decoration: a flex child defaults

@@ -232,7 +232,7 @@ export function RiteRouter() {
   }, [inView]);
 
   return (
-    <section ref={bandRef} className="rite-band mt-20 border-y py-14 lg:mt-28 lg:py-20">
+    <section ref={bandRef} className="rite-drain rite-band mt-20 border-y py-14 lg:mt-28 lg:py-20">
       <div className="rite-field" aria-hidden="true" />
 
       <div className="section-shell relative">
