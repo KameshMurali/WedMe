@@ -182,6 +182,24 @@ const featureHighlights = [
 ];
 
 
+// The rolling ceremony names under the hero. These eight also carry the pinned
+// sequence much further down the page, and that repetition is deliberate rather
+// than an oversight: here they are ambient, a rhythm that says "we know your
+// wedding" before any claim is made; there they are the argument, each with its
+// own timing, venue, dress code and RSVP. Several screens apart, one motif in
+// two registers reads as authorship. Side by side it would read as a bug, which
+// is why this lives in the hero and not next to the stage.
+const ceremonyMarquee = [
+  "Mehendi",
+  "Haldi",
+  "Sangeet",
+  "Nikkah",
+  "Muhurtham",
+  "Ceremony",
+  "Reception",
+  "Walima",
+];
+
 function getResumeLabel(pathname: string) {
   const labels: Record<string, string> = {
     "/dashboard": "Overview",
@@ -444,6 +462,34 @@ export default async function HomePage() {
                   </Link>
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* The band's bottom rule. It arrives on the entrance sequence's last
+              beat rather than simply being there from the first frame. */}
+          <div
+            className={`animate-fade-rise relative mt-12 overflow-hidden border-t pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)] ${
+              heroMedia ? "border-white/20" : "border-white/60"
+            }`}
+            style={{ animationDelay: "480ms" }}
+            aria-hidden="true"
+          >
+            <div className="marquee-track">
+              {[0, 1].map((copy) => (
+                <div key={copy} className="flex items-center">
+                  {ceremonyMarquee.map((ceremony) => (
+                    <span
+                      key={`${copy}-${ceremony}`}
+                      className={`flex items-center whitespace-nowrap px-5 font-display text-xl sm:text-2xl ${
+                        heroMedia ? "text-white/65" : "text-stone-500"
+                      }`}
+                    >
+                      {ceremony}
+                      <span className="ml-10 h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]/60" />
+                    </span>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
 

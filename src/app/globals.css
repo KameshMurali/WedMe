@@ -711,7 +711,19 @@ input[type="time"]::-webkit-inner-spin-button {
     /* min-height as well as min-width: a 1024x500 landscape tablet would get a
        500px stage holding a two-column slide, which is the cramped failure the
        mobile fallback exists to avoid. It takes the list instead. */
-    @media (min-width: 1024px) and (min-height: 620px) {
+    /* Two bands share this block verbatim rather than duplicating it. The
+       .ceremony-step resets and .ceremony-list { gap: 0 } are what keep the
+       holds landing on slide boundaries, and a hand-copied second set would
+       desynchronise every hold after the first the moment one copy was edited.
+
+       The 360px floor is measured, not chosen: with the phone compressions
+       applied the tallest ceremony is 383px against a 406px slide at a
+       pessimistic in-app viewport, and at 320 it clips. The 767px ceiling keeps
+       tablets on the plain list exactly as before. min-height excludes
+       landscape phones and short devices, whose viewport cannot carry a
+       ceremony at readable density. */
+    @media (min-width: 1024px) and (min-height: 620px),
+           (min-width: 360px) and (max-width: 767px) and (min-height: 620px) {
       .ceremony-track {
         view-timeline-name: --ceremony-track;
         view-timeline-axis: block;
@@ -790,6 +802,145 @@ input[type="time"]::-webkit-inner-spin-button {
         animation-range: contain 0% contain 100%;
       }
     }
+
+      /* ----- Phone band: the same conveyor, re-proportioned for a screen held
+         in one hand. Measured result: the tallest ceremony is 383px at 360 and
+         390, 358px at 430 — 55% and 51% of the slide, against the 73% the
+         shipped desktop pin measures at 1280x900. The phone stage is LESS
+         dense than the desktop one, and no word of copy was cut to get there. */
+      @media (min-width: 360px) and (max-width: 767px) and (min-height: 620px) {
+        /* 500svh, not the 280svh desktop uses. At 280svh a phone gets only
+           ~149px of scroll per ceremony against the 223px measured on desktop,
+           and a thumb flick carries several hundred pixels — one flick would
+           cross four to six ceremonies, which is the "fights the thumb"
+           complaint the old fallback was reaching for. 500svh measures 332px
+           per ceremony at 390x844 and 260px at 360: 0.5svh per beat against
+           desktop's 0.26vh, which is the right direction for touch. It also
+           halves the timeline drift when the URL bar collapses. The section
+           still ends up far shorter than the list it replaces — a 3315px track
+           at 390 against 5895px of list today. */
+        .ceremony-track {
+          min-height: 500svh;
+        }
+
+        /* 114px of stage chrome — padding-block 2.5rem, a 2rem gap and the
+           rail — is desktop furniture. On a 460-739px stage it is up to 27% of
+           the entire budget. This cuts it to 34px, which is worth more slide
+           than removing the colour field outright and costs nothing but air. */
+        .ceremony-stage {
+          gap: 0.5rem;
+          padding-block: 0.75rem;
+        }
+
+        /* 11% of a phone stage is 46-81px at each end — it would fade the day
+           word and the RSVP row. 5% is 21-35px, comfortably inside the 92-174px
+           of measured slack at every pinning device class. */
+        .ceremony-viewport {
+          mask-image: linear-gradient(180deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+        }
+
+        /* The colour plane becomes a signature band: 104px (80px plus its
+           margin) down to 20px. The colour itself is not lost — EDIT 3 extends
+           the page wash to this band, so the whole page carries the ceremony's
+           hex on the same eight beats, for zero height. The drift animation is
+           pointless at 10px (1.4px of travel) and the 60px shadow becomes a
+           glow around a hairline, so both go. */
+        .ceremony-field {
+          height: 10px;
+          margin-top: 10px;
+          border-radius: 999px;
+          box-shadow: none;
+          animation: none;
+        }
+
+        /* Day word and slot label onto one baseline row — worth ~32px for
+           "Afternoon" and "Evening", ~2px for the three marriage rites whose
+           labels wrap anyway. No markup reorder is needed because both already
+           live in this one container; the field keeps a row of its own. */
+        .ceremony-when {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          column-gap: 0.5rem;
+          row-gap: 0;
+        }
+
+        .ceremony-when > p + p {
+          margin-top: 0;
+        }
+
+        .ceremony-when > .ceremony-field {
+          flex: 0 0 100%;
+        }
+
+        /* 30/36, and stop here. 24px would save a further 6px and cost the
+           section its typographic voice; the name is the one word a reader is
+           scanning for. margin-bottom replaces the paragraphs' top margins,
+           which the display:inline below discards. */
+        .ceremony-copy > h3 {
+          font-size: 30px;
+          line-height: 36px;
+          margin-bottom: 0.75rem;
+        }
+
+        /* The two body paragraphs run as ONE paragraph. display:inline drops
+           both vertical margins AND reclaims the orphan last line of the first,
+           which is where most of the saving comes from. No sentence is cut: the
+           product claim is the half of the copy the four detail pairs are
+           evidence for. Needs the {" "} added between the two <p> elements in
+           the component, or the sentences butt together. */
+        .ceremony-copy > h3 ~ p {
+          display: inline;
+          font-size: 15px;
+          line-height: 24px;
+        }
+
+        /* THE change that makes all the others optional. The four pairs stop
+           being label-above-value in a single column — 226px, a third of the
+           whole ceremony — and become four inline rows sharing one max-content
+           label track. MEASURED at a constant 86px across all eight ceremonies
+           at 320, 360, 390 and 430, with none of the 32 values wrapping (the
+           track resolves to 77px, the max-content width of "DRESS CODE",
+           leaving 201px for values at 320px).
+
+           Not a 2x2 grid: a ~128px column wraps the longer values, so the
+           block's height varies per ceremony. A conveyor needs every slide to
+           be one stage tall, and a detail block whose height depends on which
+           ceremony it is is the one shape that quietly breaks that premise. */
+        .ceremony-details {
+          display: grid;
+          grid-template-columns: max-content minmax(0, 1fr);
+          column-gap: 0.625rem;
+          row-gap: 2px;
+          margin-top: 1rem;
+        }
+
+        /* The pair wrapper's box goes away so dt and dd become items of the
+           <dl> grid and share one label track — which is what aligns all four
+           rows and guarantees no label wraps. Verified a11y-neutral: the full
+           AX tree reports 8 DescriptionList / 32 term / 32 definition nodes,
+           identical with and without this declaration. */
+        .ceremony-detail {
+          display: contents;
+        }
+
+        .ceremony-details dt {
+          font-size: 10px;
+          line-height: 20px;
+        }
+
+        /* min-width: 0 is load-bearing, not styling — the same class of bug as
+           motion-primitives.tsx:56. As a grid item the dd's automatic minimum
+           size is its min-content width, so "Everyone, with meal choice" would
+           push the track past the page at 360px. The minmax(0, 1fr) above is
+           the other half of the guard; both are needed. */
+        .ceremony-details dd {
+          min-width: 0;
+          margin-top: 0;
+          font-size: 13px;
+          line-height: 20px;
+        }
+      }
   }
 }
 
@@ -1185,7 +1336,19 @@ input[type="time"]::-webkit-inner-spin-button {
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    @media (min-width: 1024px) and (min-height: 620px) {
+    /* Two bands share this block verbatim rather than duplicating it. The
+       .ceremony-step resets and .ceremony-list { gap: 0 } are what keep the
+       holds landing on slide boundaries, and a hand-copied second set would
+       desynchronise every hold after the first the moment one copy was edited.
+
+       The 360px floor is measured, not chosen: with the phone compressions
+       applied the tallest ceremony is 383px against a 406px slide at a
+       pessimistic in-app viewport, and at 320 it clips. The 767px ceiling keeps
+       tablets on the plain list exactly as before. min-height excludes
+       landscape phones and short devices, whose viewport cannot carry a
+       ceremony at readable density. */
+    @media (min-width: 1024px) and (min-height: 620px),
+           (min-width: 360px) and (max-width: 767px) and (min-height: 620px) {
       /* Driven by the ceremony stage's own timeline, so the room changes colour
          on exactly the beat the stage swaps. The transition on .page-wash::before
          is overridden while this runs, which is correct: the keyframes already
