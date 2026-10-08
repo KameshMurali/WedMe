@@ -32,6 +32,13 @@ import "@fontsource/cormorant-garamond/400.css";
 import "@fontsource/cormorant-garamond/500.css";
 import "@fontsource/cormorant-garamond/600.css";
 import "@fontsource/cinzel/600.css";
+// The marketing site's display face. Marcellus is a carved-inscription Roman
+// rather than a book serif, which is the register luxury Indian wedding
+// stationery actually works in; Rozha One is a Devanagari-derived high-contrast
+// display used only for the largest moments, where its single heavy weight is a
+// feature rather than a limit.
+import "@fontsource/marcellus/400.css";
+import "@fontsource/rozha-one/400.css";
 import "@fontsource/noto-serif-tamil/400.css";
 import "@fontsource/noto-serif-tamil/500.css";
 import "@fontsource/noto-serif-tamil/600.css";

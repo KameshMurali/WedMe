@@ -16,10 +16,13 @@ import { logoutAction } from "@/actions/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
+import { CeremonySequence } from "@/components/marketing/ceremony-sequence";
+import { GuestStack } from "@/components/marketing/guest-stack";
+import { HeroOverlay } from "@/components/marketing/hero-overlay";
 import { HeroVideoLayer } from "@/components/marketing/hero-video-layer";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { OrnamentDivider } from "@/components/marketing/ornament-divider";
+import { RiteRouter } from "@/components/marketing/rite-router";
 import { Reveal } from "@/components/marketing/reveal";
 import { RevealText, ScrollProgressBar } from "@/components/public/motion-primitives";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -178,17 +181,6 @@ const featureHighlights = [
   },
 ];
 
-// Slow marquee under the hero — grounds the brand in the ceremonies it serves.
-const ceremonyMarquee = [
-  "Mehendi",
-  "Haldi",
-  "Sangeet",
-  "Nikkah",
-  "Muhurtham",
-  "Ceremony",
-  "Reception",
-  "Walima",
-];
 
 function getResumeLabel(pathname: string) {
   const labels: Record<string, string> = {
@@ -224,7 +216,12 @@ export default async function HomePage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
     <ScrollProgressBar />
-    <main className="pb-24">
+    {/* page-wash paints a fixed, warm field behind everything, tinted by the
+        ceremony currently on the stage and drained to neutral at the commit
+        boundary. See globals.css — it is deliberately the hero's WARMTH rather
+        than the film's saturation, which would fight the sixteen template
+        palettes further down. */}
+    <main className="page-wash pb-24">
       {/* Site chrome. This used to live inside the hero panel, above a divider
           rule. The hero is now a full-bleed band, so the chrome sits in its own
           shell above it rather than being furniture inside the artwork. */}
@@ -363,6 +360,13 @@ export default async function HomePage() {
         <div className="section-shell relative w-full pb-10 pt-20 sm:pt-24">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
+              {/* The overture leads the content block rather than floating over
+                  it. Nothing between it and .hero-overture may set overflow,
+                  filter, opacity or will-change: each forces transform-style to
+                  compute flat and collapses the depth that is the whole
+                  effect. */}
+              <HeroOverlay onMedia={Boolean(heroMedia)} />
+
               {/* Every colour below switches on whether there is media behind
                   it. On the bare gradient the page's own dark ink is correct;
                   over the footage it would be unreadable, and white would be
@@ -378,7 +382,7 @@ export default async function HomePage() {
                   a flourish. The per-character reveal goes on the payoff line
                   only, which is the line that earns it. */}
               <h1
-                className={`mt-5 max-w-3xl animate-fade-rise font-display text-4xl leading-[1.04] sm:text-5xl lg:text-7xl ${
+                className={`mt-5 max-w-3xl animate-fade-rise font-royal text-4xl leading-[1.08] sm:text-5xl lg:text-7xl ${
                   heroMedia ? "text-white [text-shadow:0_2px_24px_rgba(22,12,15,0.5)]" : "text-[#1f1117]"
                 }`}
                 style={{ animationDelay: "120ms" }}
@@ -443,58 +447,13 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Ceremony marquee — now the band's bottom rule rather than a strip
-              inside a card. It arrives on the sequence's last beat (480ms)
-              instead of simply being there from the first frame. */}
-          <div
-            className={`animate-fade-rise relative mt-12 overflow-hidden border-t pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)] ${
-              heroMedia ? "border-white/20" : "border-white/60"
-            }`}
-            style={{ animationDelay: "480ms" }}
-            aria-hidden="true"
-          >
-            <div className="marquee-track">
-              {[0, 1].map((copy) => (
-                <div key={copy} className="flex items-center">
-                  {ceremonyMarquee.map((ceremony) => (
-                    <span
-                      key={`${copy}-${ceremony}`}
-                      className={`flex items-center whitespace-nowrap px-5 font-display text-xl sm:text-2xl ${
-                        heroMedia ? "text-white/65" : "text-stone-500"
-                      }`}
-                    >
-                      {ceremony}
-                      <span className="ml-10 h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]/60" />
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* The showcase cards used to sit inside the hero, to the right of the
-          headline. Against a full-bleed band they read as a second hero
-          competing with the first, so they get their own stage directly below —
-          the first thing a scroll reveals, rather than something already seen. */}
-      <section className="section-shell mt-16 flex justify-center lg:mt-20">
-        {/* The px-6 is load-bearing, not spacing. HeroShowcase draws its glow
-            with `-inset-6`, i.e. 24px OUTSIDE its own box, and it used to sit
-            inside the hero's overflow-hidden panel, which clipped that bleed.
-            Out here nothing clips it, so at 320 and 390 it pushed the document
-            8px wider and the whole page scrolled sideways. This gutter gives
-            the bleed exactly the room it needs.
 
-            Worth knowing: `npm run test:layout` does NOT catch this. It runs
-            against `next dev`, and this container's CSP blocks the eval() the
-            React dev build needs, so hydration never completes and the lazily
-            loaded showcase never mounts — the offending element simply is not
-            on the page. Only a production build shows it. */}
-        <div className="px-6">
-          <HeroShowcaseLazy />
-        </div>
-      </section>
+      <CeremonySequence />
+
+      <GuestStack />
 
       <section className="section-shell mt-20">
         <Reveal>
@@ -522,7 +481,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <OrnamentDivider kind="kolam" />
+      {/* The commit boundary. Everything above this moves; from here the page
+          deliberately stops, because choosing is hostile to motion. The router
+          leads into the sixteen template pages, and the grid below it is the
+          comparison view for a reader who already knows what they want. */}
+      <RiteRouter />
 
       <section className="section-shell mt-20">
         <div className="scroll-reveal">

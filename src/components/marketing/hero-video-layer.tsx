@@ -48,6 +48,17 @@ const LIGHTWEIGHT_TYPES = new Set(["slow-2g", "2g", "3g"]);
 const MIN_DOWNLINK_MBPS = 1.5;
 const MAX_RTT_MS = 500;
 
+// Playback-rate drive. MIN/MAX_PLAYBACK are the range browsers actually honour
+// — outside it they throw or silently mute — so every assignment is clamped to
+// them regardless of what the velocity maths produces.
+const REST_RATE = 0.72;
+const MAX_RATE = 1.55;
+const VELOCITY_FULL = 36; // px per frame at which the rate reaches MAX_RATE
+const RATE_DECAY = 0.12;
+const RATE_EPSILON = 0.01;
+const MIN_PLAYBACK = 0.0625;
+const MAX_PLAYBACK = 16;
+
 export type HeroVideoTier = { mp4: string; webm?: string };
 
 // Device pixels, not CSS pixels. A 390px phone at DPR 3 needs 1170 real pixels
@@ -118,6 +129,58 @@ export function HeroVideoLayer({
     video.load();
   }, [wide, narrow, reduceMotion]);
 
+  // Scroll VELOCITY drives playbackRate. This is the owner's "the video takes
+  // the movement", and it is deliberately not the literal version of it:
+  // scrubbing currentTime is impossible on this asset. Measured with ffprobe,
+  // the shipped clip carries ONE keyframe across 97 frames, so every seek
+  // decodes from zero — a 120-tick sweep painted a single frame, with seek
+  // latency of 731ms median and 1696ms worst case. Re-encoding all-intra to fix
+  // that costs 4.68MB in H.264 and 6.13MB in VP9, against a 2.5MB/1.2MB budget.
+  //
+  // Rate, on the other hand, is free: no extra bytes, no seeking, and the
+  // picture never freezes. Scroll fast and the mandap rushes toward you; stop
+  // and it settles.
+  useEffect(() => {
+    const video = ref.current;
+    if (!video || !video.src || reduceMotion !== false || !inView) return;
+
+    let frame = 0;
+    let rate = REST_RATE;
+    let lastY = window.scrollY;
+
+    const tick = () => {
+      const y = window.scrollY;
+      const velocity = Math.abs(y - lastY);
+      lastY = y;
+
+      // The target collapses to REST_RATE as velocity approaches zero, so the
+      // decay back to rest is the same line rather than a separate branch.
+      const target = REST_RATE + (MAX_RATE - REST_RATE) * Math.min(velocity / VELOCITY_FULL, 1);
+      rate += (target - rate) * RATE_DECAY;
+      const next = Math.min(Math.max(rate, MIN_PLAYBACK), MAX_PLAYBACK);
+
+      if (Math.abs(video.playbackRate - next) > RATE_EPSILON) {
+        // Safari throws when the element is between sources, and an exception
+        // inside a rAF callback kills the loop for the rest of the session.
+        try {
+          video.playbackRate = next;
+        } catch {}
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    // scrollY is sampled inside rAF rather than from a scroll listener: nothing
+    // sits on the scroll path, and the read cannot force a reflow because
+    // nothing in the loop writes layout.
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      try {
+        video.playbackRate = REST_RATE;
+      } catch {}
+    };
+  }, [inView, ready, reduceMotion]);
+
   useEffect(() => {
     const video = ref.current;
     if (!video || !video.src) return;
@@ -139,7 +202,12 @@ export function HeroVideoLayer({
       loop
       playsInline
       preload="none"
-      onCanPlay={() => setReady(true)}
+      onCanPlay={(event) => {
+        try {
+          event.currentTarget.playbackRate = REST_RATE;
+        } catch {}
+        setReady(true);
+      }}
       className={className}
       style={{ opacity: ready ? 1 : 0, transition: "opacity 900ms ease-out" }}
     />
