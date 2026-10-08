@@ -23,7 +23,30 @@ import { useInView, useReducedMotion } from "motion/react";
 //   - opacity 0 until `canplay`, so it cross-fades up from the poster instead
 //     of flashing a black frame.
 
-type Connection = { saveData?: boolean; effectiveType?: string };
+type Connection = {
+  saveData?: boolean;
+  effectiveType?: string;
+  downlink?: number;
+  rtt?: number;
+};
+
+// effectiveType has FOUR buckets — "slow-2g", "2g", "3g", "4g" — and the first
+// version of this guard caught only the slowest two. That made it look
+// protective while being close to dead code, because genuine 2g barely exists
+// on real networks any more. Chrome derives these buckets from observed
+// latency and throughput, and "3g" means round-trips up to 1.4 SECONDS, or as
+// little as 70kbps. A measured hotel-wifi profile (1.2Mbps, 400ms RTT) reports
+// exactly that, with saveData false — so the old guard let the 692KB mobile
+// tier download anyway and the hero showed nothing for about seven seconds.
+// That is the connection most guests are actually on.
+const LIGHTWEIGHT_TYPES = new Set(["slow-2g", "2g", "3g"]);
+
+// effectiveType is a coarse bucket, so these catch a link that reports "4g"
+// while behaving badly. downlink is Mbps and rtt is ms, both deliberately
+// rounded by the browser for fingerprinting resistance. The narrow tier is
+// ~692KB ≈ 5.5Mbit, so below 1.5Mbps it cannot arrive in a sensible time.
+const MIN_DOWNLINK_MBPS = 1.5;
+const MAX_RTT_MS = 500;
 
 export type HeroVideoTier = { mp4: string; webm?: string };
 
@@ -36,9 +59,25 @@ const NARROW_TIER_WIDTH = 1280;
 
 function prefersLightweight() {
   const connection = (navigator as Navigator & { connection?: Connection }).connection;
+
+  // navigator.connection is Chromium-only: Safari and Firefox report nothing,
+  // so this returns false there and those visitors always get the video. That
+  // is a real hole and is NOT fixed here — stating it rather than implying the
+  // guard is universal. The honest mitigation is that the video is already
+  // weightless until after hydration and the poster alone is a complete hero.
   if (!connection) return false;
+
   if (connection.saveData) return true;
-  return connection.effectiveType === "2g" || connection.effectiveType === "slow-2g";
+  if (connection.effectiveType && LIGHTWEIGHT_TYPES.has(connection.effectiveType)) return true;
+
+  // downlink of exactly 0 means "unknown", not "no bandwidth", so it must not
+  // trip the guard.
+  if (typeof connection.downlink === "number" && connection.downlink > 0 && connection.downlink < MIN_DOWNLINK_MBPS) {
+    return true;
+  }
+  if (typeof connection.rtt === "number" && connection.rtt > MAX_RTT_MS) return true;
+
+  return false;
 }
 
 function pickTier(wide: HeroVideoTier, narrow: HeroVideoTier): HeroVideoTier {
