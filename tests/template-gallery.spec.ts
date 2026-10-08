@@ -2,16 +2,20 @@ import { test, expect } from "@playwright/test";
 
 import { templateRegistry } from "../src/lib/template-registry";
 import { findOverflow } from "./helpers/overflow";
+import { findSvgDefsProblems } from "./helpers/svg-defs";
 
 /**
  * Exercises every template through the dev gallery route (TEMPLATE_GALLERY=1).
  *
- * Two jobs. It asserts the things the chrome work is actually about — that the
- * page backdrop follows the template rather than falling through to a shared
- * default, and that no design pushes the document sideways on a phone now that
- * the ornament frames are drawn below `lg`. And with TEMPLATE_SHOTS=1 it writes
- * the screenshots, which are both how a human verifies the designs really do
- * differ and the source for the picker's thumbnails.
+ * Three jobs. It asserts the things the chrome work is actually about — that
+ * the page backdrop follows the template rather than falling through to a
+ * shared default, and that no design pushes the document sideways on a phone
+ * now that the ornament frames are drawn below `lg`. It checks that every
+ * ornament's `<defs>` ids line up with the references that paint them, because
+ * a mismatch there renders nothing and reports nothing. And with
+ * TEMPLATE_SHOTS=1 it writes the screenshots, which are both how a human
+ * verifies the designs really do differ and the source for the picker's
+ * thumbnails.
  *
  * IMPORTANT: point this at a PRODUCTION build (`next build && next start`).
  * React's development build needs eval(), and under a strict CSP that fails,
@@ -46,6 +50,22 @@ for (const template of templateRegistry) {
       // template. Eleven of sixteen designs used to fall through to the
       // champagne default because the switch only named the original five.
       await expect(page.locator(`.chrome-${template.chromeStyle}`).first()).toBeAttached();
+
+      // The other failure this suite missed entirely: an ornament that paints
+      // nothing. Every *Frame renders its screen twice, left and right, so the
+      // pattern ids are prop-driven — and a rename that reaches the reference
+      // but not the definition leaves the reference dangling and the two
+      // definitions colliding. Both are silent in the browser; the palace
+      // template's jaali screens were blank and all 48 tests here still passed.
+      const defs = await findSvgDefsProblems(page);
+      expect(
+        defs.dangling,
+        `${template.key} paints from <defs> ids that nothing defines`,
+      ).toEqual([]);
+      expect(
+        defs.duplicated,
+        `${template.key} defines the same <defs> id more than once`,
+      ).toEqual([]);
 
       const result = await findOverflow(page);
       expect(

@@ -59,7 +59,7 @@ export function MughalArch({ className }: { className?: string }) {
 
 // Pierced marble jaali: an eight-point star lattice, tiled at true pixel size.
 // patternId is a prop because every *Frame renders this twice, left and
-// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// right. With a hardcoded id the document carried two <pattern id="jaali">
 // and both url(#jaali) references resolved to whichever came first — invalid,
 // and silently wrong the moment the two sides differ in colour or scale.
 export function JaaliScreen({
@@ -72,7 +72,7 @@ export function JaaliScreen({
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
-        <pattern id="jaali" width="44" height="44" patternUnits="userSpaceOnUse">
+        <pattern id={patternId} width="44" height="44" patternUnits="userSpaceOnUse">
           <g stroke="currentColor" strokeWidth="1.1" fill="none">
             <rect x="8" y="8" width="28" height="28" />
             <rect x="8" y="8" width="28" height="28" transform="rotate(45 22 22)" />

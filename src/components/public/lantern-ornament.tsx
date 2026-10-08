@@ -38,7 +38,7 @@ export function MoonGate({ className }: { className?: string }) {
 
 // Ice-ray lattice: the irregular cracked-ice window screen.
 // patternId is a prop because every *Frame renders this twice, left and
-// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// right. With a hardcoded id the document carried two <pattern id="iceray">
 // and both url(#iceray) references resolved to whichever came first — invalid,
 // and silently wrong the moment the two sides differ in colour or scale.
 export function IceRayLattice({
@@ -51,7 +51,7 @@ export function IceRayLattice({
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
-        <pattern id="iceray" width="80" height="80" patternUnits="userSpaceOnUse">
+        <pattern id={patternId} width="80" height="80" patternUnits="userSpaceOnUse">
           <g stroke="currentColor" strokeWidth="1.2" fill="none">
             <path d="M0 26 L22 14 L48 24 L80 10" />
             <path d="M0 54 L18 46 L44 58 L80 48" />

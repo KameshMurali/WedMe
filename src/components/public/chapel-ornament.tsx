@@ -100,7 +100,7 @@ export function RoseWindow({ className }: { className?: string }) {
 
 // Colonnade: the arcade running down a nave aisle.
 // patternId is a prop because every *Frame renders this twice, left and
-// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// right. With a hardcoded id the document carried two <pattern id="colonnade">
 // and both url(#colonnade) references resolved to whichever came first — invalid,
 // and silently wrong the moment the two sides differ in colour or scale.
 export function Colonnade({
@@ -113,7 +113,7 @@ export function Colonnade({
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
-        <pattern id="colonnade" width="72" height="160" patternUnits="userSpaceOnUse">
+        <pattern id={patternId} width="72" height="160" patternUnits="userSpaceOnUse">
           <g stroke="currentColor" strokeWidth="1.4" fill="none">
             {/* Column shaft with fluting */}
             <rect x="26" y="46" width="20" height="98" />

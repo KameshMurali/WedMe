@@ -41,7 +41,7 @@ export function HorseshoeArch({ className }: { className?: string }) {
 
 // Mashrabiya: the turned-wood lattice over a window.
 // patternId is a prop because every *Frame renders this twice, left and
-// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// right. With a hardcoded id the document carried two <pattern id="mashrabiya">
 // and both url(#mashrabiya) references resolved to whichever came first — invalid,
 // and silently wrong the moment the two sides differ in colour or scale.
 export function MashrabiyaScreen({
@@ -54,7 +54,7 @@ export function MashrabiyaScreen({
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
-        <pattern id="mashrabiya" width="48" height="48" patternUnits="userSpaceOnUse">
+        <pattern id={patternId} width="48" height="48" patternUnits="userSpaceOnUse">
           <g stroke="currentColor" strokeWidth="1.1" fill="none">
             <circle cx="24" cy="24" r="13" />
             <circle cx="24" cy="24" r="5" />

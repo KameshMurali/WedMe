@@ -24,7 +24,7 @@ function starPoints(cx: number, cy: number, outer: number, inner: number, points
 }
 
 // patternId is a prop because every *Frame renders this twice, left and
-// right. With a hardcoded id the document carried two <pattern id={patternId}>
+// right. With a hardcoded id the document carried two <pattern id="girih">
 // and both url(#girih) references resolved to whichever came first — invalid,
 // and silently wrong the moment the two sides differ in colour or scale.
 export function GirihScreen({
@@ -37,7 +37,7 @@ export function GirihScreen({
   return (
     <svg className={className} width="100%" height="100%" fill="none" aria-hidden="true">
       <defs>
-        <pattern id="girih" width="60" height="60" patternUnits="userSpaceOnUse">
+        <pattern id={patternId} width="60" height="60" patternUnits="userSpaceOnUse">
           <g stroke="currentColor" strokeWidth="1" fill="none">
             <polygon points={starPoints(30, 30, 26, 11, 10)} />
             <polygon points={starPoints(30, 30, 14, 6, 10)} />
