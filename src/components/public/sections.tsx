@@ -118,8 +118,10 @@ function HeroMediaFrame({
 function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSnapshot; large?: boolean; dark?: boolean }) {
   return (
     <div className="max-w-3xl">
-      <Badge className={dark ? "border-white/20 bg-white/10 text-white" : undefined}>{snapshot.site.brandName}</Badge>
-      <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+      {/* The brand-name badge used to sit here, immediately above the
+          headline, rendering "KAMMONBEGINNINGS" on top of "Kamesh weds
+          Monisha". It said nothing the heading below did not say better. */}
+      <div className="flex flex-wrap items-center gap-3 text-sm">
         <span
           className={cn(
             "inline-flex items-center gap-2 rounded-full px-4 py-2",

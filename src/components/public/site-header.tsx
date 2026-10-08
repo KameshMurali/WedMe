@@ -5,11 +5,10 @@ import type { Route } from "next";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
 import { findTemplateByKey } from "@/lib/template-registry";
-import { cn, formatDate, formatEnumLabel } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 type NavItem = { href: string; label: string; sectionType?: string };
 
@@ -74,24 +73,20 @@ function getNavRailClasses(isDark: boolean) {
 
 export function SiteHeader({
   templateKey,
-  brandName,
   coupleNames,
   weddingDate,
   locationSummary,
   slug,
-  visibility,
   visibleNavItems,
   activeHref,
   showBackToPlatformHome,
   isDark,
 }: {
   templateKey: string;
-  brandName: string;
   coupleNames: string;
   weddingDate: string;
   locationSummary: string | null;
   slug: string;
-  visibility: string;
   visibleNavItems: NavItem[];
   activeHref?: string;
   showBackToPlatformHome: boolean;
@@ -165,8 +160,10 @@ export function SiteHeader({
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div className="space-y-2">
+                  {/* The brand-name badge sat here, directly above the couple's
+                      names below, so a guest read "KAMMONBEGINNINGS" and then
+                      "Kamesh & Monisha". The names are the better version. */}
                   <div className="flex flex-wrap items-center gap-3">
-                    <Badge>{brandName}</Badge>
                     <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
                       <CalendarDays className="h-3.5 w-3.5" />
                       {formatDate(weddingDate)}
@@ -184,10 +181,13 @@ export function SiteHeader({
                 </div>
               </div>
 
+              {/* The visibility pill used to render here. It told a guest
+                  "Password Protected" on a site they were reading without a
+                  password, which was both useless to them and an advertisement
+                  that the couple believed they were private. Visibility is an
+                  owner setting; it belongs in the dashboard, not on the guest
+                  page. */}
               <div className="flex shrink-0 items-center gap-3">
-                <div className="hidden rounded-full panel-faint border border-[color:var(--accent)]/18 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted)] sm:inline-flex">
-                  {formatEnumLabel(visibility, "PUBLIC")}
-                </div>
                 <Button asChild size="sm">
                   <Link href={`/${slug}/rsvp` as Route}>Reply to Invite</Link>
                 </Button>

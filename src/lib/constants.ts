@@ -4,6 +4,16 @@
 // still honors a localhost APP_URL from .env.local.
 export const siteUrl = process.env.APP_URL ?? "https://wed.tonewbeginning.com";
 
+// Display-only, and safe to use from a client component.
+//
+// siteUrl reads process.env.APP_URL. Referencing that from client code makes
+// Next inline the value into the browser bundle at build time, which both bakes
+// in whatever host the build happened to run on — a local build rendered
+// "127.0.0.1:3000" into the signup page's URL preview — and drags a server
+// variable somewhere it does not belong. A couple reading "your guests will
+// visit ..." wants the real public address regardless of where the build ran.
+export const publicSiteDomain = "wed.tonewbeginning.com";
+
 export const sectionLabels = {
   HERO: "Hero",
   STORY: "Our Story",
@@ -31,6 +41,12 @@ export const reservedSlugs = [
   "pricing",
   "admin",
   "api",
+  // The password / invite-code gate lives at /unlock/[slug]. It is a top-level
+  // route rather than /[slug]/unlock so that the gate in [slug]/layout.tsx
+  // cannot redirect to a page it also guards, which would loop forever.
+  "unlock",
+  // Sixteen public design pages live at /templates and /templates/[key].
+  "templates",
   "kammonbeginnings",
 ];
 

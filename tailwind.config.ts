@@ -39,6 +39,15 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(14px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        // The hero entrance. fade-up travels 14px in 0.7s, which reads as "the
+        // page loaded" rather than as motion — fine for small chrome, too timid
+        // for a full-height editorial band. This one travels twice as far, over
+        // a slightly longer beat, and lands with a touch of settle rather than
+        // easing flat to a stop.
+        "fade-rise": {
+          "0%": { opacity: "0", transform: "translateY(30px) scale(0.985)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
         shimmer: {
           "0%": { backgroundPosition: "-1000px 0" },
           "100%": { backgroundPosition: "1000px 0" },
@@ -46,6 +55,7 @@ const config: Config = {
       },
       animation: {
         "fade-up": "fade-up 0.7s ease-out both",
+        "fade-rise": "fade-rise 0.85s var(--ease-settle) both",
         shimmer: "shimmer 2.5s infinite linear",
       },
       borderRadius: {

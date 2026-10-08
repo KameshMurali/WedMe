@@ -84,13 +84,18 @@ const registerBaseSchema = z.object({
     .min(1, registerFieldMessages.partnerTwoName.required)
     .min(2, registerFieldMessages.partnerTwoName.min)
     .max(80, registerFieldMessages.partnerTwoName.max),
+  // Optional. Blank is filled in from the couple's names by registerAction, so
+  // nobody has to invent a brand for their own wedding to finish signing up.
+  // The length and character rules still apply to anything actually typed.
   brandName: z
     .string()
     .trim()
-    .min(1, registerFieldMessages.brandName.required)
-    .min(3, registerFieldMessages.brandName.min)
     .max(120, registerFieldMessages.brandName.max)
-    .regex(brandNamePattern, registerFieldMessages.brandName.invalid),
+    .refine((value) => value === "" || value.length >= 3, registerFieldMessages.brandName.min)
+    .refine(
+      (value) => value === "" || brandNamePattern.test(value),
+      registerFieldMessages.brandName.invalid,
+    ),
   slug: z
     .string()
     .trim()

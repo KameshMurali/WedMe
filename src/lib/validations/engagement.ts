@@ -14,7 +14,9 @@ const assetUrlSchema = z
 export const siteBasicsSchema = z.object({
   partnerOneName: z.string().min(2).max(80),
   partnerTwoName: z.string().min(2).max(80),
-  brandName: z.string().min(3).max(120),
+  // Blank is allowed and resolved to the couple's names on save, matching the
+  // signup form. See updateSiteBasicsAction.
+  brandName: z.string().trim().max(120).refine((value) => value === "" || value.length >= 3),
   headline: z.string().min(10).max(180),
   subtitle: z.string().max(200).optional().or(z.literal("")),
   tagline: z.string().max(200).optional().or(z.literal("")),

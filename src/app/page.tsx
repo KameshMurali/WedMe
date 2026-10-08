@@ -17,8 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HeroShowcaseLazy } from "@/components/marketing/hero-showcase-lazy";
+import { HeroVideoLayer } from "@/components/marketing/hero-video-layer";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
+import { OrnamentDivider } from "@/components/marketing/ornament-divider";
 import { Reveal } from "@/components/marketing/reveal";
+import { RevealText, ScrollProgressBar } from "@/components/public/motion-primitives";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { buildOfferSchema } from "@/lib/pricing";
@@ -59,6 +62,30 @@ export const metadata: Metadata = {
 };
 
 const BASE_URL = "https://wed.tonewbeginning.com";
+
+// The editorial hero's media, or null while there is none.
+//
+// The band renders complete without it — bg-hero-mesh is the base layer and the
+// poster and video only ever sit ON TOP of a finished hero. So this is a flag
+// rather than a fallback: pointing it at files that are not in public/hero yet
+// would ship a homepage firing 404s on every visit, which is worse than
+// shipping the gradient. Flip it on in the same commit that adds the files.
+//
+// Two tiers of each, because a phone has no use for the 1920 master: see
+// public/hero/README.md for how they are produced and what they must weigh.
+type HeroMedia = {
+  poster: string;
+  posterNarrow: string;
+  wide: { mp4: string; webm?: string };
+  narrow: { mp4: string; webm?: string };
+};
+
+const heroMedia: HeroMedia | null = {
+  poster: "/hero/hero-poster.jpg",
+  posterNarrow: "/hero/hero-poster-sm.jpg",
+  wide: { mp4: "/hero/hero-1080.mp4", webm: "/hero/hero-1080.webm" },
+  narrow: { mp4: "/hero/hero-720.mp4", webm: "/hero/hero-720.webm" },
+};
 
 const websiteSchema = {
   "@context": "https://schema.org",
@@ -144,9 +171,9 @@ const featureHighlights = [
     icon: LayoutDashboard,
   },
   {
-    title: "Five designs, zero rebuilds",
+    title: "Sixteen designs, zero rebuilds",
     description:
-      "Switch templates any time, and your story, events, and photos flow into the new look instantly. Customise the palette until it feels like you, then publish when it's ready.",
+      "Sixteen designs, each built for a tradition rather than recoloured from one. Switch any time and your story, events, and photos flow into the new look instantly.",
     icon: Palette,
   },
 ];
@@ -196,18 +223,25 @@ export default async function HomePage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+    <ScrollProgressBar />
     <main className="pb-24">
+      {/* Site chrome. This used to live inside the hero panel, above a divider
+          rule. The hero is now a full-bleed band, so the chrome sits in its own
+          shell above it rather than being furniture inside the artwork. */}
       <section className="section-shell pt-6">
-        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-6 py-6 rich-shadow sm:px-10 lg:px-14 lg:py-10">
+        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-5 py-4 rich-shadow sm:px-10 sm:py-5">
           <div className="absolute inset-0 bg-hero-mesh opacity-90" />
-          <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/60 pb-6">
+          <div className="relative flex flex-wrap items-center justify-between gap-3 sm:gap-4">
             <div>
               <p className="font-display text-2xl text-[#1f1117]">ToNewBeginning.com</p>
-              <p className="mt-2 text-sm text-stone-700">
+              {/* Hidden on phones. It was taking a quarter of the first screen
+                  between the wordmark and a headline that says the same thing
+                  better, so the hero began a thousand pixels down. */}
+              <p className="mt-2 hidden text-sm text-stone-700 sm:block">
                 A premium wedding platform with a calm couple workspace and polished guest journey.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button asChild variant="ghost">
                 <Link href="/pricing">Pricing</Link>
               </Button>
@@ -219,7 +253,11 @@ export default async function HomePage() {
               </Button>
               {hasWorkspace ? (
                 <>
-                  <div className="rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm text-stone-700">
+                  {/* An email address is wide and this pill does not truncate,
+                      so on a phone it either wraps the row or runs off it. The
+                      Log out control beside it is the part that has to be
+                      reachable. */}
+                  <div className="hidden rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm text-stone-700 sm:block">
                     Signed in as {user?.email}
                   </div>
                   <form action={logoutAction}>
@@ -230,30 +268,135 @@ export default async function HomePage() {
                   </form>
                 </>
               ) : (
-                <Button asChild variant="ghost">
+                /* Hidden on phones: it wrapped the chrome onto a second row
+                   to offer the same action as "Start yours free", which is a
+                   few hundred pixels below it in the hero. */
+                <Button asChild variant="ghost" className="hidden sm:inline-flex">
                   <Link href="/register">Create Couple Account</Link>
                 </Button>
               )}
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="relative mt-8 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+      {/* The editorial hero.
+          The height subtracts the chrome panel above rather than being a flat
+          fraction of the screen, so the band ends AT the fold and the marquee
+          reads as the bottom rule instead of being sliced through.
+
+          svh, not vh: vh is the LARGE viewport on mobile, so a vh band stays
+          taller than the screen until the browser chrome retracts.
+
+          And it only claims a full screen when there is media to fill it. A
+          tall band is composed around a picture; with nothing but the gradient
+          behind, the same band is just a column of text with an empty half
+          beside it. Without media it takes its natural height. */}
+      <section
+        className={`relative isolate mt-6 flex items-end overflow-hidden ${
+          heroMedia ? "min-h-[calc(100svh-10rem)] lg:min-h-[calc(100svh-11rem)]" : ""
+        }`}
+      >
+        {/* Media stack. bg-hero-mesh is the BASE, always painted, so the band is
+            finished before any image or video arrives — the drift wrapper only
+            ever moves a layer that is already complete. */}
+        <div className="hero-media-drift absolute inset-0 -z-10 will-change-transform">
+          <div className="absolute inset-0 bg-hero-mesh" />
+          {heroMedia ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- the LCP
+                  element: a plain img with an explicit fetchPriority, not routed
+                  through the optimizer, so nothing sits between the HTML and
+                  the first paint. */}
+              <img
+                src={heroMedia.poster}
+                srcSet={`${heroMedia.posterNarrow} 960w, ${heroMedia.poster} 1920w`}
+                sizes="100vw"
+                alt=""
+                aria-hidden="true"
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <HeroVideoLayer
+                wide={heroMedia.wide}
+                narrow={heroMedia.narrow}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </>
+          ) : null}
+        </div>
+
+        {/* Scrim.
+            The first attempt was a PALE scrim with the page's dark type on top,
+            and it failed twice over: it washed the colour out of the footage
+            AND still left near-black Cormorant sitting on mid-tone marigold and
+            teal, which is unreadable at any size. Saturated media wants light
+            type on a dark scrim — it is more legible and it lets the video keep
+            its colour, which is the whole reason for having it.
+
+            Two layers, because the text sits in different places at different
+            widths: a vertical wash that covers the phone, where the column runs
+            the full width, and a left-to-right wash that covers the desktop,
+            where it occupies the left half. */}
+        {heroMedia ? (
+          <>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to top, rgba(22,12,15,0.92) 0%, rgba(22,12,15,0.72) 45%, rgba(22,12,15,0.42) 100%)",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 hidden lg:block"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(22,12,15,0.80) 0%, rgba(22,12,15,0.45) 55%, transparent 85%)",
+              }}
+            />
+          </>
+        ) : null}
+
+        <div className="section-shell relative w-full pb-10 pt-20 sm:pt-24">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="animate-fade-up">
-                <Badge>Craft Your Celebration</Badge>
+              {/* Every colour below switches on whether there is media behind
+                  it. On the bare gradient the page's own dark ink is correct;
+                  over the footage it would be unreadable, and white would be
+                  unreadable on the gradient. One condition, applied
+                  consistently, rather than a second hero component. */}
+              <div className="animate-fade-rise">
+                <Badge className={heroMedia ? "bg-white/15 text-white/90 backdrop-blur-sm" : undefined}>
+                  Craft Your Celebration
+                </Badge>
               </div>
+              {/* Lines one and two paint immediately: they are the LCP text, and
+                  starting a heading at opacity 0 trades a measurable metric for
+                  a flourish. The per-character reveal goes on the payoff line
+                  only, which is the line that earns it. */}
               <h1
-                className="mt-5 max-w-3xl animate-fade-up font-display text-4xl leading-[1.04] text-[#1f1117] sm:text-5xl lg:text-6xl"
+                className={`mt-5 max-w-3xl animate-fade-rise font-display text-4xl leading-[1.04] sm:text-5xl lg:text-7xl ${
+                  heroMedia ? "text-white [text-shadow:0_2px_24px_rgba(22,12,15,0.5)]" : "text-[#1f1117]"
+                }`}
                 style={{ animationDelay: "120ms" }}
               >
                 Five ceremonies.
                 <br />
                 Two hundred guests.
                 <br />
-                <span className="text-[color:var(--primary)]">One beautiful link.</span>
+                <RevealText
+                  text="One beautiful link."
+                  delay={0.75}
+                  className={heroMedia ? "text-[color:var(--accent)]" : "text-[color:var(--primary)]"}
+                />
               </h1>
               <p
-                className="mt-6 max-w-2xl animate-fade-up text-base leading-8 text-stone-800 sm:text-lg"
+                className={`mt-6 max-w-2xl animate-fade-rise text-base leading-8 sm:text-lg ${
+                  heroMedia ? "text-white/85 [text-shadow:0_1px_12px_rgba(22,12,15,0.55)]" : "text-stone-800"
+                }`}
                 style={{ animationDelay: "240ms" }}
               >
                 Your family is planning five events across three venues, and every guest has the
@@ -263,7 +406,7 @@ export default async function HomePage() {
               </p>
               {hasWorkspace ? (
                 <div
-                  className="mt-6 animate-fade-up rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur"
+                  className="mt-6 animate-fade-rise rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur"
                   style={{ animationDelay: "320ms" }}
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
@@ -272,13 +415,20 @@ export default async function HomePage() {
                   <p className="mt-2 text-base font-semibold text-[#1f1117]">Continue from {resumeLabel}</p>
                 </div>
               ) : null}
-              <div className="mt-8 flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "360ms" }}>
-                <Button asChild>
+              <div className="mt-8 flex flex-wrap gap-3 animate-fade-rise" style={{ animationDelay: "360ms" }}>
+                <Button
+                  asChild
+                  className={heroMedia ? "bg-white text-[#1f1117] hover:bg-[color:var(--accent)] hover:text-white" : undefined}
+                >
                   <Link href="/kammonbeginnings">
                     See a real wedding site <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline">
+                <Button
+                  asChild
+                  variant="outline"
+                  className={heroMedia ? "border-white/40 bg-white/10 text-white backdrop-blur hover:border-white hover:bg-white/20" : undefined}
+                >
                   <Link href={hasWorkspace ? workspaceHref : "/register"}>
                     {hasWorkspace ? (
                       <>
@@ -291,14 +441,16 @@ export default async function HomePage() {
                 </Button>
               </div>
             </div>
-            <div className="flex w-full justify-center lg:w-auto lg:justify-end">
-              <HeroShowcaseLazy />
-            </div>
           </div>
 
-          {/* Ceremony marquee — quiet motion that says "we know your wedding". */}
+          {/* Ceremony marquee — now the band's bottom rule rather than a strip
+              inside a card. It arrives on the sequence's last beat (480ms)
+              instead of simply being there from the first frame. */}
           <div
-            className="relative mt-10 overflow-hidden border-t border-white/60 pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]"
+            className={`animate-fade-rise relative mt-12 overflow-hidden border-t pt-5 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)] ${
+              heroMedia ? "border-white/20" : "border-white/60"
+            }`}
+            style={{ animationDelay: "480ms" }}
             aria-hidden="true"
           >
             <div className="marquee-track">
@@ -307,7 +459,9 @@ export default async function HomePage() {
                   {ceremonyMarquee.map((ceremony) => (
                     <span
                       key={`${copy}-${ceremony}`}
-                      className="flex items-center whitespace-nowrap px-5 font-display text-xl text-stone-500 sm:text-2xl"
+                      className={`flex items-center whitespace-nowrap px-5 font-display text-xl sm:text-2xl ${
+                        heroMedia ? "text-white/65" : "text-stone-500"
+                      }`}
                     >
                       {ceremony}
                       <span className="ml-10 h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]/60" />
@@ -317,6 +471,28 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* The showcase cards used to sit inside the hero, to the right of the
+          headline. Against a full-bleed band they read as a second hero
+          competing with the first, so they get their own stage directly below —
+          the first thing a scroll reveals, rather than something already seen. */}
+      <section className="section-shell mt-16 flex justify-center lg:mt-20">
+        {/* The px-6 is load-bearing, not spacing. HeroShowcase draws its glow
+            with `-inset-6`, i.e. 24px OUTSIDE its own box, and it used to sit
+            inside the hero's overflow-hidden panel, which clipped that bleed.
+            Out here nothing clips it, so at 320 and 390 it pushed the document
+            8px wider and the whole page scrolled sideways. This gutter gives
+            the bleed exactly the room it needs.
+
+            Worth knowing: `npm run test:layout` does NOT catch this. It runs
+            against `next dev`, and this container's CSP blocks the eval() the
+            React dev build needs, so hydration never completes and the lazily
+            loaded showcase never mounts — the offending element simply is not
+            on the page. Only a production build shows it. */}
+        <div className="px-6">
+          <HeroShowcaseLazy />
         </div>
       </section>
 
@@ -346,17 +522,32 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <OrnamentDivider kind="kolam" />
+
       <section className="section-shell mt-20">
+        <div className="scroll-reveal">
         <SectionHeading
-          eyebrow="Five moods, one wedding"
+          eyebrow="Sixteen designs, one wedding"
           title="Pick a feeling. Change your mind whenever."
           description="Romantic florals or cinematic drama: every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
+        </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-5">
           {templateRegistry.map((template, index) => (
             <Reveal key={template.key} delay={index * 0.08}>
+              {/* These cards were rectangles that went nowhere. Sixteen
+                  culturally specific designs — the product's clearest
+                  differentiator — were a dead end for a reader AND invisible to
+                  a crawler, because the only route that rendered them was
+                  /dev/template-gallery, which 404s unless TEMPLATE_GALLERY=1.
+                  Each one is now a link to a real indexable page. */}
               <Card className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
-                <div className="h-40 w-full overflow-hidden">
+                <Link href={`/templates/${template.key}` as Route} className="block">
+                {/* The strip wipes up as the card arrives, like an invitation
+                    coming out of its envelope. clip-path, not height — the
+                    card's box never changes, so this cannot cause layout
+                    shift. */}
+                <div className="card-unsheathe h-40 w-full overflow-hidden">
                   <div
                     className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-110"
                     style={{ background: template.previewGradient }}
@@ -369,6 +560,7 @@ export default async function HomePage() {
                   <h3 className="font-display text-2xl text-[color:var(--text)]">{template.name}</h3>
                   <p className="text-sm leading-7 text-[color:var(--muted)]">{template.description}</p>
                 </div>
+                </Link>
               </Card>
             </Reveal>
           ))}
@@ -376,7 +568,7 @@ export default async function HomePage() {
       </section>
 
       <section className="section-shell mt-20">
-        <Card className="grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
+        <Card className="scroll-reveal grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
           <div>
             <SectionHeading
               eyebrow="Demo Site : KamMonBeginnings"
@@ -411,15 +603,19 @@ export default async function HomePage() {
         </Card>
       </section>
 
+      <OrnamentDivider kind="girih" />
+
       <section className="section-shell mt-20">
+        <div className="scroll-reveal">
         <SectionHeading
           eyebrow="Common questions"
           title="Everything couples ask before choosing a wedding website builder."
           description="Answers to the questions we hear most from couples planning multi-event weddings, whether Indian, South Asian, fusion, or Western multi-day celebrations."
         />
+        </div>
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {homepageFaqs.map(({ q, a }) => (
-            <details key={q} className="group rounded-[1.4rem] border border-black/8 bg-white/70 p-5 transition open:bg-white">
+            <details key={q} className="faq-item group rounded-[1.4rem] border border-black/8 bg-white/70 p-5 transition open:bg-white">
               <summary className="cursor-pointer list-none font-semibold text-[color:var(--text)] [&::-webkit-details-marker]:hidden">
                 <span className="mr-3 inline-block text-[color:var(--primary)] transition group-open:rotate-90">›</span>
                 {q}
@@ -433,8 +629,10 @@ export default async function HomePage() {
       {/* Closing waitlist band. Until this existed, the only way to join was
           inside a pricing card on /pricing — so anyone arriving on the bare
           domain from a link or a post had no way in and simply left. */}
+      <OrnamentDivider kind="chapel" />
+
       <section className="section-shell mt-20">
-        <Card className="mx-auto max-w-3xl text-center">
+        <Card className="scroll-reveal mx-auto max-w-3xl text-center">
           <SectionHeading
             align="center"
             eyebrow="Founding couples"
