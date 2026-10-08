@@ -11,7 +11,7 @@ WedMe is a multi-tenant wedding website SaaS platform. Couples register, pick a 
 ```bash
 # Development
 npm run dev               # Start Next.js dev server (port 3000)
-npm run build             # Run prisma migrate deploy + prisma generate + next build
+npm run build             # Migrate (production only) + prisma generate + next build
 npm run lint              # ESLint (quiet mode)
 npx tsc --noEmit          # Type-check without emitting
 
@@ -49,6 +49,43 @@ on `crimson-gold` through the system CJK stack in `--font-sc`.
 The general rule this leaves behind: **a build must not depend on a
 third-party network call.** If a dependency wants to fetch at build time, find
 one that ships its assets through npm instead.
+
+**Nor on a database.** Same rule, learned a second time and more expensively.
+`npm run build` used to start with a bare `prisma migrate deploy`, which made
+every build need a reachable Postgres. On Vercel only *production* has one:
+`DATABASE_URL` and `DIRECT_URL` are scoped to the production environment, so
+every preview build fell through `prisma.config.ts` to its localhost
+placeholder and died on the first command with `P1001: Can't reach database
+server at localhost:5432`. Six consecutive preview deployments failed that way.
+
+The migration step now goes through `scripts/run-migrations.mjs`, which skips
+when `VERCEL_ENV` is set to anything other than `production`. Read the comment
+at the top of that file before changing the condition — it is inverted on
+purpose, so an *unrecognised* environment migrates rather than skips. A build
+that fails is recoverable; a production database that quietly missed a
+migration is not.
+
+Two separate things wanted that URL, which is why this looked like one bug and
+was two:
+
+| | needs `DATABASE_URL` … |
+|---|---|
+| the Zod parse in `src/lib/env.ts` | …merely to be **present** |
+| `prisma migrate deploy` | …to be **reachable** |
+
+So preview also needs `DATABASE_URL` and `DIRECT_URL` set to a deliberately
+unreachable placeholder — the same trick `.github/workflows/layout.yml` already
+uses to run the full test suite with no database. Without it the build gets
+past compilation and then dies collecting page data:
+
+```
+✓ Compiled successfully
+Error: Failed to collect configuration for /_not-found
+  [cause]: ZodError: "DATABASE_URL" — "DATABASE_URL is required"
+```
+
+Fixing only the migration step produces exactly that, which reads like a new
+and unrelated problem. It is not: it is the second half of this one.
 
 ### Tests
 
