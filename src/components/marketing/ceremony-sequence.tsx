@@ -250,7 +250,7 @@ export function CeremonySequence() {
                   className="ceremony-step grid min-w-0 gap-6 border-t pt-10 first:border-t-0 first:pt-0 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16"
                 >
                   <div className="min-w-0">
-                    <p className="font-display text-4xl leading-none text-[color:var(--primary)] sm:text-5xl lg:text-6xl">
+                    <p className="font-royal text-4xl leading-none text-[color:var(--primary)] sm:text-5xl lg:text-6xl">
                       {ceremony.day}
                     </p>
                     <p className="mt-3 text-sm text-[color:var(--muted)]">{ceremony.slot}</p>

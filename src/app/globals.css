@@ -22,9 +22,21 @@
   --font-manrope: "Manrope";
   --font-cormorant: "Cormorant Garamond";
   --font-cinzel: "Cinzel";
+  --font-marcellus: "Marcellus";
+  --font-rozha: "Rozha One";
   --font-tamil: "Noto Serif Tamil";
   --font-arabic: "Noto Naskh Arabic";
   --font-sc: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+
+  /* Defaults for the two faces Tailwind's font-display / font-body stacks read
+     through var(). WITHOUT THESE, an undefined var() with no fallback makes the
+     entire font-family declaration invalid at computed-value time and the
+     element inherits instead — which is exactly how every marketing heading
+     ended up in the body sans while carrying a correct font-display class.
+     site-shell.tsx sets both inline per wedding site, further down the tree, so
+     a couple's chosen heading font still wins. */
+  --font-heading-face: var(--font-marcellus);
+  --font-body-face: var(--font-manrope);
 }
 
 :root {

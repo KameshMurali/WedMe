@@ -382,7 +382,7 @@ export default async function HomePage() {
                   a flourish. The per-character reveal goes on the payoff line
                   only, which is the line that earns it. */}
               <h1
-                className={`mt-5 max-w-3xl animate-fade-rise font-display text-4xl leading-[1.04] sm:text-5xl lg:text-7xl ${
+                className={`mt-5 max-w-3xl animate-fade-rise font-royal text-4xl leading-[1.08] sm:text-5xl lg:text-7xl ${
                   heroMedia ? "text-white [text-shadow:0_2px_24px_rgba(22,12,15,0.5)]" : "text-[#1f1117]"
                 }`}
                 style={{ animationDelay: "120ms" }}

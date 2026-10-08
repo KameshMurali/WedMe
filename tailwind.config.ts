@@ -12,6 +12,11 @@ const config: Config = {
         // choice the customizer has always let couples make.
         display: ["var(--font-heading-face)", "var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
         luxe: ["var(--font-cinzel)", "Cinzel", "Georgia", "serif"],
+        // The biggest display moments only — the homepage h1 and the ceremony
+        // day word. Rozha One is Devanagari-derived and ships one heavy weight,
+        // which is why it is reserved for type large enough to carry it rather
+        // than offered as a general heading face.
+        royal: ["var(--font-rozha)", "Rozha One", "var(--font-marcellus)", "Georgia", "serif"],
         tamil: ["var(--font-tamil)", "Noto Serif Tamil", "Georgia", "serif"],
         arabic: ["var(--font-arabic)", "Noto Naskh Arabic", "Georgia", "serif"],
         sc: ["var(--font-sc)", "Noto Serif SC", "Georgia", "serif"],
