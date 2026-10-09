@@ -270,7 +270,7 @@ export function CeremonySequence() {
                   // once (see motion-primitives.tsx:56).
                   className="ceremony-step grid min-w-0 gap-6 border-t pt-10 first:border-t-0 first:pt-0 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16"
                 >
-                  <div className="min-w-0">
+                  <div className="ceremony-when min-w-0">
                     <p className="font-royal text-4xl leading-none text-[color:var(--primary)] sm:text-5xl lg:text-6xl">
                       {ceremony.day}
                     </p>
@@ -281,7 +281,7 @@ export function CeremonySequence() {
                     />
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="ceremony-copy min-w-0">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--accent)] tabular-nums">
                       {String(index + 1).padStart(2, "0")} / {String(ceremonies.length).padStart(2, "0")}
                     </p>
@@ -295,12 +295,12 @@ export function CeremonySequence() {
                     </h3>
                     <p className="mt-4 max-w-xl text-base leading-7 text-[color:var(--muted)]">
                       {ceremony.what}
-                    </p>
+                    </p>{" "}
                     <p className="mt-3 max-w-xl text-base leading-7 text-[color:var(--text)]">
                       {ceremony.product}
                     </p>
 
-                    <dl className="mt-6 grid min-w-0 grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+                    <dl className="ceremony-details mt-6 grid min-w-0 grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
                       {(
                         [
                           ["Timing", ceremony.timing],
@@ -309,7 +309,7 @@ export function CeremonySequence() {
                           ["RSVP", ceremony.rsvp],
                         ] as const
                       ).map(([label, value]) => (
-                        <div key={label} className="min-w-0">
+                        <div key={label} className="ceremony-detail min-w-0">
                           <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)]">
                             {label}
                           </dt>
