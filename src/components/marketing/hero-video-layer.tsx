@@ -28,6 +28,8 @@ type Connection = {
   effectiveType?: string;
   downlink?: number;
   rtt?: number;
+  addEventListener?: (type: "change", listener: () => void) => void;
+  removeEventListener?: (type: "change", listener: () => void) => void;
 };
 
 // effectiveType has FOUR buckets — "slow-2g", "2g", "3g", "4g" — and the first
@@ -120,13 +122,50 @@ export function HeroVideoLayer({
   // falsy initial value.
   useEffect(() => {
     const video = ref.current;
-    if (!video || reduceMotion !== false || prefersLightweight()) return;
-    if (video.src) return;
+    if (!video || reduceMotion !== false) return;
 
-    const tier = pickTier(wide, narrow);
-    const preferWebm = Boolean(tier.webm) && video.canPlayType("video/webm") !== "";
-    video.src = preferWebm && tier.webm ? tier.webm : tier.mp4;
-    video.load();
+    const attach = () => {
+      if (video.src || prefersLightweight()) return false;
+      const tier = pickTier(wide, narrow);
+      const preferWebm = Boolean(tier.webm) && video.canPlayType("video/webm") !== "";
+      video.src = preferWebm && tier.webm ? tier.webm : tier.mp4;
+      video.load();
+      return true;
+    };
+
+    if (attach()) return;
+
+    // The guard said no — but it may have asked at the worst possible moment,
+    // and the first version of this code took that first answer as final.
+    //
+    // effectiveType, downlink and rtt are a ROLLING ESTIMATE. In the first
+    // moments after a navigation, before enough samples have accumulated,
+    // Chrome frequently reports "3g" or an inflated rtt on a perfectly good
+    // connection, then settles. Sampling once, in an effect whose deps never
+    // change, meant a single pessimistic reading disabled the hero video for
+    // the whole page view. Reproduced: with the connection reporting 3g at
+    // mount and 4g a second later, the video never loaded at all — which is
+    // exactly the "sometimes it doesn't play" this is fixing.
+    const connection = (navigator as Navigator & { connection?: Connection }).connection;
+    const timer: ReturnType<typeof setTimeout> = setTimeout(() => retry(), 2500);
+
+    const retry = () => {
+      if (!attach()) return;
+      connection?.removeEventListener?.("change", retry);
+      clearTimeout(timer);
+    };
+
+    // A backstop for the case where the estimate is simply stale and `change`
+    // never fires. One late check, not a poll: if the connection is genuinely
+    // slow this asks once more and then stops, so a bad link still only ever
+    // costs the poster.
+
+    connection?.addEventListener?.("change", retry);
+
+    return () => {
+      connection?.removeEventListener?.("change", retry);
+      clearTimeout(timer);
+    };
   }, [wide, narrow, reduceMotion]);
 
   // Scroll VELOCITY drives playbackRate. This is the owner's "the video takes
