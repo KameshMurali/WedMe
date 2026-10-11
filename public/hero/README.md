@@ -53,12 +53,28 @@ ffmpeg -y -i $R -an -movflags +faststart -c:v libx264 -profile:v high \
 ffmpeg -y -i $R -an -movflags +faststart -c:v libx264 -profile:v high \
   -pix_fmt yuv420p -crf 28 -preset veryslow -vf "scale=1280:-2" public/hero/hero-720.mp4
 
-ffmpeg -y -i $R -an -c:v libvpx-vp9 -crf 45 -b:v 0 -row-mt 1 public/hero/hero-1080.webm
-ffmpeg -y -i $R -an -c:v libvpx-vp9 -crf 45 -b:v 0 -row-mt 1 \
-  -vf "scale=1280:-2" public/hero/hero-720.webm
+ffmpeg -y -i $R -an -c:v libvpx-vp9 -pix_fmt yuv420p -profile:v 0 -crf 45 -b:v 0 \
+  -row-mt 1 public/hero/hero-1080.webm
+ffmpeg -y -i $R -an -c:v libvpx-vp9 -pix_fmt yuv420p -profile:v 0 -crf 45 -b:v 0 \
+  -row-mt 1 -vf "scale=1280:-2" public/hero/hero-720.webm
 
 ffmpeg -y -i $R -vframes 1 -q:v 6 public/hero/hero-poster.jpg
 ffmpeg -y -i $R -vframes 1 -q:v 5 -vf "scale=960:-2" public/hero/hero-poster-sm.jpg
+```
+
+**`-pix_fmt yuv420p` on the VP9 encodes is not optional, and leaving it out is
+a bug that only shows up on other people's phones.** The Seedance master is
+HEVC Main 10 (`yuv420p10le`), and libvpx-vp9 silently carries that 10-bit depth
+through, producing **VP9 Profile 2**. Profile 0 is the 8-bit one every decoder
+handles; Profile 2 has no hardware path on older iPhones, so they fall back to
+software decode or fail outright — and since the WebM is the PREFERRED source,
+those visitors saw the poster and nothing else while a current iPhone played it
+perfectly. The H.264 commands above always carried `-pix_fmt yuv420p`; the VP9
+ones did not, which is the whole of the defect. Verify with:
+
+```bash
+ffprobe -v error -select_streams v:0 -show_entries stream=profile,pix_fmt \
+  -of csv=p=0 public/hero/hero-720.webm   # must print: Profile 0,yuv420p
 ```
 
 `-an` drops the audio stream rather than muting it: the element is muted

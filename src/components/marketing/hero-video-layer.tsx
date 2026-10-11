@@ -127,11 +127,35 @@ export function HeroVideoLayer({
     const attach = () => {
       if (video.src || prefersLightweight()) return false;
       const tier = pickTier(wide, narrow);
-      const preferWebm = Boolean(tier.webm) && video.canPlayType("video/webm") !== "";
-      video.src = preferWebm && tier.webm ? tier.webm : tier.mp4;
+
+      // Ask about the CODEC, not just the container. `canPlayType("video/webm")`
+      // answers about the wrapper and several engines return "maybe" for it
+      // while being unable to decode what is inside — which is precisely how a
+      // 10-bit VP9 shipped to iPhones that cannot decode it and showed nothing
+      // but the poster. "probably" is the only answer worth acting on here.
+      const canWebm =
+        Boolean(tier.webm) &&
+        video.canPlayType('video/webm; codecs="vp9"') === "probably";
+      video.src = canWebm && tier.webm ? tier.webm : tier.mp4;
       video.load();
       return true;
     };
+
+    // The belt to that braces. A capability query is ADVISORY: it is the
+    // browser's opinion before it has seen the file, and it can be wrong about
+    // a profile, a bit depth or a hardware path that is missing. H.264 High is
+    // decodable essentially everywhere, so any failure on the WebM falls back
+    // to it rather than leaving a reader with a still image and no explanation.
+    // Guarded against looping: it only ever swaps once, toward the mp4.
+    const onError = () => {
+      const tier = pickTier(wide, narrow);
+      if (!video.src.endsWith(tier.mp4)) {
+        video.src = tier.mp4;
+        video.load();
+        void video.play().catch(() => {});
+      }
+    };
+    video.addEventListener("error", onError);
 
     if (attach()) return;
 
@@ -163,6 +187,7 @@ export function HeroVideoLayer({
     connection?.addEventListener?.("change", retry);
 
     return () => {
+      video.removeEventListener("error", onError);
       connection?.removeEventListener?.("change", retry);
       clearTimeout(timer);
     };
