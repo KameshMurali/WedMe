@@ -14,7 +14,7 @@ import { PalaceFrame } from "@/components/public/palace-ornament";
 import { TempleFrame } from "@/components/public/temple-ornament";
 import { SiteActivityTracker } from "@/components/public/site-activity-tracker";
 import { SiteHeader } from "@/components/public/site-header";
-import { isDarkColor } from "@/lib/color";
+import { isDarkColor, readableInkOn } from "@/lib/color";
 import { findTemplateByKey } from "@/lib/template-registry";
 import { cn, formatDate } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
@@ -114,6 +114,14 @@ export function SiteShell({
           "--text": snapshot.theme.textColor,
           "--muted": snapshot.theme.mutedColor,
           "--primary": snapshot.theme.primaryColor,
+          // The ink a solid button needs in order to be readable ON --primary.
+          // Buttons were hardcoded to white, which is right for a deep primary
+          // and invisible on a pale one: cinematic-modern measured 1.42:1,
+          // nowhere near the 4.5:1 WCAG asks for body-sized text, so its main
+          // call to action was effectively blank. A couple can also pick any
+          // primary they like in the customizer, so this cannot be decided per
+          // template — it has to follow the colour.
+          "--primary-ink": readableInkOn(snapshot.theme.primaryColor),
           "--accent": snapshot.theme.accentColor,
           "--radius": snapshot.theme.borderRadius,
           // The customizer has always let couples pick a heading font, but the

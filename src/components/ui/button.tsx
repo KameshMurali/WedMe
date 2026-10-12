@@ -10,8 +10,11 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
+  // --primary-ink is published by site-shell from the template's own primary
+  // luminance; the fallback keeps the marketing pages, which have no shell, on
+  // white against their deep brown primary.
   solid:
-    "bg-[var(--primary)] text-white shadow-glow hover:bg-[color:var(--accent)] hover:text-ink",
+    "bg-[var(--primary)] text-[color:var(--primary-ink,#ffffff)] shadow-glow hover:bg-[color:var(--accent)] hover:text-ink",
   outline:
     "border border-[color:var(--primary)]/20 bg-white/70 text-[color:var(--text)] hover:border-[color:var(--accent)] hover:bg-white",
   ghost: "bg-transparent text-[color:var(--text)] hover:bg-white/70",
