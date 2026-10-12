@@ -38,11 +38,46 @@ function glassPanel(className?: string) {
   );
 }
 
-function metricCard(label: string, value: string, className?: string) {
+// Facts a GUEST wants, drawn from the couple's own wedding.
+//
+// These tiles used to report the product's own statistics — "5 milestones
+// shared", "5 curated events", "RSVP, gallery, messages". That is dashboard
+// language on an invitation: a guest has no use for how many milestones were
+// entered, and a count of events tells them nothing they can act on. One hero
+// went further and printed "A spacious, modern layout that keeps guests
+// oriented at a glance" — the template describing its own design, on somebody's
+// wedding site.
+//
+// Every value below is real content or it is not shown. A couple who has not
+// filled in a dress code gets three tiles instead of four, never a tile reading
+// "Not set", because an invitation with blanks in it is worse than a shorter one.
+function heroFacts(snapshot: SiteSnapshot) {
+  const first = snapshot.events[0];
+  const facts: Array<{ label: string; value: string }> = [];
+
+  if (first?.dayLabel) facts.push({ label: "First celebration", value: `${first.title}, ${first.dayLabel}` });
+  else if (first?.title) facts.push({ label: "First celebration", value: first.title });
+
+  if (first?.locationName) facts.push({ label: "Where", value: first.locationName });
+  if (first?.dressCode) facts.push({ label: "Dress code", value: first.dressCode });
+
+  // Only worth saying when there is more than one day to keep straight — which
+  // is the whole premise of the product, and a single-event wedding should not
+  // be told it has "1 day".
+  const days = new Set(snapshot.events.map((event) => event.dayLabel).filter(Boolean));
+  if (days.size > 1) facts.push({ label: "Across", value: `${days.size} days of celebration` });
+
+  if (facts.length === 0 && snapshot.site.locationSummary) {
+    facts.push({ label: "Where", value: snapshot.site.locationSummary });
+  }
+  return facts;
+}
+
+function factCard(fact: { label: string; value: string }, className?: string) {
   return (
-    <div className={glassPanel(cn("px-4 py-4", className))}>
-      <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">{label}</p>
-      <p className="mt-3 text-base font-semibold text-[color:var(--text)]">{value}</p>
+    <div key={fact.label} className={glassPanel(cn("px-4 py-4", className))}>
+      <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">{fact.label}</p>
+      <p className="mt-3 text-base font-semibold text-[color:var(--text)]">{fact.value}</p>
     </div>
   );
 }
@@ -188,9 +223,7 @@ function HeroSectionClassic({ snapshot }: { snapshot: SiteSnapshot }) {
       <div className="self-center">
         <HeroCopy snapshot={snapshot} />
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          {metricCard("Celebrations", `${snapshot.events.length} curated events`)}
-          {metricCard("Story", `${snapshot.storyMilestones.length} milestones shared`)}
-          {metricCard("Guest flow", "RSVP, gallery, messages")}
+          {heroFacts(snapshot).slice(0, 3).map((fact) => factCard(fact))}
         </div>
       </div>
       <div className="grid gap-4">
@@ -273,18 +306,28 @@ function HeroSectionSplit({ snapshot }: { snapshot: SiteSnapshot }) {
       <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-14">
         <HeroCopy snapshot={snapshot} />
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {metricCard("Events", `${snapshot.events.length} celebrations planned`)}
-          {metricCard("For guests", "All the details, one place")}
+          {heroFacts(snapshot).slice(0, 2).map((fact) => factCard(fact))}
         </div>
       </div>
       <div className="relative min-h-[520px] border-t border-[color:var(--accent)]/14 lg:border-l lg:border-t-0">
         <HeroMediaFrame snapshot={snapshot} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[520px]" imageSizes="(max-width: 1024px) 100vw, 56vw" />
         <div className="absolute inset-0 bg-gradient-to-l from-black/12 via-transparent to-[color:var(--background)]/16" />
         <div className="absolute bottom-6 left-6 right-6 grid gap-4 sm:grid-cols-2">
+          {/* This panel used to read "A spacious, modern layout that keeps
+              guests oriented at a glance" — the template describing its own
+              design, printed on a couple's wedding site. A guest reading an
+              invitation wants to know where to be, not what the page is made
+              of. It now carries the location, falling back to the day rather
+              than to a boast. */}
           <div className={glassPanel("px-5 py-5")}>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Weekend focus</p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">
+              {firstEvent?.locationName ? "Where" : "When"}
+            </p>
             <p className="mt-3 text-lg font-semibold text-[color:var(--text)]">
-              A spacious, modern layout that keeps guests oriented at a glance.
+              {firstEvent?.locationName ??
+                firstEvent?.dayLabel ??
+                snapshot.site.locationSummary ??
+                formatDate(snapshot.site.weddingDate)}
             </p>
           </div>
           <div className={glassPanel("px-5 py-5")}>
