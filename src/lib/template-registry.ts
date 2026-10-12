@@ -672,7 +672,14 @@ export const templateRegistry: TemplateRegistryEntry[] = [
       paletteKey: "atoll",
       headingFontKey: "display",
       bodyFontKey: "body",
-      primaryColor: "#3d857f",
+      // Darkened 3% from #3d857f. That original is a mid-tone that cannot carry
+    // readable text against EITHER ink — white scores 4.32:1 and near-black
+    // 3.95:1, both under the 4.5 WCAG asks for body-sized text — so its call to
+    // action was unreadable whatever the button did. This is the smallest
+    // change that clears it (4.55:1 on white) and is not perceptible beside the
+    // original. It is a default; a couple can still pick anything in the
+    // customizer, which is why readableInkOn() exists as well.
+    primaryColor: "#3b817b",
       accentColor: "#8cc2bc",
       backgroundColor: "#fafdfd",
       surfaceColor: "#ffffff",

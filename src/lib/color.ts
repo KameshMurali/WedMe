@@ -61,3 +61,52 @@ export function isDarkColor(value: string | null | undefined): boolean {
   if (luminance === null) return false;
   return luminance < 0.22;
 }
+
+// The two inks a solid control can use. Not pure black: #1b1114 is the ink the
+// rest of the product uses, and pure black against a warm palette reads as a
+// hole rather than as text.
+const INK_DARK = "#1b1114";
+const INK_LIGHT = "#ffffff";
+
+function contrastRatio(a: number, b: number) {
+  const [hi, lo] = a > b ? [a, b] : [b, a];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * The readable ink for text sitting ON this background.
+ *
+ * Deliberately NOT `isDarkColor(bg) ? white : dark`. A luminance threshold
+ * answers "is this a dark colour", which is the right question for a page
+ * treatment and the wrong one for a single piece of text: near the threshold it
+ * picks an ink that is merely on the correct side rather than the ink that is
+ * actually more readable. Measured on the shipped palettes, that cost
+ * atoll-white's primary (#3d857f) its call to action at 4.32:1 — under the 4.5
+ * WCAG asks for body-sized text — while the other ink cleared it.
+ *
+ * Computing both and taking the winner is also self-correcting for a colour the
+ * registry has never seen, which matters because a couple can set any primary
+ * they like in the customizer.
+ *
+ * It cannot work miracles: a true mid-tone tops out near 4.5 against either
+ * ink, so this returns the best available rather than a guarantee. Use
+ * contrastWithInk() when a caller needs to know how good the best was.
+ */
+export function readableInkOn(background: string | null | undefined): string {
+  const luminance = relativeLuminance(background ?? "");
+  // Unparseable falls back to white, matching isDarkColor's light-first bias:
+  // the registry's primaries are overwhelmingly deep enough to carry it.
+  if (luminance === null) return INK_LIGHT;
+
+  const onDark = contrastRatio(luminance, relativeLuminance(INK_DARK) ?? 0);
+  const onLight = contrastRatio(luminance, relativeLuminance(INK_LIGHT) ?? 1);
+  return onDark >= onLight ? INK_DARK : INK_LIGHT;
+}
+
+/** The contrast the chosen ink actually achieves, for tests and audits. */
+export function contrastWithInk(background: string | null | undefined): number {
+  const luminance = relativeLuminance(background ?? "");
+  if (luminance === null) return 0;
+  const ink = readableInkOn(background);
+  return contrastRatio(luminance, relativeLuminance(ink) ?? 0);
+}
