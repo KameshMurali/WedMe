@@ -1301,6 +1301,20 @@ input[type="time"]::-webkit-inner-spin-button {
    page is neutral, because a decision should not be made inside a mood. */
 .page-wash {
   --wash-tint: var(--accent);
+
+  /* THE WASH WAS FROZEN WITHOUT THIS, and the symptom was silent: no console
+     error, the animation attached, and the colour simply never changed.
+     Measured at eight scroll positions, --wash-tint read rgb(169, 118, 47) at
+     every one — #a9762f, the LAST ceremony's tint, i.e. the animation sitting
+     on its final keyframe with `both` fill and no timeline driving it.
+
+     A named view timeline is only visible to DESCENDANTS of the element that
+     declares it. --ceremony-track is declared on .ceremony-track, and
+     .page-wash is <main> — its ANCESTOR — so the lookup silently failed.
+     timeline-scope hoists the name up to this element so an ancestor can
+     reference a timeline its own descendant defines, which is precisely the
+     shape here: the ceremony stage drives the colour of the whole page. */
+  timeline-scope: --ceremony-track;
 }
 
 @media (prefers-reduced-motion: reduce) {
