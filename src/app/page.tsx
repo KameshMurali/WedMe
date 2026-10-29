@@ -541,7 +541,7 @@ export default async function HomePage() {
           description="Romantic florals or cinematic drama: every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
         </div>
-        <div className="mt-10 grid gap-5 lg:grid-cols-5">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {templateRegistry.map((template, index) => (
             <Reveal key={template.key} delay={index * 0.08}>
               {/* These cards were rectangles that went nowhere. Sixteen
@@ -550,15 +550,30 @@ export default async function HomePage() {
                   a crawler, because the only route that rendered them was
                   /dev/template-gallery, which 404s unless TEMPLATE_GALLERY=1.
                   Each one is now a link to a real indexable page. */}
-              <Card className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
+              <Card className="group h-full overflow-hidden p-0 sm:p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
                 <Link href={`/templates/${template.key}` as Route} className="block">
                 {/* The strip wipes up as the card arrives, like an invitation
                     coming out of its envelope. clip-path, not height — the
                     card's box never changes, so this cannot cause layout
                     shift. */}
-                <div className="card-unsheathe h-40 w-full overflow-hidden">
-                  <div
-                    className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-110"
+                <div className="card-unsheathe aspect-video w-full overflow-hidden">
+                  {/* A real screenshot of the design, not a CSS gradient. The
+                      sixteen designs are the product's clearest differentiator
+                      and were being sold with sixteen colour swatches — the
+                      least persuasive possible representation of them. The
+                      gradient survives as the img's background, so it is still
+                      what a reader sees while the file loads or if it 404s. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a
+                      static asset of known size, below the fold and lazy; the
+                      optimizer would add a round trip for no gain. */}
+                  <img
+                    src={`/templates/${template.key}.webp`}
+                    alt={`The ${template.name} design`}
+                    loading="lazy"
+                    decoding="async"
+                    width={960}
+                    height={540}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ background: template.previewGradient }}
                   />
                 </div>
