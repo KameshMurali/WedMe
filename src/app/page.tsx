@@ -23,8 +23,7 @@ import { HeroVideoLayer } from "@/components/marketing/hero-video-layer";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { OrnamentDivider } from "@/components/marketing/ornament-divider";
 import { RiteRouter } from "@/components/marketing/rite-router";
-import { Reveal } from "@/components/marketing/reveal";
-import { RevealText, ScrollProgressBar } from "@/components/public/motion-primitives";
+import { ScrollProgressBar } from "@/components/public/motion-primitives";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { buildOfferSchema } from "@/lib/pricing";
@@ -239,20 +238,20 @@ export default async function HomePage() {
         boundary. See globals.css — it is deliberately the hero's WARMTH rather
         than the film's saturation, which would fight the sixteen template
         palettes further down. */}
-    <main className="page-wash pb-24">
+    <main className="page-wash band-ink pb-24">
       {/* Site chrome. This used to live inside the hero panel, above a divider
           rule. The hero is now a full-bleed band, so the chrome sits in its own
           shell above it rather than being furniture inside the artwork. */}
       <section className="section-shell pt-6">
-        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-white/70 px-5 py-4 rich-shadow sm:px-10 sm:py-5">
+        <div className="glass-panel fade-border relative overflow-hidden rounded-[2rem] border border-[color:var(--border)] px-5 py-4 rich-shadow sm:px-10 sm:py-5">
           <div className="absolute inset-0 bg-hero-mesh opacity-90" />
           <div className="relative flex flex-wrap items-center justify-between gap-3 sm:gap-4">
             <div>
-              <p className="font-display text-2xl text-[#1f1117]">ToNewBeginning.com</p>
+              <p className="font-display text-2xl text-[color:var(--text)]">ToNewBeginning.com</p>
               {/* Hidden on phones. It was taking a quarter of the first screen
                   between the wordmark and a headline that says the same thing
                   better, so the hero began a thousand pixels down. */}
-              <p className="mt-2 hidden text-sm text-stone-700 sm:block">
+              <p className="mt-2 hidden text-sm text-[color:var(--muted)] sm:block">
                 A premium wedding platform with a calm couple workspace and polished guest journey.
               </p>
             </div>
@@ -276,7 +275,7 @@ export default async function HomePage() {
                       so on a phone it either wraps the row or runs off it. The
                       Log out control beside it is the part that has to be
                       reachable. */}
-                  <div className="hidden rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm text-stone-700 sm:block">
+                  <div className="hidden rounded-full border border-[color:var(--border)] panel-soft px-4 py-2 text-sm text-[color:var(--muted)] sm:block">
                     Signed in as {user?.email}
                   </div>
                   <form action={logoutAction}>
@@ -365,7 +364,7 @@ export default async function HomePage() {
               className="absolute inset-0 -z-10"
               style={{
                 backgroundImage:
-                  "linear-gradient(to top, rgba(22,12,15,0.92) 0%, rgba(22,12,15,0.72) 45%, rgba(22,12,15,0.42) 100%)",
+                  "linear-gradient(to top, rgba(20,14,36,0.92) 0%, rgba(20,14,36,0.72) 45%, rgba(20,14,36,0.42) 100%)",
               }}
             />
             <div
@@ -373,7 +372,7 @@ export default async function HomePage() {
               className="absolute inset-0 -z-10 hidden lg:block"
               style={{
                 backgroundImage:
-                  "linear-gradient(to right, rgba(22,12,15,0.80) 0%, rgba(22,12,15,0.45) 55%, transparent 85%)",
+                  "linear-gradient(to right, rgba(20,14,36,0.80) 0%, rgba(20,14,36,0.45) 55%, transparent 85%)",
               }}
             />
           </>
@@ -405,7 +404,7 @@ export default async function HomePage() {
                   only, which is the line that earns it. */}
               <h1
                 className={`mt-5 max-w-3xl animate-fade-rise font-royal text-4xl leading-[1.08] sm:text-5xl lg:text-7xl ${
-                  heroMedia ? "text-white [text-shadow:0_2px_24px_rgba(22,12,15,0.5)]" : "text-[#1f1117]"
+                  heroMedia ? "text-white [text-shadow:0_2px_24px_rgba(20,14,36,0.5)]" : "text-[color:var(--text)]"
                 }`}
                 style={{ animationDelay: "120ms" }}
               >
@@ -413,15 +412,20 @@ export default async function HomePage() {
                 <br />
                 Two hundred guests.
                 <br />
-                <RevealText
-                  text="One beautiful link."
-                  delay={0.75}
-                  className={heroMedia ? "text-[color:var(--accent)]" : "text-[color:var(--primary)]"}
-                />
+                {/* Plain text, not RevealText. That component split this line
+                    into 17 per-character motion spans, and motion/react writes
+                    `initial` into inline style on the SERVER render — so the
+                    production HTML shipped every character at opacity:0 and the
+                    line only appeared if JavaScript ran. It rides the h1's own
+                    `animate-fade-rise` instead, which is CSS and ends at the
+                    resting state. */}
+                <span className={heroMedia ? "text-[color:var(--accent)]" : "text-[color:var(--primary)]"}>
+                  One beautiful link.
+                </span>
               </h1>
               <p
                 className={`mt-4 max-w-2xl animate-fade-rise text-[15px] leading-7 sm:mt-6 sm:text-lg sm:leading-8 ${
-                  heroMedia ? "text-white/85 [text-shadow:0_1px_12px_rgba(22,12,15,0.55)]" : "text-stone-800"
+                  heroMedia ? "text-white/85 [text-shadow:0_1px_12px_rgba(20,14,36,0.55)]" : "text-[color:var(--muted)]"
                 }`}
                 style={{ animationDelay: "240ms" }}
               >
@@ -432,13 +436,13 @@ export default async function HomePage() {
               </p>
               {hasWorkspace ? (
                 <div
-                  className="mt-6 animate-fade-rise rounded-[1.6rem] border border-white/70 bg-white/75 p-4 backdrop-blur"
+                  className="mt-6 animate-fade-rise rounded-[1.6rem] border border-[color:var(--border)] panel-solid p-4 backdrop-blur"
                   style={{ animationDelay: "320ms" }}
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
                     Resume where you left off
                   </p>
-                  <p className="mt-2 text-base font-semibold text-[#1f1117]">Continue from {resumeLabel}</p>
+                  <p className="mt-2 text-base font-semibold text-[color:var(--text)]">Continue from {resumeLabel}</p>
                 </div>
               ) : null}
               {/* The two treatments are swapped from how they shipped. The
@@ -450,7 +454,7 @@ export default async function HomePage() {
               <div className="mt-8 flex flex-wrap gap-3 animate-fade-rise" style={{ animationDelay: "360ms" }}>
                 <Button
                   asChild
-                  className={heroMedia ? "bg-white text-[#1f1117] hover:bg-[color:var(--accent)] hover:text-white" : undefined}
+                  className={heroMedia ? "bg-white text-[#15101f] hover:bg-[color:var(--accent)] hover:text-[color:var(--primary-ink,#15101f)]" : undefined}
                 >
                   <Link href={hasWorkspace ? workspaceHref : "/register"}>
                     {hasWorkspace ? (
@@ -491,7 +495,7 @@ export default async function HomePage() {
                     <span
                       key={`${copy}-${ceremony}`}
                       className={`flex items-center whitespace-nowrap px-5 font-display text-xl sm:text-2xl ${
-                        heroMedia ? "text-white/65" : "text-stone-500"
+                        heroMedia ? "text-white/65" : "text-[color:var(--muted)]"
                       }`}
                     >
                       {ceremony}
@@ -509,21 +513,33 @@ export default async function HomePage() {
 
       <CeremonySequence />
 
+      {/* THE PAPER BAND.
+          Everything from the guest deck to the sixteen designs runs on light
+          paper; the ink canvas resumes below it. Two tone transitions across
+          12,400px instead of one unbroken field, and the dark runs need no
+          paint at all because they are the canvas.
+
+          One wrapper, no edits to the sections inside it — they read their
+          colours from tokens, so the band simply redefines what light means
+          here. See .band-light in globals.css for why it may never be given
+          overflow, transform, filter, will-change or contain. */}
+      <div className="band-light">
+
       <GuestStack />
 
       <section className="section-shell mt-20">
-        <Reveal>
+        <div className="scroll-reveal">
           <SectionHeading
             eyebrow="Why couples pick us"
             title="Built around how multi-event weddings actually work."
             description="Most builders assume one event, one day, one guest list. Yours has never worked that way, so we didn't build it that way."
           />
-        </Reveal>
+        </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
           {featureHighlights.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Reveal key={feature.title} delay={index * 0.12}>
+              <div key={feature.title} className="scroll-reveal" style={{ "--i": index } as React.CSSProperties}>
                 <Card className="h-full space-y-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--accent)]/10">
                     <Icon className="h-6 w-6 text-[color:var(--primary)]" />
@@ -531,7 +547,7 @@ export default async function HomePage() {
                   <h3 className="font-display text-3xl text-[color:var(--text)]">{feature.title}</h3>
                   <p className="text-sm leading-7 text-[color:var(--muted)]">{feature.description}</p>
                 </Card>
-              </Reveal>
+              </div>
             );
           })}
         </div>
@@ -553,7 +569,7 @@ export default async function HomePage() {
         </div>
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {templateRegistry.map((template, index) => (
-            <Reveal key={template.key} delay={index * 0.08}>
+            <div key={template.key} className="scroll-reveal" style={{ "--i": index % 4 } as React.CSSProperties}>
               {/* These cards were rectangles that went nowhere. Sixteen
                   culturally specific designs — the product's clearest
                   differentiator — were a dead end for a reader AND invisible to
@@ -566,7 +582,7 @@ export default async function HomePage() {
                     coming out of its envelope. clip-path, not height — the
                     card's box never changes, so this cannot cause layout
                     shift. */}
-                <div className="card-unsheathe aspect-video w-full overflow-hidden">
+                <div className="aspect-video w-full overflow-hidden">
                   {/* A real screenshot of the design, not a CSS gradient. The
                       sixteen designs are the product's clearest differentiator
                       and were being sold with sixteen colour swatches — the
@@ -596,13 +612,14 @@ export default async function HomePage() {
                 </div>
                 </Link>
               </Card>
-            </Reveal>
+            </div>
           ))}
         </div>
       </section>
+      </div>
 
       <section className="section-shell mt-20">
-        <Card className="scroll-reveal grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
+        <Card className="scroll-reveal grid gap-8 bg-gradient-to-br from-[#1b1335] via-[#2f2152] to-[#6b4a2e] text-white lg:grid-cols-[1.3fr_0.9fr]">
           <div>
             {/* Written for couples, not for investors. "Seeded", "RSVP data"
                 and "investor-demo ready on day one" described the fixture to
@@ -677,7 +694,7 @@ export default async function HomePage() {
         </div>
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {homepageFaqs.map(({ q, a }) => (
-            <details key={q} className="faq-item group rounded-[1.4rem] border border-black/8 bg-white/70 p-5 transition open:bg-white">
+            <details key={q} className="faq-item group rounded-[1.4rem] border border-[color:var(--border)] panel-solid p-5 transition open:bg-[color:var(--elevated)]">
               <summary className="cursor-pointer list-none font-semibold text-[color:var(--text)] [&::-webkit-details-marker]:hidden">
                 <span className="mr-3 inline-block text-[color:var(--primary)] transition group-open:rotate-90">›</span>
                 {q}
@@ -720,7 +737,7 @@ export default async function HomePage() {
               `autoFocus={!defaultOpen}` then applies to a visitor who opened
               the form themselves — which is what that guard was always for.
               Open by default it would have stolen focus on page load. */}
-          <div className="mx-auto mt-8 max-w-md border-t border-black/5 pt-6 text-center">
+          <div className="mx-auto mt-8 max-w-md border-t border-[color:var(--border)] pt-6 text-center">
             <p className="mb-4 text-sm leading-7 text-[color:var(--muted)]">
               Paid plans open soon. We&rsquo;ll tell you the moment they do &mdash; one email, nothing else.
             </p>

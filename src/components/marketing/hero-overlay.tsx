@@ -47,10 +47,10 @@ const PLATFORM_FACTS = ["Every ceremony, in order", "Sixteen templates", "RSVPs 
 // invisible the moment someone follows that instruction. It defaults to the
 // media treatment so the no-prop call site keeps today's rendering.
 export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
-  const ink = onMedia ? "text-white [text-shadow:0_2px_18px_rgba(18,10,13,0.75)]" : "text-[#1f1117]";
+  const ink = onMedia ? "text-white [text-shadow:0_2px_18px_rgba(18,10,13,0.75)]" : "text-[color:var(--text)]";
   const panel = onMedia
-    ? "border-white/15 bg-[rgba(18,10,13,0.72)] text-white/85"
-    : "border-black/10 bg-white/80 text-stone-700";
+    ? "border-white/15 bg-[rgba(20,14,36,0.72)] text-white/85"
+    : "border-[color:var(--border)] panel-solid text-[color:var(--muted)]";
 
   return (
     // NOT absolutely positioned any more, and that is the fix rather than a
