@@ -576,7 +576,23 @@ export default async function HomePage() {
                   a crawler, because the only route that rendered them was
                   /dev/template-gallery, which 404s unless TEMPLATE_GALLERY=1.
                   Each one is now a link to a real indexable page. */}
-              <Card className="group h-full overflow-clip p-0 sm:p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
+              {/* Each card wears the palette it is selling. These are the same
+                    themeDefaults the template itself renders from, so the card
+                    is a faithful miniature rather than sixteen identical
+                    rectangles — which is what this grid was: the largest flat
+                    region on the page, selling variety with none. */}
+                <Card
+                  className="template-swatch group h-full overflow-clip p-0 sm:p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow"
+                  style={
+                    {
+                      "--surface": template.themeDefaults.surfaceColor,
+                      "--text": template.themeDefaults.textColor,
+                      "--swatch-muted": template.themeDefaults.mutedColor,
+                      "--primary": template.themeDefaults.primaryColor,
+                      "--accent": template.themeDefaults.accentColor,
+                    } as React.CSSProperties
+                  }
+                >
                 <Link href={`/templates/${template.key}` as Route} className="block">
                 {/* The strip wipes up as the card arrives, like an invitation
                     coming out of its envelope. clip-path, not height — the

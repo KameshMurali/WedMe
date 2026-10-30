@@ -308,6 +308,26 @@ a {
     backdrop-filter: blur(12px);
   }
 
+  /* The sixteen gallery cards, each wearing the palette it sells.
+     page.tsx publishes that template's own tokens on the card, so this only has
+     to undo .section-card's translucency: at 88% over paper a dark template
+     surface composites to mud, and the point is for Cinematic Modern's card to
+     actually be #201625. `color` is re-anchored for the same reason the band
+     scopes are — the text inside would otherwise inherit the paper band's
+     near-black and sit on its own dark surface. */
+  .template-swatch {
+    background-color: var(--surface);
+    color: var(--text);
+    /* Three registry palettes ship a mutedColor that lands 4.08-4.47:1 on their
+       own surfaceColor — just under AA. Rendering them faithfully reproduced
+       that, so the card pulls its body text a quarter of the way toward the
+       template's own text colour: still unmistakably that palette's muted tone,
+       but legible. Mixing from a separate --swatch-muted rather than from
+       --muted itself, because a custom property defined in terms of itself is a
+       cycle and resolves to nothing. */
+    --muted: color-mix(in srgb, var(--swatch-muted, currentColor) 74%, var(--text));
+  }
+
   /* Page backdrops, one per chromeStyle in the template registry. Each composes
      entirely from the template's own tokens, so a palette change changes the
      page — and because the registry field is a closed union consumed by an
@@ -574,6 +594,12 @@ input[type="time"]::-webkit-inner-spin-button {
     /* Sections that previously had no entrance at all. `entry 0% cover 30%`
        means the animation completes shortly after the element is fully in
        view, so content is never left half-faded while you read it. */
+    /* Named so .page-wash can hang its drain on this band from above. */
+    .rite-band {
+      view-timeline-name: --rite-band;
+      view-timeline-axis: block;
+    }
+
     .scroll-reveal {
       animation: scroll-reveal linear both;
       animation-timeline: view();
@@ -1508,7 +1534,7 @@ input[type="time"]::-webkit-inner-spin-button {
      timeline-scope hoists the name up to this element so an ancestor can
      reference a timeline its own descendant defines, which is precisely the
      shape here: the ceremony stage drives the colour of the whole page. */
-  timeline-scope: --ceremony-track;
+  timeline-scope: --ceremony-track, --rite-band;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1572,11 +1598,41 @@ input[type="time"]::-webkit-inner-spin-button {
            `.page-wash { --wash-tint: var(--accent) }`, the resting value this
            file documents. The 1.1s transition on .page-wash::before then
            carries the change as the stage arrives. */
-        animation: page-wash-tint linear forwards;
-        animation-timeline: --ceremony-track;
-        animation-range: contain 0% contain 100%;
+        /* Two animations on one property, so ONE shorthand with two entries.
+           A second flat `animation:` rule would replace this one outright
+           rather than add to it, and the tint would simply stop. */
+        animation:
+          page-wash-tint linear forwards,
+          page-wash-drain linear forwards;
+        animation-timeline: --ceremony-track, --rite-band;
+        animation-range: contain 0% contain 100%, entry 0% entry 35%;
       }
     }
+  }
+}
+
+/* THE DRAIN, which until now did nothing at all.
+   ---------------------------------------------------------------------------
+   `.rite-drain` set `--wash-tint: var(--background)` on a <section> INSIDE
+   <main>. But the wash is `.page-wash::before`, a pseudo-element OF <main>, so
+   it reads the token from <main> and a descendant can never reach it. The 1.1s
+   transition the old comment credited with carrying the drain out had nothing
+   to carry.
+
+   Measured consequence: `page-wash-tint` fills `forwards`, so from the end of
+   the ceremony stage to the footer `--wash-tint` stayed locked at #a9762f, the
+   last ceremony's amber — 7,757px of a 12,225px page wearing a stale tint.
+   (Sampling inside the stage showed the tint moving correctly, which is how
+   this hid: the drain is a separate mechanism from the swap.)
+
+   So the drain is driven from .page-wash itself, on a view timeline hung on the
+   rite band, hoisted by the timeline-scope above. It lands on the ink ground
+   itself, which means no tint at all: the lower third is clean ink, which is
+   what the rite band wants — a decision should not be made inside a mood, and
+   the sixteen template palettes below need unbiased ground. */
+@keyframes page-wash-drain {
+  to {
+    --wash-tint: #140e24;
   }
 }
 
@@ -1599,6 +1655,10 @@ input[type="time"]::-webkit-inner-spin-button {
    need unbiased ground to be compared on. The wash is a fixed layer, so this
    cannot be done by painting over it — the band resets the inherited tint
    instead, and the 1.1s transition on the wash carries it out smoothly. */
+/* Deliberately empty of the old `--wash-tint: var(--background)`, which could
+   never reach the wash from here. The drain lives on .page-wash now; see
+   @keyframes page-wash-drain. The class is kept because rite-router.tsx applies
+   it and it still marks the commit boundary in the markup. */
 .rite-drain {
-  --wash-tint: var(--background);
+  position: relative;
 }
