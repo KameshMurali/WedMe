@@ -59,6 +59,12 @@ type Ceremony = {
   venue: string;
   dress: string;
   rsvp: string;
+  // Basename in public/ceremonies/. One photograph per rite, each shot in that
+  // rite's own colour so it sits with the tint the page wash is already
+  // running. Kept as data rather than derived from `name` because the two are
+  // free to diverge — "Ceremony" is a generic label, ceremony.webp is a
+  // specific garden aisle.
+  image: string;
   // The ceremony's own colour — henna green, turmeric yellow, kumkum red — not
   // a palette rotation. Passed as an inline custom property rather than eight
   // new tokens in globals.css because it is per-item data that nothing outside
@@ -74,6 +80,7 @@ type Ceremony = {
 const ceremonies: Ceremony[] = [
   {
     name: "Mehendi",
+    image: "mehendi",
     day: "Day one",
     slot: "Afternoon",
     what: "Henna is drawn on the bride's hands and feet while the women of both families sit around her.",
@@ -85,6 +92,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Haldi",
+    image: "haldi",
     day: "Day two",
     slot: "Morning",
     what: "Turmeric paste is put on the couple by their families — a blessing, and a mess.",
@@ -96,6 +104,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Sangeet",
+    image: "sangeet",
     day: "Day two",
     slot: "Evening, late",
     what: "The music night: rehearsed family dances, unrehearsed ones, and the loudest dinner of the week.",
@@ -107,6 +116,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Nikkah",
+    image: "nikkah",
     day: "Day three",
     slot: "The marriage, in Islamic rite",
     what: "The Islamic marriage contract is read and signed in front of witnesses.",
@@ -118,6 +128,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Muhurtham",
+    image: "muhurtham",
     day: "Day three",
     slot: "The marriage, in Hindu rite",
     what: "The Hindu wedding rites, performed in the auspicious hour the families have fixed.",
@@ -129,6 +140,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Ceremony",
+    image: "ceremony",
     day: "Day three",
     slot: "The marriage, in Western rite",
     what: "The vows themselves — church, registry, garden or shoreline, whatever form yours takes.",
@@ -140,6 +152,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Reception",
+    image: "reception",
     day: "Day three",
     slot: "Evening",
     what: "The dinner that follows: seating, speeches, and the first evening as a married couple.",
@@ -151,6 +164,7 @@ const ceremonies: Ceremony[] = [
   },
   {
     name: "Walima",
+    image: "walima",
     day: "Day four",
     slot: "Evening",
     what: "The reception hosted by the groom's family after the Nikkah, announcing the marriage publicly.",
@@ -275,10 +289,27 @@ export function CeremonySequence() {
                       {ceremony.day}
                     </p>
                     <p className="mt-3 text-sm text-[color:var(--muted)]">{ceremony.slot}</p>
+                    {/* Decorative: the rite is named and described in the
+                        column beside this, so an alt text here would only
+                        repeat it. The wrapper stays aria-hidden and the img
+                        carries an empty alt. */}
                     <div
                       className="ceremony-field mt-6 h-20 w-full sm:h-28 lg:mt-8 lg:h-64 xl:h-72"
                       aria-hidden="true"
-                    />
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element --
+                          a static asset of known size, far below the fold and
+                          lazy; the optimizer would add a round trip for no
+                          gain, and these are already sized to the box. */}
+                      <img
+                        src={`/ceremonies/${ceremony.image}.webp`}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        width={640}
+                        height={480}
+                      />
+                    </div>
                   </div>
 
                   <div className="ceremony-copy min-w-0">

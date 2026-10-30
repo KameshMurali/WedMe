@@ -676,6 +676,39 @@ input[type="time"]::-webkit-inner-spin-button {
       color-mix(in srgb, var(--primary) 10%, var(--surface))
     );
   box-shadow: 0 18px 60px var(--elevation);
+  /* The gradients above are now the placeholder the photograph loads over, and
+     the backstop if it ever 404s. Everything below positions that photograph. */
+  position: relative;
+  overflow: hidden;
+}
+
+/* The ceremony itself, photographed.
+   This panel used to be the gradient alone: a large, soft, empty rectangle
+   beside every ceremony, which read as an image that had failed to load rather
+   than as a design element. Eight of them, down the page's longest section. */
+.ceremony-field img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* The ceremony's hex, kept over the photograph.
+   Each photo is already shot in its ceremony's colour — henna green, turmeric,
+   kumkum red — so this is a harmonising glaze, not a recolour. It is weighted
+   into the top-left corner and gone by 62%, which is where the gradient
+   beneath it was strongest, so the panel keeps the same colour gesture it had
+   before. Heavier than this and eight good photographs turn to mud. */
+.ceremony-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    158deg,
+    color-mix(in srgb, var(--ceremony-tint, var(--accent)) 26%, transparent),
+    transparent 62%
+  );
 }
 
 /* Progress through the eight holds. Meaningless without the conveyor — a bar
@@ -851,6 +884,14 @@ input[type="time"]::-webkit-inner-spin-button {
           border-radius: 999px;
           box-shadow: none;
           animation: none;
+        }
+
+        /* A photograph 10px tall is noise, and its glaze would only dull the
+           band. The pill goes back to being pure colour, which is the one
+           thing it is still carrying at this height. */
+        .ceremony-field img,
+        .ceremony-field::after {
+          display: none;
         }
 
         /* Day word and slot label onto one baseline row — worth ~32px for
