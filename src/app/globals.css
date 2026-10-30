@@ -590,7 +590,17 @@ input[type="time"]::-webkit-inner-spin-button {
      never cover the badge or the headline no matter how the type reflows. */
   --overture-drop: -3.5svh;
   --overture-drop-far: -5svh;
-  --overture-near-z: 140px;
+  /* 140px put the near plane's magnified width past the right screen edge on
+     every phone. A translateZ under `perspective: 1000px` scales by
+     1000/(1000-z), so the pill grows by W*z/(1000-z) and must still clear the
+     16px gutter. It is `flex flex-col items-start`, so the pill is
+     shrink-to-fit and gutter-capped until ~462px, where its natural 429.4px
+     width takes over — which makes the WIDEST wrapping width the binding case,
+     not the narrowest. Measured right edges at 140px ran past the viewport at
+     every phone size; 40px still clipped at 430 (iPhone 15/16 Pro Max) and
+     462. At 32px the margins are 4.17 / 3.37 / 2.84 / 2.38px at
+     390 / 414 / 430 / 462. Desktop keeps its own value below. */
+  --overture-near-z: 32px;
   --overture-far-z: 30px;
 }
 
@@ -676,6 +686,39 @@ input[type="time"]::-webkit-inner-spin-button {
       color-mix(in srgb, var(--primary) 10%, var(--surface))
     );
   box-shadow: 0 18px 60px var(--elevation);
+  /* The gradients above are now the placeholder the photograph loads over, and
+     the backstop if it ever 404s. Everything below positions that photograph. */
+  position: relative;
+  overflow: hidden;
+}
+
+/* The ceremony itself, photographed.
+   This panel used to be the gradient alone: a large, soft, empty rectangle
+   beside every ceremony, which read as an image that had failed to load rather
+   than as a design element. Eight of them, down the page's longest section. */
+.ceremony-field img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* The ceremony's hex, kept over the photograph.
+   Each photo is already shot in its ceremony's colour — henna green, turmeric,
+   kumkum red — so this is a harmonising glaze, not a recolour. It is weighted
+   into the top-left corner and gone by 62%, which is where the gradient
+   beneath it was strongest, so the panel keeps the same colour gesture it had
+   before. Heavier than this and eight good photographs turn to mud. */
+.ceremony-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    158deg,
+    color-mix(in srgb, var(--ceremony-tint, var(--accent)) 26%, transparent),
+    transparent 62%
+  );
 }
 
 /* Progress through the eight holds. Meaningless without the conveyor — a bar
@@ -851,6 +894,14 @@ input[type="time"]::-webkit-inner-spin-button {
           border-radius: 999px;
           box-shadow: none;
           animation: none;
+        }
+
+        /* A photograph 10px tall is noise, and its glaze would only dull the
+           band. The pill goes back to being pure colour, which is the one
+           thing it is still carrying at this height. */
+        .ceremony-field img,
+        .ceremony-field::after {
+          display: none;
         }
 
         /* Day word and slot label onto one baseline row — worth ~32px for
@@ -1301,6 +1352,20 @@ input[type="time"]::-webkit-inner-spin-button {
    page is neutral, because a decision should not be made inside a mood. */
 .page-wash {
   --wash-tint: var(--accent);
+
+  /* THE WASH WAS FROZEN WITHOUT THIS, and the symptom was silent: no console
+     error, the animation attached, and the colour simply never changed.
+     Measured at eight scroll positions, --wash-tint read rgb(169, 118, 47) at
+     every one — #a9762f, the LAST ceremony's tint, i.e. the animation sitting
+     on its final keyframe with `both` fill and no timeline driving it.
+
+     A named view timeline is only visible to DESCENDANTS of the element that
+     declares it. --ceremony-track is declared on .ceremony-track, and
+     .page-wash is <main> — its ANCESTOR — so the lookup silently failed.
+     timeline-scope hoists the name up to this element so an ancestor can
+     reference a timeline its own descendant defines, which is precisely the
+     shape here: the ceremony stage drives the colour of the whole page. */
+  timeline-scope: --ceremony-track;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1355,7 +1420,16 @@ input[type="time"]::-webkit-inner-spin-button {
          carry the easing, and a transition fighting an animation is how you get
          a colour that lags half a ceremony behind the words. */
       .page-wash {
-        animation: page-wash-tint linear both;
+        /* `forwards`, not `both`. `both` also applies the BEFORE phase, so
+           above the ceremony stage the first keyframe held --wash-tint at the
+           first ceremony's henna green and washed the hero and the intro olive
+           — a colour that belongs to Mehendi, 1,700px further down. `forwards`
+           fills only the after phase, so the gold hold below the stage is
+           unchanged and everything above it falls back to
+           `.page-wash { --wash-tint: var(--accent) }`, the resting value this
+           file documents. The 1.1s transition on .page-wash::before then
+           carries the change as the stage arrives. */
+        animation: page-wash-tint linear forwards;
         animation-timeline: --ceremony-track;
         animation-range: contain 0% contain 100%;
       }

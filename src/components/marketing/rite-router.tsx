@@ -290,7 +290,7 @@ export function RiteRouter() {
                       <span aria-hidden="true" className="rite-mark" />
                     )}
                   </div>
-                  <span className="text-[11px] font-semibold tabular-nums tracking-[0.18em] text-[color:var(--accent)]">
+                  <span className="text-[11px] font-semibold tabular-nums tracking-[0.18em] text-[color:var(--primary)]">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>

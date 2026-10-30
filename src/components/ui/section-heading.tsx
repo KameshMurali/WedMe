@@ -18,7 +18,15 @@ export function SectionHeading({
 }) {
   return (
     <div className={align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
-      {eyebrow ? <Badge>{eyebrow}</Badge> : null}
+      {/* Badge's own bg-[color:var(--accent)]/10 + text-[color:var(--primary)]
+          is dark-on-dark inside a tone="light" band. cn() runs twMerge, which
+          reads the color: hints, so a className here replaces both conflicting
+          classes rather than stacking with them. white/90 on the band's painted
+          rgb(44,27,33) measures 13.1:1, and matches the white/80 the
+          description below already uses. */}
+      {eyebrow ? (
+        <Badge className={tone === "light" ? "bg-white/15 text-white/90" : undefined}>{eyebrow}</Badge>
+      ) : null}
       <h2
         className={cn(
           "mt-5 font-display text-4xl leading-tight sm:text-5xl",

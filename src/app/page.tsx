@@ -260,7 +260,11 @@ export default async function HomePage() {
               <Button asChild variant="ghost">
                 <Link href="/pricing">Pricing</Link>
               </Button>
-              <Button asChild variant="outline">
+              {/* ghost when logged out, so "Create Couple Account" beside it
+                  is the emphasised control. A signed-in couple is a different
+                  case: resuming their workspace IS the primary action there,
+                  so it keeps the outline. */}
+              <Button asChild variant={hasWorkspace ? "outline" : "ghost"}>
                 <Link href={workspaceHref}>
                   <LogIn className="h-4 w-4" />
                   {hasWorkspace ? "Resume workspace" : "Log in"}
@@ -286,7 +290,7 @@ export default async function HomePage() {
                 /* Hidden on phones: it wrapped the chrome onto a second row
                    to offer the same action as "Start yours free", which is a
                    few hundred pixels below it in the hero. */
-                <Button asChild variant="ghost" className="hidden sm:inline-flex">
+                <Button asChild className="hidden sm:inline-flex">
                   <Link href="/register">Create Couple Account</Link>
                 </Button>
               )}
@@ -375,7 +379,7 @@ export default async function HomePage() {
           </>
         ) : null}
 
-        <div className="section-shell relative w-full pb-10 pt-20 sm:pt-24">
+        <div className="section-shell relative w-full pb-10 pt-12 sm:pt-24">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               {/* The overture leads the content block rather than floating over
@@ -416,7 +420,7 @@ export default async function HomePage() {
                 />
               </h1>
               <p
-                className={`mt-6 max-w-2xl animate-fade-rise text-base leading-8 sm:text-lg ${
+                className={`mt-4 max-w-2xl animate-fade-rise text-[15px] leading-7 sm:mt-6 sm:text-lg sm:leading-8 ${
                   heroMedia ? "text-white/85 [text-shadow:0_1px_12px_rgba(22,12,15,0.55)]" : "text-stone-800"
                 }`}
                 style={{ animationDelay: "240ms" }}
@@ -437,19 +441,16 @@ export default async function HomePage() {
                   <p className="mt-2 text-base font-semibold text-[#1f1117]">Continue from {resumeLabel}</p>
                 </div>
               ) : null}
+              {/* The two treatments are swapped from how they shipped. The
+                  filled button used to be "See a real wedding site" and the
+                  signup was the outline beside it, so the strongest control on
+                  the first screen sent visitors away from the funnel. The
+                  components are unchanged; only which one carries the filled
+                  class and the forward arrow. */}
               <div className="mt-8 flex flex-wrap gap-3 animate-fade-rise" style={{ animationDelay: "360ms" }}>
                 <Button
                   asChild
                   className={heroMedia ? "bg-white text-[#1f1117] hover:bg-[color:var(--accent)] hover:text-white" : undefined}
-                >
-                  <Link href="/kammonbeginnings">
-                    See a real wedding site <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className={heroMedia ? "border-white/40 bg-white/10 text-white backdrop-blur hover:border-white hover:bg-white/20" : undefined}
                 >
                   <Link href={hasWorkspace ? workspaceHref : "/register"}>
                     {hasWorkspace ? (
@@ -457,9 +458,18 @@ export default async function HomePage() {
                         Resume {resumeLabel} <PlayCircle className="h-4 w-4" />
                       </>
                     ) : (
-                      "Start yours free"
+                      <>
+                        Start yours free <ArrowRight className="h-4 w-4" />
+                      </>
                     )}
                   </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className={heroMedia ? "border-white/40 bg-white/10 text-white backdrop-blur hover:border-white hover:bg-white/20" : undefined}
+                >
+                  <Link href="/kammonbeginnings">See a real wedding site</Link>
                 </Button>
               </div>
             </div>
@@ -541,7 +551,7 @@ export default async function HomePage() {
           description="Romantic florals or cinematic drama: every template carries your full story, events, and photos, so switching looks takes one click, not one weekend."
         />
         </div>
-        <div className="mt-10 grid gap-5 lg:grid-cols-5">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {templateRegistry.map((template, index) => (
             <Reveal key={template.key} delay={index * 0.08}>
               {/* These cards were rectangles that went nowhere. Sixteen
@@ -550,15 +560,30 @@ export default async function HomePage() {
                   a crawler, because the only route that rendered them was
                   /dev/template-gallery, which 404s unless TEMPLATE_GALLERY=1.
                   Each one is now a link to a real indexable page. */}
-              <Card className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
+              <Card className="group h-full overflow-clip p-0 sm:p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow">
                 <Link href={`/templates/${template.key}` as Route} className="block">
                 {/* The strip wipes up as the card arrives, like an invitation
                     coming out of its envelope. clip-path, not height — the
                     card's box never changes, so this cannot cause layout
                     shift. */}
-                <div className="card-unsheathe h-40 w-full overflow-hidden">
-                  <div
-                    className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-110"
+                <div className="card-unsheathe aspect-video w-full overflow-hidden">
+                  {/* A real screenshot of the design, not a CSS gradient. The
+                      sixteen designs are the product's clearest differentiator
+                      and were being sold with sixteen colour swatches — the
+                      least persuasive possible representation of them. The
+                      gradient survives as the img's background, so it is still
+                      what a reader sees while the file loads or if it 404s. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a
+                      static asset of known size, below the fold and lazy; the
+                      optimizer would add a round trip for no gain. */}
+                  <img
+                    src={`/templates/${template.key}.webp`}
+                    alt={`The ${template.name} design`}
+                    loading="lazy"
+                    decoding="async"
+                    width={960}
+                    height={540}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ background: template.previewGradient }}
                   />
                 </div>
@@ -579,33 +604,61 @@ export default async function HomePage() {
       <section className="section-shell mt-20">
         <Card className="scroll-reveal grid gap-8 bg-gradient-to-br from-[#26171c] via-[#3d2730] to-[#7b5842] text-white lg:grid-cols-[1.3fr_0.9fr]">
           <div>
+            {/* Written for couples, not for investors. "Seeded", "RSVP data"
+                and "investor-demo ready on day one" described the fixture to
+                the people who built it; a couple reading this wants to know
+                what they are about to click. */}
             <SectionHeading
-              eyebrow="Demo Site : KamMonBeginnings"
-              title="A seeded wedding experience is included for Kamesh & Monisha."
-              description="Sample events, story milestones, dress code boards, FAQs, RSVP data, guest messages, uploads, and themed imagery are all seeded so the platform feels investor-demo ready on day one."
+              eyebrow="A finished wedding site"
+              title="See how yours could look before you build it."
+              description="Kamesh and Monisha's site is real and public: four days of ceremonies each with their own venue, timing and dress code, per-event RSVPs, a guest gallery and a wall of wishes. It is the same site you would publish."
               tone="light"
             />
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild className="bg-white text-stone-900 hover:bg-amber-100">
                 <Link href="/kammonbeginnings">View the wedding site</Link>
               </Button>
+              {/* One branching control, not two. For a signed-in couple this
+                  is "Resume workspace" and must stay — it is what
+                  safeResumePath exists to serve. Logged out, "Log in" was the
+                  only other thing on offer beside a demo link, which asks a
+                  stranger to sign in to an account they do not have. */}
               <Button asChild variant="secondary" className="bg-white/10 text-white hover:bg-white/20">
-                <Link href={workspaceHref}>{hasWorkspace ? "Resume workspace" : "Log in"}</Link>
+                <Link href={hasWorkspace ? workspaceHref : "/register"}>
+                  {hasWorkspace ? "Resume workspace" : "Start yours free"}
+                </Link>
               </Button>
             </div>
           </div>
+          {/* Each tile used to be a single label floating in a tall empty
+              box, which read as content that had failed to load. A sentence
+              under each one both fills the box and says what the label means
+              to a couple rather than to a product manager. */}
           <div className="grid gap-4 sm:grid-cols-2">
             {[
-              "Secure registration and login",
-              "Theme and template selection",
-              "RSVP analytics and CSV export",
-              "Guest uploads moderation",
+              {
+                label: "Every ceremony, on its own",
+                body: "Mehendi, Haldi, Sangeet and the rest, each with its own timing, venue and dress code.",
+              },
+              {
+                label: "RSVPs per event",
+                body: "Guests reply once and pick the functions they'll attend. Headcounts per ceremony, not one number.",
+              },
+              {
+                label: "Sixteen designs",
+                body: "Switch any time. Your story, events and photos follow the new look instantly.",
+              },
+              {
+                label: "Photos and wishes",
+                body: "Guests upload from their phones and leave messages. You approve what appears.",
+              },
             ].map((item) => (
               <div
-                key={item}
-                className="rounded-[1.6rem] border border-white/10 bg-white/10 px-5 py-5 text-sm font-medium backdrop-blur"
+                key={item.label}
+                className="rounded-[1.6rem] border border-white/10 bg-white/10 px-5 py-5 backdrop-blur"
               >
-                {item}
+                <p className="text-sm font-semibold">{item.label}</p>
+                <p className="mt-2 text-sm leading-6 text-white/75">{item.body}</p>
               </div>
             ))}
           </div>
@@ -642,22 +695,41 @@ export default async function HomePage() {
 
       <section className="section-shell mt-20">
         <Card className="scroll-reveal mx-auto max-w-3xl text-center">
+          {/* The band used to lead with "Paid plans are opening soon." — so
+              after ~12,000px the last thing a visitor read was that they could
+              not buy yet, contradicting "Start yours free" in the hero, and the
+              final 4,300px of the page carried no signup link at all. The free
+              tier is the ask; the waitlist is for the paid plans only, and it
+              now says so. */}
           <SectionHeading
             align="center"
-            eyebrow="Founding couples"
-            title="Paid plans are opening soon."
-            description="We'll tell you the moment they open. One email, nothing else."
+            eyebrow="One link, every ceremony"
+            title="Start your wedding site free."
+            description="Build it, share the link, collect RSVPs. No card, and nothing expires while you are planning."
           />
-          {/* text-center so the form's own line sits with the copy above it
-              rather than hanging left inside a centred card. */}
-          <div className="mx-auto mt-8 max-w-md text-center">
+          <div className="mt-8 flex justify-center">
+            <Button asChild>
+              <Link href={hasWorkspace ? workspaceHref : "/register"}>
+                {hasWorkspace ? "Resume workspace" : "Start yours free"} <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* Demoted beneath the signup, and no longer defaultOpen: collapsed,
+              WaitlistForm renders an outline Button carrying ctaLabel, and its
+              `autoFocus={!defaultOpen}` then applies to a visitor who opened
+              the form themselves — which is what that guard was always for.
+              Open by default it would have stolen focus on page load. */}
+          <div className="mx-auto mt-8 max-w-md border-t border-black/5 pt-6 text-center">
+            <p className="mb-4 text-sm leading-7 text-[color:var(--muted)]">
+              Paid plans open soon. We&rsquo;ll tell you the moment they do &mdash; one email, nothing else.
+            </p>
             <WaitlistForm
               planKey="together"
               planName="Together"
               currency={currency}
               ctaLabel="Join the founding-couple list"
               source="home_waitlist"
-              defaultOpen
             />
           </div>
         </Card>

@@ -12,6 +12,19 @@ type TemplateRegistryEntry = {
   tier: "free" | "premium";
   previewGradient: string;
   heroVariant: "classic" | "split" | "cinematic" | "editorial" | "celebration" | "destination";
+  // Only the four `destination` designs set this, and they MUST.
+  //
+  // /templates/[templateKey] strips the demo couple's hero photo so the page
+  // shows the DESIGN rather than their photographs. For the twelve ornamented
+  // designs that is right — their design is drawn, so stripping the photo
+  // reveals it. For a destination design it removes the design, because the
+  // photograph IS the design: Santorini, a Tuscan hillside and an atoll look
+  // nothing alike because the picture differs, not because anything was drawn
+  // over them. Without one, all four collapsed to the same composed no-photo
+  // dusk under the same dark scrim and rendered as four colour slabs sharing
+  // one layout — including Atoll White, which is described as "kept pale so
+  // the water stays the brightest thing on the page" and came out dark teal.
+  previewHeroImage?: string;
   // Drives the page chrome: backdrop, footer panel and header treatment.
   // These used to be switch statements over template keys, written when there
   // were five templates; the eleven added since all fell through to the
@@ -542,6 +555,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Mediterranean coast",
     previewGradient: "linear-gradient(135deg, #f7fbfd 0%, #bcd8e6 42%, #1d5d86 100%)",
     heroVariant: "destination",
+    previewHeroImage: "/templates/hero/shoreline-blue.webp",
     chromeStyle: "veil",
     cardVariant: "glass",
     navigationVariant: "underline",
@@ -583,6 +597,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Tuscan countryside",
     previewGradient: "linear-gradient(135deg, #fdfaf2 0%, #ddd0ac 44%, #6d7546 100%)",
     heroVariant: "destination",
+    previewHeroImage: "/templates/hero/olive-grove.webp",
     chromeStyle: "horizon",
     cardVariant: "soft",
     navigationVariant: "underline",
@@ -624,6 +639,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Tropical evening",
     previewGradient: "linear-gradient(135deg, #fdf7f1 0%, #e0b384 42%, #2f4a3c 100%)",
     heroVariant: "destination",
+    previewHeroImage: "/templates/hero/palm-and-teak.webp",
     chromeStyle: "horizon",
     cardVariant: "shadow",
     navigationVariant: "pill",
@@ -665,6 +681,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Island lagoon",
     previewGradient: "linear-gradient(135deg, #fbfdfd 0%, #cfe8e6 44%, #4d9c96 100%)",
     heroVariant: "destination",
+    previewHeroImage: "/templates/hero/atoll-white.webp",
     chromeStyle: "veil",
     cardVariant: "glass",
     navigationVariant: "ghost",

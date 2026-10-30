@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, MapPin, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { LinkPendingSpinner } from "@/components/ui/link-pending-spinner";
@@ -141,14 +141,31 @@ export function SiteHeader({
                 "linear-gradient(to right, color-mix(in srgb, var(--surface) 20%, transparent), transparent, color-mix(in srgb, var(--accent) 10%, transparent))",
             }}
           />
+          {/* Demo-site chrome only: showBackToPlatformHome is
+              `slug === "kammonbeginnings"` (site-shell.tsx), so none of this
+              ever renders on a real couple's wedding site.
+
+              "Back to Home" alone made the demo a round trip. The homepage
+              sends visitors here from the hero, the rite-router and the dark
+              card, and every one of those was a one-way trip into a site with
+              no route to signing up — so the strongest proof the product has
+              was also its biggest leak. The second pill closes it, and it
+              works for a visitor who arrived on a shared link too. */}
           {showBackToPlatformHome ? (
-            <div className="relative border-b border-black/5 px-5 py-3 group-data-[collapsed=true]:hidden sm:px-6 lg:group-data-[collapsed=true]:block">
+            <div className="relative flex flex-wrap items-center gap-2 border-b border-black/5 px-5 py-3 group-data-[collapsed=true]:hidden sm:px-6 lg:group-data-[collapsed=true]:block">
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 rounded-full panel-soft border border-[color:var(--accent)]/20 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:opacity-80"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 rounded-full border border-transparent bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-[color:var(--primary-ink,#fff)] transition hover:opacity-90"
+              >
+                Make your own free
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           ) : null}

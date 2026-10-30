@@ -93,12 +93,27 @@ export default function TemplatesIndexPage() {
             {templateRegistry.map((template) => (
               <Card
                 key={template.key}
-                className="group h-full overflow-hidden p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow"
+                className="group h-full overflow-hidden p-0 sm:p-0 transition duration-300 hover:-translate-y-1.5 hover:shadow-glow"
               >
                 <Link href={`/templates/${template.key}` as Route} className="block">
-                  <div className="h-44 w-full overflow-hidden">
-                    <div
-                      className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-105"
+                  <div className="aspect-video w-full overflow-hidden">
+                    {/* A real screenshot of the design, not a CSS gradient. The
+                        sixteen designs are the product's clearest differentiator
+                        and were being sold with sixteen colour swatches — the
+                        least persuasive possible representation of them. The
+                        gradient survives as the img's background, so it is still
+                        what a reader sees while the file loads or if it 404s. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element -- a
+                        static asset of known size, below the fold and lazy; the
+                        optimizer would add a round trip for no gain. */}
+                    <img
+                      src={`/templates/${template.key}.webp`}
+                      alt={`The ${template.name} design`}
+                      loading="lazy"
+                      decoding="async"
+                      width={960}
+                      height={540}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       style={{ background: template.previewGradient }}
                     />
                   </div>
