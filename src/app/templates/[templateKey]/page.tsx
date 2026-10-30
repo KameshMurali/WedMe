@@ -85,7 +85,23 @@ export default async function TemplateDetailPage({
     // applied template has none. Stripping it shows the DESIGN rather than the
     // demo couple's photographs, and exercises the composed fallback that a
     // real couple sees on day one.
-    site: { ...demoSiteSnapshot.site, heroImageUrl: null, heroVideoUrl: null },
+    //
+    // EXCEPT for the four `destination` designs, where that reasoning inverts.
+    // Their design IS the photograph — sections.tsx says so itself: "Como,
+    // Santorini, Bali all look completely different because the picture does,
+    // not because we drew something." Stripping it left all four rendering the
+    // same composed no-photo dusk under the same dark scrim, so Shoreline Blue,
+    // Olive Grove, Palm & Teak and Atoll White appeared as one layout in four
+    // colour slabs, directly under card copy promising the opposite.
+    //
+    // These are our own photographs in public/templates/hero/, not the demo
+    // couple's and not hotlinked, so the page still shows the design rather
+    // than someone's wedding.
+    site: {
+      ...demoSiteSnapshot.site,
+      heroImageUrl: template.previewHeroImage ?? null,
+      heroVideoUrl: null,
+    },
     theme: { ...demoSiteSnapshot.theme, ...defaults, templateKey: template.key },
   } as unknown as SiteSnapshot;
 

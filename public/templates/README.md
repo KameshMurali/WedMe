@@ -28,6 +28,38 @@ that `--primary` resolved before it will shoot, so that failure is loud.
 **One server.** Same reason: a second build for a second port is what replaced
 the first server's assets.
 
+**And clear `.next/cache/images` if you replaced a hero photograph without
+renaming it.** The four destination previews render their hero through
+`next/image`, which caches optimized variants in `.next/cache/images` keyed by
+the source URL. Replace `public/templates/hero/atoll-white.webp` in place and
+the URL does not change, so the capture silently re-shoots the OLD photograph —
+the server serves the new bytes to `curl` while the page keeps rendering the
+cached variant. That is exactly how it looked when it happened: the file on
+disk was right, the served file was right, and the screenshot was wrong.
+
+```bash
+rm -rf .next/cache/images
+```
+
+## The four destination designs
+
+Twelve of the sixteen are drawn, so stripping the demo couple's hero photo
+reveals the design. The four with `heroVariant: "destination"` are the
+opposite: the photograph IS the design, which is why they carry a
+`previewHeroImage` in `src/lib/template-registry.ts` pointing at
+`public/templates/hero/`. Without one they all collapsed to the same composed
+no-photo dusk under the same dark scrim and shipped as four colour slabs
+sharing one layout.
+
+Those four photographs are ours, generated with Higgsfield — not the demo
+couple's and not hotlinked.
+
+A note if you replace one: the hero scrim is weighted dark for white type, so a
+pale, low-contrast photograph turns grey-green under it. The first Atoll White
+photo did exactly that and had to be reshot with real tonal range, which is the
+opposite of what its own description promises ("kept pale so the water stays the
+brightest thing on the page"). Bright is fine; flat is not.
+
 ## Framing
 
 Each shot is the hero section only. The marketing band above it is page

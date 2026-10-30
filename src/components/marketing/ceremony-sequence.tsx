@@ -313,7 +313,7 @@ export function CeremonySequence() {
                   </div>
 
                   <div className="ceremony-copy min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--accent)] tabular-nums">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)] tabular-nums">
                       {String(index + 1).padStart(2, "0")} / {String(ceremonies.length).padStart(2, "0")}
                     </p>
                     {/* Plain text, NOT a link. See the note at the top of this

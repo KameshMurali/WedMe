@@ -590,7 +590,17 @@ input[type="time"]::-webkit-inner-spin-button {
      never cover the badge or the headline no matter how the type reflows. */
   --overture-drop: -3.5svh;
   --overture-drop-far: -5svh;
-  --overture-near-z: 140px;
+  /* 140px put the near plane's magnified width past the right screen edge on
+     every phone. A translateZ under `perspective: 1000px` scales by
+     1000/(1000-z), so the pill grows by W*z/(1000-z) and must still clear the
+     16px gutter. It is `flex flex-col items-start`, so the pill is
+     shrink-to-fit and gutter-capped until ~462px, where its natural 429.4px
+     width takes over — which makes the WIDEST wrapping width the binding case,
+     not the narrowest. Measured right edges at 140px ran past the viewport at
+     every phone size; 40px still clipped at 430 (iPhone 15/16 Pro Max) and
+     462. At 32px the margins are 4.17 / 3.37 / 2.84 / 2.38px at
+     390 / 414 / 430 / 462. Desktop keeps its own value below. */
+  --overture-near-z: 32px;
   --overture-far-z: 30px;
 }
 
@@ -1410,7 +1420,16 @@ input[type="time"]::-webkit-inner-spin-button {
          carry the easing, and a transition fighting an animation is how you get
          a colour that lags half a ceremony behind the words. */
       .page-wash {
-        animation: page-wash-tint linear both;
+        /* `forwards`, not `both`. `both` also applies the BEFORE phase, so
+           above the ceremony stage the first keyframe held --wash-tint at the
+           first ceremony's henna green and washed the hero and the intro olive
+           — a colour that belongs to Mehendi, 1,700px further down. `forwards`
+           fills only the after phase, so the gold hold below the stage is
+           unchanged and everything above it falls back to
+           `.page-wash { --wash-tint: var(--accent) }`, the resting value this
+           file documents. The 1.1s transition on .page-wash::before then
+           carries the change as the stage arrives. */
+        animation: page-wash-tint linear forwards;
         animation-timeline: --ceremony-track;
         animation-range: contain 0% contain 100%;
       }

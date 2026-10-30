@@ -101,7 +101,7 @@ export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
             reason the lg size step is gone: the padding is part of the resting
             strip's height budget against the hero's 96px of top padding. */}
         <ul
-          className={`hero-overture-near mb-5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 rounded-[var(--radius)] border px-3 py-1.5 text-[10px] uppercase leading-tight tracking-[0.1em] sm:mb-6 sm:gap-x-3 sm:gap-y-1 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em] ${panel}`}
+          className={`hero-overture-near mb-5 flex min-w-0 flex-wrap items-center gap-x-5 gap-y-0.5 rounded-[var(--radius)] border px-3 py-1.5 text-[10px] uppercase leading-tight tracking-[0.1em] sm:mb-6 sm:gap-x-3 sm:gap-y-1 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em] ${panel}`}
         >
           {PLATFORM_FACTS.map((fact, index) => (
             // min-w-0 on the flex items, not decoration: a flex child defaults
@@ -110,8 +110,14 @@ export function HeroOverlay({ onMedia = true }: { onMedia?: boolean }) {
             // its track instead of wrapping. This repo has been bitten by
             // exactly that (see motion-primitives.tsx:56).
             <li key={fact} className="flex min-w-0 items-center gap-2">
+              {/* The facts wrap on a phone, and when they do the separator
+                  leads the new line — a middot orphaned at the left margin,
+                  reading as a bullet rather than as a join. It is dropped
+                  below sm, where the column gap (gap-x-5, wider than the
+                  sm gap-x-3 precisely because it is now carrying the
+                  separation on its own) does the separating instead. */}
               {index > 0 ? (
-                <span aria-hidden="true" className="text-[color:var(--accent)]">
+                <span aria-hidden="true" className="hidden text-[color:var(--accent)] sm:inline">
                   &middot;
                 </span>
               ) : null}
