@@ -4,6 +4,10 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client/default";
 
 import { env } from "@/lib/env";
+// resolveExpiry is shared with the Paddle webhook. It used to be duplicated
+// here as a local `expiryFor` with its own hardcoded 18, so an admin grant and
+// a paid purchase could silently disagree about when a plan ends.
+import { resolveExpiry } from "@/lib/billing/plan-transition";
 import { plans, type PlanKey } from "@/lib/pricing";
 
 // Grants (or revokes) a paid plan for a couple by account email. Until
@@ -32,15 +36,6 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
 });
 
-// Together is priced for the wedding year: 12 months of full access plus a
-// 6-month post-wedding archive window. Forever and hello never expire.
-function expiryFor(planKey: PlanKey, activatedAt: Date): Date | null {
-  if (planKey !== "together") return null;
-  const expires = new Date(activatedAt);
-  expires.setMonth(expires.getMonth() + 18);
-  return expires;
-}
-
 async function main() {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
@@ -60,7 +55,7 @@ async function main() {
   }
 
   const activatedAt = new Date();
-  const planExpiresAt = expiryFor(requestedPlan, activatedAt);
+  const planExpiresAt = resolveExpiry(requestedPlan, activatedAt);
 
   await prisma.couple.update({
     where: { id: user.couple.id },

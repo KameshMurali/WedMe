@@ -81,6 +81,23 @@ const environmentSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.string().optional(),
   ),
+  // The same NEXT_PUBLIC_* price ids pricing.ts reads, declared here so the
+  // WEBHOOK can map a price back to a plan server-side. pricing.ts cannot be
+  // imported here (it is client-imported and must stay free of env.ts), and
+  // the webhook must not trust the plan the browser sent, so it needs its own
+  // authoritative copy. Same values, one place to set them.
+  //
+  // KEEP THESE OPTIONAL. A required var here fails the Zod parse on every
+  // preview build, which is the `Failed to collect configuration for
+  // /_not-found` failure CLAUDE.md documents at length.
+  NEXT_PUBLIC_PADDLE_PRICE_TOGETHER: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().optional(),
+  ),
+  NEXT_PUBLIC_PADDLE_PRICE_FOREVER: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().optional(),
+  ),
   // Signing secret for webhook signature verification. Without it the webhook
   // rejects every request rather than trusting unverified payloads.
   PADDLE_WEBHOOK_SECRET: z.preprocess(
@@ -115,4 +132,6 @@ export const env = environmentSchema.parse({
   REQUIRE_EMAIL_VERIFICATION: process.env.REQUIRE_EMAIL_VERIFICATION,
   PADDLE_API_KEY: process.env.PADDLE_API_KEY,
   PADDLE_WEBHOOK_SECRET: process.env.PADDLE_WEBHOOK_SECRET,
+  NEXT_PUBLIC_PADDLE_PRICE_TOGETHER: process.env.NEXT_PUBLIC_PADDLE_PRICE_TOGETHER,
+  NEXT_PUBLIC_PADDLE_PRICE_FOREVER: process.env.NEXT_PUBLIC_PADDLE_PRICE_FOREVER,
 });

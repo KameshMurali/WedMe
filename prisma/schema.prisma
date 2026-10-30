@@ -111,28 +111,41 @@ model User {
 }
 
 model Couple {
-  id              String      @id @default(cuid())
-  primaryUserId   String      @unique
-  partnerOneName  String
-  partnerTwoName  String
-  brandName       String
-  storyBlurb      String?
-  weddingDate     DateTime?
+  id                  String       @id @default(cuid())
+  primaryUserId       String       @unique
+  partnerOneName      String
+  partnerTwoName      String
+  brandName           String
+  storyBlurb          String?
+  weddingDate         DateTime?
   // Plan entitlements. Stored as a String (not a Prisma enum) so
   // src/lib/pricing.ts `PlanKey` stays the single source of truth and adding a
   // tier never requires a DB enum migration. Unknown/expired values resolve to
   // "hello" in src/server/services/plan.ts.
-  planKey         String      @default("hello") // "hello" | "together" | "forever"
-  planActivatedAt DateTime?
-  planExpiresAt   DateTime? // null = never expires (hello, forever)
-  planSource      String? // "admin_grant" | "founding_offer" | "stripe" (future)
+  planKey             String       @default("hello") // "hello" | "together" | "forever"
+  planActivatedAt     DateTime?
+  planExpiresAt       DateTime? // null = never expires (hello, forever)
+  planSource          String? // "admin_grant" | "founding_offer" | "paddle"
+  // Paddle identifiers for the purchase that granted the current plan.
+  //
+  // Without these there was no indexed link between a payment and a couple at
+  // all, so a refund could not be traced back to the workspace it should
+  // revoke, and support had nothing to look a customer up by.
+  //
+  // Deliberately no paddleSubscriptionId: both paid tiers are one-time
+  // (src/lib/pricing.ts `recurrence`), so there is no subscription to track.
+  paddleCustomerId    String?
+  paddleTransactionId String?
   // Lifetime counter backing the free-tier AI drafting teaser. Persistent on
   // purpose — RateLimitBucket rows expire, so they can't hold a lifetime quota.
-  aiDraftCount    Int         @default(0)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  primaryUser     User        @relation("PrimaryOwner", fields: [primaryUserId], references: [id], onDelete: Cascade)
-  weddingSite     WeddingSite?
+  aiDraftCount        Int          @default(0)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  primaryUser         User         @relation("PrimaryOwner", fields: [primaryUserId], references: [id], onDelete: Cascade)
+  weddingSite         WeddingSite?
+
+  // Support lookups by Paddle customer, and the reverse hop a refund needs.
+  @@index([paddleCustomerId])
 }
 
 model TemplatePreset {
@@ -244,46 +257,46 @@ model SectionConfig {
 }
 
 model StoryMilestone {
-  id               String      @id @default(cuid())
-  weddingSiteId    String
-  title            String
-  shortLabel       String?
-  eventDateLabel   String
-  description      String
-  imageUrl         String?
-  sortOrder        Int
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  weddingSite      WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  id             String      @id @default(cuid())
+  weddingSiteId  String
+  title          String
+  shortLabel     String?
+  eventDateLabel String
+  description    String
+  imageUrl       String?
+  sortOrder      Int
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  weddingSite    WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
 }
 
 model Event {
-  id               String         @id @default(cuid())
-  weddingSiteId    String
-  title            String
-  subtitle         String?
-  description      String
-  startDateTime    DateTime
-  endDateTime      DateTime
-  dayLabel         String
-  locationName     String
-  fullAddress      String
-  googleMapsUrl    String?
-  dressCode        String?
-  notes            String?
-  imageUrl         String?
-  rsvpRequired     Boolean        @default(true)
-  audience         EventAudience  @default(ALL_GUESTS)
-  contactName      String?
-  contactPhone     String?
-  sortOrder        Int
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  weddingSite      WeddingSite    @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
-  scheduleItems    ScheduleItem[]
-  dressCodeGuides  DressCodeGuide[]
-  rsvpSelections   RSVPEventSelection[]
-  guestUploads     GuestUpload[]
+  id              String               @id @default(cuid())
+  weddingSiteId   String
+  title           String
+  subtitle        String?
+  description     String
+  startDateTime   DateTime
+  endDateTime     DateTime
+  dayLabel        String
+  locationName    String
+  fullAddress     String
+  googleMapsUrl   String?
+  dressCode       String?
+  notes           String?
+  imageUrl        String?
+  rsvpRequired    Boolean              @default(true)
+  audience        EventAudience        @default(ALL_GUESTS)
+  contactName     String?
+  contactPhone    String?
+  sortOrder       Int
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  weddingSite     WeddingSite          @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  scheduleItems   ScheduleItem[]
+  dressCodeGuides DressCodeGuide[]
+  rsvpSelections  RSVPEventSelection[]
+  guestUploads    GuestUpload[]
 }
 
 model ScheduleItem {
@@ -359,37 +372,37 @@ model TravelGuideItem {
 }
 
 model DressCodeGuide {
-  id                 String      @id @default(cuid())
-  weddingSiteId      String
-  eventId            String?
-  title              String
-  guidance           String
-  palette            Json?
-  inspirationImage   String?
-  sortOrder          Int
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-  weddingSite        WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
-  event              Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  id               String      @id @default(cuid())
+  weddingSiteId    String
+  eventId          String?
+  title            String
+  guidance         String
+  palette          Json?
+  inspirationImage String?
+  sortOrder        Int
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  weddingSite      WeddingSite @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  event            Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
 }
 
 model MediaAsset {
-  id               String        @id @default(cuid())
-  weddingSiteId    String
-  category         MediaCategory
-  title            String?
-  altText          String?
-  caption          String?
-  url              String
-  storageKey       String?
-  mimeType         String?
-  sizeBytes        Int?
-  width            Int?
-  height           Int?
-  sortOrder        Int          @default(0)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  weddingSite      WeddingSite   @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  id            String        @id @default(cuid())
+  weddingSiteId String
+  category      MediaCategory
+  title         String?
+  altText       String?
+  caption       String?
+  url           String
+  storageKey    String?
+  mimeType      String?
+  sizeBytes     Int?
+  width         Int?
+  height        Int?
+  sortOrder     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  weddingSite   WeddingSite   @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
 }
 
 model EmbeddedVideo {
@@ -436,50 +449,50 @@ model Guest {
 }
 
 model RSVPResponse {
-  id                  String               @id @default(cuid())
-  weddingSiteId       String
-  inviteGroupId       String?
-  guestName           String
-  guestEmail          String?
-  guestPhone          String?
+  id                 String               @id @default(cuid())
+  weddingSiteId      String
+  inviteGroupId      String?
+  guestName          String
+  guestEmail         String?
+  guestPhone         String?
   // Normalised "name|email|phone" identity used to block duplicate RSVPs.
   // Nullable on purpose: rows created before this field existed stay NULL, and
   // Postgres treats NULLs as distinct, so the unique index below can be added
   // to a live table without any chance of colliding with existing data.
-  dedupeKey           String?
-  inviteCode          String?
-  status              RSVPStatus
-  attendeeCount       Int
+  dedupeKey          String?
+  inviteCode         String?
+  status             RSVPStatus
+  attendeeCount      Int
   // Which partner the guest is connected to, for seating/catering splits.
   // Stored as a neutral key ("PARTNER_ONE" | "PARTNER_TWO" | "BOTH") rather
   // than bride/groom so the labels can render from the couple's own names and
   // work for every kind of couple. Nullable: optional for guests, and existing
   // rows predate the field.
-  guestSide           String?
-  mealPreference      String?
-  accommodationNeeds  String?
-  travelNotes         String?
-  specialRequests     String?
-  accessibilityNeeds  String?
-  noteToCouple        String?
-  confirmedAt         DateTime?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  weddingSite         WeddingSite          @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
-  inviteGroup         InviteGroup?         @relation(fields: [inviteGroupId], references: [id], onDelete: SetNull)
-  eventSelections     RSVPEventSelection[]
+  guestSide          String?
+  mealPreference     String?
+  accommodationNeeds String?
+  travelNotes        String?
+  specialRequests    String?
+  accessibilityNeeds String?
+  noteToCouple       String?
+  confirmedAt        DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  weddingSite        WeddingSite          @relation(fields: [weddingSiteId], references: [id], onDelete: Cascade)
+  inviteGroup        InviteGroup?         @relation(fields: [inviteGroupId], references: [id], onDelete: SetNull)
+  eventSelections    RSVPEventSelection[]
 
   @@unique([weddingSiteId, dedupeKey])
 }
 
 model RSVPEventSelection {
-  id             String       @id @default(cuid())
-  responseId     String
-  eventId        String
-  status         RSVPStatus
-  createdAt      DateTime     @default(now())
-  response       RSVPResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
-  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  responseId String
+  eventId    String
+  status     RSVPStatus
+  createdAt  DateTime     @default(now())
+  response   RSVPResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([responseId, eventId])
 }
@@ -531,23 +544,23 @@ model AnalyticsEvent {
 }
 
 model PasswordResetToken {
-  id         String   @id @default(cuid())
-  userId     String
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EmailVerificationToken {
-  id         String   @id @default(cuid())
-  userId     String
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RateLimitBucket {
@@ -572,16 +585,26 @@ model RateLimitBucket {
 // replayed event must never grant a plan twice. Payload is kept verbatim for
 // reconciliation and support.
 model PaymentEvent {
-  id            String   @id @default(cuid())
-  paddleEventId String   @unique
-  eventType     String
-  status        String   @default("received") // "received" | "applied" | "unmapped" | "ignored"
-  userId        String?
-  planKey       String?
-  payload       Json
-  createdAt     DateTime @default(now())
+  id                  String   @id @default(cuid())
+  paddleEventId       String   @unique
+  eventType           String
+  // "received" is a TRANSIENT state, not a terminal one: the row is written
+  // before the entitlement is granted, so a row still reading "received" means
+  // a previous attempt died between the two. The webhook treats it as work to
+  // resume, never as work already done.
+  status              String   @default("received") // "received" | "applied" | "unmapped" | "ignored" | "revoked"
+  userId              String?
+  planKey             String?
+  // The transaction this event concerns. An adjustment (refund, chargeback)
+  // names the transaction it reverses, which is how it is traced back to the
+  // couple to revoke.
+  paddleTransactionId String?
+  payload             Json
+  createdAt           DateTime @default(now())
 
   @@index([createdAt])
+  @@index([userId])
+  @@index([paddleTransactionId])
 }
 
 model WaitlistSignup {
