@@ -116,7 +116,7 @@ Couples edit content in draft state. The "Publish" action serializes the entire 
 
 ### Auth
 
-Custom email/password auth — no OAuth. Passwords hashed with bcryptjs. Sessions are signed JWTs (jose) stored as httpOnly cookies (`AUTH_COOKIE_NAME` from `src/lib/constants.ts`). Session max-age is 14 days. Key session functions live in `src/server/auth/session.ts`:
+Custom email/password auth — no OAuth. Passwords hashed with bcryptjs. Sessions are signed JWTs (jose) stored as httpOnly cookies (`authCookieName` from `src/lib/constants.ts`). Session max-age is 14 days. Key session functions live in `src/server/auth/session.ts`:
 - `getSession()` / `getCurrentUser()` — returns null if unauthenticated
 - `requireUser()` — throws redirect to `/login` if unauthenticated
 - `requireAdmin()` — checks against `ADMIN_EMAILS` env var
@@ -144,14 +144,72 @@ Database-backed via the `RateLimitBucket` Prisma model. Applied to login, RSVP, 
 
 ### Server / client boundary
 - Files with `"use server"` are server actions — never import client-only code there.
-- Prisma is only ever imported from `@/server/prisma` (singleton). Never instantiate it elsewhere.
-- `src/lib/env.ts` exports a Zod-validated environment object — use it instead of `process.env` directly.
+- Prisma is only ever imported from `@/server/prisma` (singleton) inside `src/`.
+  The standalone CLI scripts (`scripts/*.ts`, `prisma/seed.ts`) do construct
+  their own `PrismaClient` — they run outside Next, where the singleton's
+  hot-reload guard is meaningless and the adapter needs building anyway. That is
+  the only sanctioned exception.
+- `src/lib/env.ts` exports a Zod-validated environment object — use it instead of
+  `process.env` for server configuration. Three things stay on raw `process.env`
+  on purpose:
+  - `NEXT_PUBLIC_*` read by a client-importable module. `src/lib/pricing.ts` is
+    imported by client components, so it cannot import `env.ts`; it reads
+    `process.env.NEXT_PUBLIC_*` directly, which Next inlines at build time.
+    Server-only secrets must never be referenced from there.
+  - `src/lib/constants.ts` reads `process.env.APP_URL` for `siteUrl` (canonicals,
+    OG, sitemap). That one is server-side on purpose: referencing `siteUrl` from
+    client code makes Next inline whatever host the build ran on, which once put
+    `127.0.0.1:3000` into the signup page. `publicSiteDomain` is a hardcoded
+    literal for exactly that reason — use it in client components.
+  - Platform flags that are not in the schema: `NODE_ENV`, `VERCEL`,
+    `TEMPLATE_GALLERY`.
 
 ### Validation
-Zod schemas live in `src/lib/validations/`. Server actions re-validate with the same schemas used by the frontend forms (React Hook Form + Zod).
+Zod, everywhere, and the server never trusts the client's copy.
+
+A schema shared between a server action and its form lives in
+`src/lib/validations/` and is imported by both — `registerSchema`
+(`validations/auth.ts`) is parsed in `actions/auth.ts` *and* in
+`register-form.tsx`, so the same rules hold on both sides.
+
+That is the pattern to follow for new work, but it is not yet universal and the
+exceptions are deliberate rather than accidental:
+
+- A schema with one consumer is declared next to it — `actions/waitlist.ts`,
+  `actions/site-unlock.ts` and the API routes under `src/app/api/` all do this.
+- `rsvp-form.tsx` builds its own `buildClientRsvpSchema(hasEvents)` because the
+  client rule is conditional (the event minimum only applies when the site has
+  events); `validations/rsvp.ts` holds the server schema the API route parses.
+
+Whatever the form does, the server-side action or route re-parses the input
+itself. Client validation is UX, never a gate.
 
 ### Server action response shape
-All server actions return `ActionState` from `src/lib/action-state.ts` — a discriminated union with `{ success: true, data }` or `{ success: false, error }`.
+Server actions return `ActionState` from `src/lib/action-state.ts`. It is a flat
+object of optional fields, **not** a discriminated union, and it carries no `data`:
+
+```ts
+type ActionState = {
+  error?: string;                        // one message for the whole form
+  success?: string;                      // a message, NOT a boolean
+  fieldErrors?: Record<string, string>;  // field name -> message
+};
+```
+
+- `success` is the text shown to the user (`"Site basics saved to draft."`), so
+  `if (state.success)` is a truthiness check on a string. There is no
+  `success: true`.
+- `fieldErrors` is how per-field validation reaches the UI.
+  `register-form.tsx` reads it to drive `aria-invalid`, `aria-describedby` and
+  `<FieldError>`. A validation failure returns **both** a summary `error` and
+  `fieldErrors`.
+- `initialActionState` (`{}`) is the seed for `useActionState`, which is why the
+  signature is `(previousState: ActionState, formData: FormData) =>
+  Promise<ActionState>`.
+- Actions that need one more signal intersect rather than widen the base type:
+  `export type LoginActionState = ActionState & { needsVerification?: boolean }`.
+- Many actions never return at all on success — they `redirect()`. Returning a
+  `success` message is for the forms that stay on the page.
 
 ### Constants
 Reserved slugs, section labels, and the auth cookie name are in `src/lib/constants.ts`. Don't hardcode these values inline.
