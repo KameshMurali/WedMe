@@ -75,14 +75,14 @@ export const demoSiteSnapshot = {
     tagline: "A celebration of love, family, and new beginnings",
     weddingDate: weddingDate.toISOString(),
     heroImageUrl:
-      "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1600&q=80",
+      "/demo/hero.webp",
     heroVideoUrl: null,
     locationSummary: "Dubai, United Arab Emirates",
     seoTitle: "KamMonBeginnings | Kamesh & Monisha Wedding",
     seoDescription:
       "Celebrate Kamesh and Monisha’s wedding journey with event details, RSVP, gallery, memories, and guest guidance.",
     ogImageUrl:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80",
+      "/demo/og.webp",
     canonicalUrl: baseUrl,
     coupleNames: "Kamesh & Monisha",
   },
@@ -126,7 +126,7 @@ export const demoSiteSnapshot = {
       description:
         "What started as a thoughtful conversation quickly became our favourite part of every week. We found ease, humour, and home in each other.",
       imageUrl:
-        "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+        "/demo/met.webp",
     },
     {
       id: "story-first-trip",
@@ -136,7 +136,7 @@ export const demoSiteSnapshot = {
       description:
         "A spontaneous getaway turned into one of our favourite memories, full of long walks, coffee stops, and the feeling that this was becoming something real.",
       imageUrl:
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        "/demo/trip.webp",
     },
     {
       id: "story-proposal",
@@ -146,7 +146,7 @@ export const demoSiteSnapshot = {
       description:
         "With family close in spirit and a setting that felt deeply us, one question turned into the easiest yes of our lives.",
       imageUrl:
-        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+        "/demo/proposal.webp",
     },
     {
       id: "story-engagement",
@@ -156,7 +156,7 @@ export const demoSiteSnapshot = {
       description:
         "From intimate dinners to joyful gatherings, this season reminded us how held and loved we are by the people around us.",
       imageUrl:
-        "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+        "/demo/details.webp",
     },
     {
       id: "story-wedding-journey",
@@ -166,7 +166,7 @@ export const demoSiteSnapshot = {
       description:
         "We’re now counting down to a weekend of colour, family, music, and vows. Thank you for being part of this beginning.",
       imageUrl:
-        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
+        "/demo/journey.webp",
     },
   ],
   events: [
@@ -185,7 +185,7 @@ export const demoSiteSnapshot = {
       dressCode: "Pastel festive wear",
       notes: "Traditional wear encouraged. Comfortable sandals recommended for lawn areas.",
       imageUrl:
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=80",
+        "/demo/venue.webp",
       rsvpRequired: true,
       audience: "ALL_GUESTS",
       contactName: "Asha",
@@ -206,7 +206,7 @@ export const demoSiteSnapshot = {
       dressCode: "Yellow, ivory, or floral festive wear",
       notes: "Bring a change of footwear if you plan to join the playful haldi moments.",
       imageUrl:
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=80",
+        "/demo/venue.webp",
       rsvpRequired: true,
       audience: "FAMILY_ONLY",
       contactName: "Ritika",
@@ -227,7 +227,7 @@ export const demoSiteSnapshot = {
       dressCode: "Jewel tones and evening glam",
       notes: "Guest performances begin at 7 PM sharp.",
       imageUrl:
-        "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+        "/demo/details.webp",
       rsvpRequired: true,
       audience: "ALL_GUESTS",
       contactName: "Nivetha",
@@ -248,7 +248,7 @@ export const demoSiteSnapshot = {
       dressCode: "Traditional wedding attire",
       notes: "Please be seated by 9:10 AM. Ceremony photography is permitted only from designated areas.",
       imageUrl:
-        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+        "/demo/proposal.webp",
       rsvpRequired: true,
       audience: "ALL_GUESTS",
       contactName: "Karthik",
@@ -269,7 +269,7 @@ export const demoSiteSnapshot = {
       dressCode: "Black tie optional",
       notes: "Dinner seating opens at 7 PM. Valet service is available on arrival.",
       imageUrl:
-        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
+        "/demo/journey.webp",
       rsvpRequired: true,
       audience: "ALL_GUESTS",
       contactName: "Asha",
@@ -431,7 +431,7 @@ export const demoSiteSnapshot = {
       title: "Mehendi palette",
       guidance: "Pastels, florals, and easy festive silhouettes that move well for an outdoor evening.",
       inspirationImage:
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=80",
+        "/demo/venue.webp",
       palette: ["#E9C7B8", "#C8D9C0", "#F6E3B4"],
       eventTitle: "Mehendi",
     },
@@ -440,7 +440,7 @@ export const demoSiteSnapshot = {
       title: "Ceremony styling",
       guidance: "Traditional wear is warmly encouraged. Rich silks, elegant jewellery, and classic palettes will fit beautifully.",
       inspirationImage:
-        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+        "/demo/proposal.webp",
       palette: ["#8C2F39", "#E6C58A", "#F5EFE6"],
       eventTitle: "Wedding Ceremony",
     },
@@ -449,7 +449,7 @@ export const demoSiteSnapshot = {
       title: "Reception elegance",
       guidance: "Black tie optional. Think tailored eveningwear, statement jewellery, and refined formal looks.",
       inspirationImage:
-        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
+        "/demo/journey.webp",
       palette: ["#111827", "#D4AF37", "#F9FAFB"],
       eventTitle: "Reception",
     },
@@ -459,17 +459,17 @@ export const demoSiteSnapshot = {
       id: "media-hero",
       category: "HERO",
       title: "Hero portrait",
-      altText: "Kamesh and Monisha smiling together",
+      altText: "Kamesh and Monisha’s hands resting together, her mehendi and gold bangles against his ivory sherwani",
       caption: "The beginning of KamMonBeginnings",
-      url: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80",
+      url: "/demo/og.webp",
     },
     {
       id: "media-gallery-1",
       category: "GALLERY",
       title: "Pre-wedding portrait",
-      altText: "Couple portrait by the water",
+      altText: "The two of them in silhouette at the water’s edge at dusk, city lights across the bay",
       caption: "Quiet moments before the celebrations begin.",
-      url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+      url: "/demo/met.webp",
     },
     {
       id: "media-gallery-2",
@@ -477,31 +477,31 @@ export const demoSiteSnapshot = {
       title: "Celebration detail",
       altText: "Wedding celebration details",
       caption: "Details that feel like us.",
-      url: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+      url: "/demo/details.webp",
     },
     {
       id: "media-gallery-3",
       category: "GALLERY",
       title: "Proposal memory",
-      altText: "Proposal memory photo",
+      altText: "An open ring box held up at sunset, the proposal happening out of focus behind it",
       caption: "The yes that changed everything.",
-      url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+      url: "/demo/proposal.webp",
     },
     {
       id: "media-gallery-4",
       category: "GALLERY",
       title: "Editorial portrait",
-      altText: "Elegant editorial couple portrait",
+      altText: "Kamesh and Monisha walking away hand in hand at golden hour, the Dubai skyline behind them",
       caption: "A frame from our favourite season of life.",
-      url: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80",
+      url: "/demo/hero.webp",
     },
     {
       id: "media-gallery-5",
       category: "GALLERY",
       title: "Weekend teaser",
-      altText: "Celebration teaser image",
+      altText: "A mandap lit with lamps and marigold garlands at blue hour, the two of them walking toward it",
       caption: "See you on the dance floor.",
-      url: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
+      url: "/demo/journey.webp",
     },
   ],
   embeddedVideos: [
@@ -554,7 +554,7 @@ export const demoGuestUploads: PublicGuestUpload[] = [
     submitterName: "Priya Nair",
     caption: "Dance floor rehearsal joy",
     message: "Already obsessed with the sangeet energy.",
-    url: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+    url: "/demo/og.webp",
     externalUrl: null,
     createdAt: new Date("2027-02-15T10:00:00.000Z"),
     event: {
@@ -978,7 +978,7 @@ export const demoDashboardSite = {
       submitterName: "Priya Nair",
       caption: "Dance floor rehearsal joy",
       message: "Already obsessed with the sangeet energy.",
-      url: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+      url: "/demo/og.webp",
       externalUrl: null,
       storageKey: null,
       mimeType: "image/jpeg",
