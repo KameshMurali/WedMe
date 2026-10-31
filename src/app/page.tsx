@@ -238,7 +238,23 @@ export default async function HomePage() {
         boundary. See globals.css — it is deliberately the hero's WARMTH rather
         than the film's saturation, which would fight the sixteen template
         palettes further down. */}
-    <main className="page-wash band-ink pb-24">
+    {/* THE INK CANVAS — and the footer is inside it, which is the point of the
+        wrapper rather than an accident of nesting.
+        .page-wash and .band-ink used to live on <main>, which made the token
+        scope end at </main> while the PAINT did not: .page-wash::before is
+        `position: fixed; inset: 0`, so it covered the strip the sibling
+        <MarketingFooter /> rendered in, and .page-wash's `isolation: isolate`
+        made <main> an atomically-painted stacking context that the root paints
+        AFTER the static footer — so main's ink wash landed on top of the footer
+        text and erased it (0 glyph pixels in the raster, measured at every
+        width), with the footer's own tokens meanwhile resolving to the :root
+        LIGHT set, #514a60 muted on #140e24 ink, 2.0-2.2:1 if it had survived.
+        Wrapping both in the scope makes the two boundaries the same boundary:
+        the footer reads the ink tokens it is painted on, and it paints inside
+        the same stacking context as the wash instead of under it. The spacing
+        is unchanged — main keeps its pb-24, the footer its mt-20. */}
+    <div className="page-wash band-ink">
+    <main className="pb-24">
       {/* Site chrome. This used to live inside the hero panel, above a divider
           rule. The hero is now a full-bleed band, so the chrome sits in its own
           shell above it rather than being furniture inside the artwork. */}
@@ -393,8 +409,27 @@ export default async function HomePage() {
                   over the footage it would be unreadable, and white would be
                   unreadable on the gradient. One condition, applied
                   consistently, rather than a second hero component. */}
+              {/* A DARK PLATE OVER FOOTAGE, not a white veil.
+                  `bg-white/15 text-white/90` is white type on a 15% white wash
+                  over whatever frame is behind it, which is the one combination
+                  that cannot be made to work: the wash lightens the backdrop by
+                  roughly as much as the type, so the pair tracks each other and
+                  the ratio stays put wherever the film goes. Measured 3.33:1 at
+                  390 and 3.87:1 at 1440, against 4.5 required.
+                  HeroOverlay already solved this for the facts strip directly
+                  above — `bg-[rgba(20,14,36,0.72)]` with white type — because a
+                  plate that DARKENS is the only one that holds a floor under
+                  white glyphs no matter which frame is underneath. Same case,
+                  same treatment, so the two pills in the same corner of the
+                  band now also match instead of merely coexisting. */}
               <div className="animate-fade-rise">
-                <Badge className={heroMedia ? "bg-white/15 text-white/90 backdrop-blur-sm" : undefined}>
+                <Badge
+                  className={
+                    heroMedia
+                      ? "border-white/15 bg-[rgba(20,14,36,0.72)] text-white backdrop-blur-sm"
+                      : undefined
+                  }
+                >
                   Craft Your Celebration
                 </Badge>
               </div>
@@ -769,6 +804,7 @@ export default async function HomePage() {
       </section>
     </main>
     <MarketingFooter />
+    </div>
     </>
   );
 }

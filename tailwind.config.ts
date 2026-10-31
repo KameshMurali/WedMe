@@ -36,8 +36,33 @@ const config: Config = {
         card: "0 20px 65px rgba(37, 19, 22, 0.08)",
       },
       backgroundImage: {
+        // TOKEN-DRIVEN ON PURPOSE, and it has to stay that way.
+        //
+        // This was three hardcoded cream literals — rgba(255,255,255,0.75) over
+        // rgba(246,236,231)->rgba(255,245,238) — left behind when the marketing
+        // page inverted to the dark .band-ink scope. A decoration carrying its
+        // own colour cannot follow a scope, so the mesh went on painting cream
+        // inside the ink header pill (`absolute inset-0 bg-hero-mesh opacity-90`
+        // in page.tsx) while the text above it still resolved .band-ink's
+        // near-white --text: 1.17:1, measured. The public templates had the
+        // mirror of the same bug — every one of the sixteen got the same beige
+        // placeholder regardless of its palette, and the dark ones got a pale
+        // slab (see the note in components/public/sections.tsx).
+        //
+        // Anchored to --surface, which is by definition the panel colour that
+        // the scope's --text and --muted are chosen against, so the mesh is
+        // correct in BOTH scopes with one value: dark violet inside .band-ink,
+        // near-white on paper, and the template's own surface on a wedding site.
+        // Only --surface/--background/--primary/--accent appear here: those are
+        // the four that site-shell.tsx publishes per template. --elevated is
+        // NOT one of them, so using it would fall back to :root's #ffffff and
+        // drop a white radial into every dark template.
+        //
+        // Keep the tints small. They are the only thing that can carry the mesh
+        // away from --surface, and --muted on --surface is the tightest pair on
+        // the page (measured 5.6:1 at these percentages inside .band-ink).
         "hero-mesh":
-          "radial-gradient(circle at top left, rgba(255,255,255,0.75), transparent 38%), radial-gradient(circle at top right, rgba(184,140,74,0.20), transparent 32%), linear-gradient(135deg, rgba(246,236,231,1) 0%, rgba(255,250,247,1) 45%, rgba(255,245,238,1) 100%)",
+          "radial-gradient(circle at top left, color-mix(in srgb, var(--primary) 10%, var(--surface)), transparent 38%), radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 12%, transparent), transparent 32%), linear-gradient(135deg, color-mix(in srgb, var(--background) 40%, var(--surface)) 0%, var(--surface) 45%, color-mix(in srgb, var(--accent) 8%, var(--surface)) 100%)",
       },
       keyframes: {
         "fade-up": {

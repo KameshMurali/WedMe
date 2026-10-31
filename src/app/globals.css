@@ -146,6 +146,12 @@
    the only absolutely-positioned descendant, .rite-field, already has a nearer
    positioned parent in .rite-band. */
 .band-light {
+  /* The seam height, named once. ::before hangs a ramp of exactly this height
+     ABOVE the band, and the band reserves exactly this much empty ink for it to
+     land on (see margin-top below). Two hand-kept copies of 96px would drift
+     apart and put the ramp back on top of live text. */
+  --seam: 96px;
+
   /* The full light token set, not just a background. This band sits INSIDE
      .band-ink, so `var(--background)` here would already have resolved to ink —
      painting with it would have made the band invisible, which is exactly what
@@ -166,6 +172,21 @@
   position: relative;
   background: var(--background);
   color: var(--text);
+
+  /* THE SEAM'S OWN ROOM, and it is load-bearing rather than spacing.
+     ::before is `position: absolute; top: calc(-1 * var(--seam))`, so it paints
+     OUTSIDE this box, over the tail of the preceding .band-ink section — and
+     because this band is positioned it paints above that earlier sibling's
+     in-flow content, not just behind it. The section before this one ends with
+     CeremonySequence's three-link CTA row, whose last line box ended exactly at
+     this band's top edge, so all of it sat inside the ramp: .band-ink's
+     near-white --text under a gradient resolving to .band-light's paper
+     --background measured 1.29:1 at 768/1440 and 1.11:1 at the worst pixels at
+     390. A seam cannot be given a colour that suits both scopes — ink above,
+     paper below is the whole point — so the fix is to keep content out of it.
+     Reserving --seam here means the ramp always starts at the previous
+     section's bottom edge and crosses nothing but empty ink. */
+  margin-top: var(--seam);
 }
 
 /* The upper seam: 96px of ink resolving into paper, then 1px of foil.
@@ -177,8 +198,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: -96px;
-  height: 96px;
+  top: calc(-1 * var(--seam));
+  height: var(--seam);
   background: linear-gradient(180deg, transparent, var(--background));
   pointer-events: none;
 }
@@ -1508,10 +1529,21 @@ input[type="time"]::-webkit-inner-spin-button {
    layer instead of repainting the document background.
    --------------------------------------------------------------------------- */
 /* `isolation: isolate` is required, not tidying. The wash below is
-   `position: fixed; z-index: -1`, and <main> is not a stacking context, so that
-   pseudo-element resolves into the ROOT stacking context — above the canvas but
-   BELOW <main>'s own background box. Setting a background on .page-wash without
-   this would therefore hide the wash completely, with no error.
+   `position: fixed; z-index: -1`, and the wrapper is not otherwise a stacking
+   context, so that pseudo-element resolves into the ROOT stacking context —
+   above the canvas but BELOW the wrapper's own background box. Setting a
+   background on .page-wash without this would therefore hide the wash
+   completely, with no error.
+
+   The flip side cost a whole footer. isolation makes this element a stacking
+   context painted ATOMICALLY in the root's z-index:0 pass (CSS 2.1 E.2 step 8),
+   i.e. AFTER every static in-flow sibling that follows it. While .page-wash sat
+   on <main> and <MarketingFooter /> was main's next sibling, main's fixed wash
+   was therefore painted straight over the footer's glyphs — 0 surviving pixels,
+   not merely low contrast — and the footer, being outside .band-ink, resolved
+   the :root LIGHT tokens on top of that. So this class must be on an element
+   that CONTAINS everything the fixed wash covers, which on the marketing home
+   page means <main> and the footer together; page.tsx has the full note.
 
    isolation does not create a containing block for fixed-position descendants,
    so the wash stays viewport-anchored, and it does not create a scroll
@@ -1564,7 +1596,8 @@ input[type="time"]::-webkit-inner-spin-button {
 
      A named view timeline is only visible to DESCENDANTS of the element that
      declares it. --ceremony-track is declared on .ceremony-track, and
-     .page-wash is <main> — its ANCESTOR — so the lookup silently failed.
+     .page-wash is the canvas wrapper around <main> — its ANCESTOR — so the
+     lookup silently failed.
      timeline-scope hoists the name up to this element so an ancestor can
      reference a timeline its own descendant defines, which is precisely the
      shape here: the ceremony stage drives the colour of the whole page. */
@@ -1648,7 +1681,8 @@ input[type="time"]::-webkit-inner-spin-button {
 /* THE DRAIN, which until now did nothing at all.
    ---------------------------------------------------------------------------
    `.rite-drain` set `--wash-tint: var(--background)` on a <section> INSIDE
-   <main>. But the wash is `.page-wash::before`, a pseudo-element OF <main>, so
+   the canvas. But the wash is `.page-wash::before`, a pseudo-element OF the
+   canvas wrapper, so
    it reads the token from <main> and a descendant can never reach it. The 1.1s
    transition the old comment credited with carrying the drain out had nothing
    to carry.
