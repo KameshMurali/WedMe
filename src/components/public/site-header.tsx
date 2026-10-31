@@ -152,31 +152,31 @@ export function SiteHeader({
               was also its biggest leak. The second pill closes it, and it
               works for a visitor who arrived on a shared link too. */}
           {showBackToPlatformHome ? (
-            <div className="relative flex flex-wrap items-center gap-2 border-b border-black/5 px-5 py-3 group-data-[collapsed=true]:hidden sm:px-6 lg:group-data-[collapsed=true]:block">
+            <div className="relative flex items-center gap-2 border-b border-black/5 px-4 py-1.5 group-data-[collapsed=true]:hidden sm:px-6">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-full panel-soft border border-[color:var(--accent)]/20 px-4 py-2 text-sm font-medium text-[color:var(--text)] transition hover:opacity-80"
+                className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full panel-soft border border-[color:var(--accent)]/20 px-3 py-1 text-xs font-medium text-[color:var(--text)] transition hover:opacity-80"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-3.5 w-3.5" />
                 Back to Home
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 rounded-full border border-transparent bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-[color:var(--primary-ink,#fff)] transition hover:opacity-90"
+                className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-transparent bg-[color:var(--primary)] px-3 py-1 text-xs font-semibold text-[color:var(--primary-ink,#fff)] transition hover:opacity-90"
               >
                 Make your own free
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           ) : null}
-          <div className="relative flex flex-col gap-5 px-5 py-4 transition-[padding,gap] duration-300 group-data-[collapsed=true]:gap-3 group-data-[collapsed=true]:py-2 sm:px-6 lg:group-data-[collapsed=true]:gap-5 lg:group-data-[collapsed=true]:py-4">
+          <div className="relative flex flex-col gap-3 px-4 py-3 transition-[padding,gap] duration-300 group-data-[collapsed=true]:gap-2 group-data-[collapsed=true]:py-1.5 sm:px-6 lg:group-data-[collapsed=true]:gap-3 lg:group-data-[collapsed=true]:py-2.5">
             {/* Full brand + action row — hidden on mobile once collapsed, always shown on desktop */}
-            <div className="flex flex-col gap-5 group-data-[collapsed=true]:hidden lg:flex-row lg:items-center lg:justify-between lg:group-data-[collapsed=true]:flex">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[1.3rem] bg-[color:var(--accent)]/16 text-[color:var(--primary)]">
-                  <Sparkles className="h-5 w-5" />
+            <div className="flex flex-col gap-3 group-data-[collapsed=true]:hidden lg:flex-row lg:items-center lg:justify-between lg:group-data-[collapsed=true]:flex">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1.1rem] bg-[color:var(--accent)]/16 text-[color:var(--primary)]">
+                  <Sparkles className="h-4 w-4" />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {/* The brand-name badge sat here, directly above the couple's
                       names below, so a guest read "KAMMONBEGINNINGS" and then
                       "Kamesh & Monisha". The names are the better version. */}
@@ -187,10 +187,10 @@ export function SiteHeader({
                     </span>
                   </div>
                   <div>
-                    <p className="font-display text-3xl leading-none text-[color:var(--text)] sm:text-4xl">
+                    <p className="font-display text-2xl leading-none text-[color:var(--text)] sm:text-3xl">
                       {coupleNames}
                     </p>
-                    <p className="mt-2 inline-flex items-center gap-2 text-sm text-[color:var(--muted)]">
+                    <p className="mt-1 inline-flex items-center gap-2 text-sm text-[color:var(--muted)]">
                       <MapPin className="h-4 w-4" />
                       {locationSummary ?? "A beautifully planned celebration awaits."}
                     </p>
@@ -224,7 +224,7 @@ export function SiteHeader({
               className="no-scrollbar overflow-x-auto px-1 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] [-webkit-mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]"
             >
               <div className="flex min-w-max justify-center">
-                <div className={cn("flex items-center gap-2 rounded-full p-1.5", getNavRailClasses(isDark))}>
+                <div className={cn("flex items-center gap-1 rounded-full p-1", getNavRailClasses(isDark))}>
                   {visibleNavItems.map((item) => {
                     const href = `/${slug}${item.href}` as Route;
                     const active = activeHref === href || (item.href === "" && activeHref === `/${slug}`);

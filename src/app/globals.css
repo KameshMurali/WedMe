@@ -315,6 +315,40 @@ a {
      actually be #201625. `color` is re-anchored for the same reason the band
      scopes are — the text inside would otherwise inherit the paper band's
      near-black and sit on its own dark surface. */
+  /* Full-bleed photographic breathers at the two seams in the lower ink run.
+     Height is a band, not a hero: tall enough to register as a place, short
+     enough that it never competes with the sections either side. */
+  .breather {
+    height: 190px;
+  }
+
+  @media (min-width: 640px) {
+    .breather {
+      height: 260px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .breather {
+      height: 320px;
+    }
+  }
+
+  /* Fades into the page ground at top and bottom so the band ends in the page
+     rather than against it, and darkens the middle so the gold ornament reads
+     over lantern light. --background is the ink here because the divider sits
+     inside .band-ink. */
+  .breather-scrim {
+    background:
+      linear-gradient(
+        to bottom,
+        var(--background) 0%,
+        color-mix(in srgb, var(--background) 55%, transparent) 28%,
+        color-mix(in srgb, var(--background) 55%, transparent) 72%,
+        var(--background) 100%
+      );
+  }
+
   .template-swatch {
     background-color: var(--surface);
     color: var(--text);

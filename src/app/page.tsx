@@ -698,7 +698,7 @@ export default async function HomePage() {
         </Card>
       </section>
 
-      <OrnamentDivider kind="girih" />
+      <OrnamentDivider kind="girih" image="/marketing/breather-girih.webp" />
 
       <section className="section-shell mt-20">
         <div className="scroll-reveal">
@@ -724,7 +724,7 @@ export default async function HomePage() {
       {/* Closing waitlist band. Until this existed, the only way to join was
           inside a pricing card on /pricing — so anyone arriving on the bare
           domain from a link or a post had no way in and simply left. */}
-      <OrnamentDivider kind="chapel" />
+      <OrnamentDivider kind="chapel" image="/marketing/breather-chapel.webp" />
 
       <section className="section-shell mt-20">
         <Card className="scroll-reveal mx-auto max-w-3xl text-center">
