@@ -302,19 +302,45 @@ export function TempleFrame() {
 // ghost. In the reference invitations the towers flank the TEXT — the arch is
 // the frame for the content, not wallpaper behind it — so these sit inside the
 // card and carry full weight.
-export function TempleHeroArch() {
+/**
+ * `onPhoto` is not a style option — it decides what the ornament is FOR.
+ *
+ * Without a photograph the drawn towers ARE the hero: there is nothing else in
+ * the frame, so they carry it. Once the design's own photograph is behind them
+ * — and that photograph is a real gopuram — drawing a second gopuram over it is
+ * redundant and muddled. This was built, looked at, and thrown away: a drawn
+ * temple on top of a photographed temple read worse than the flat version it
+ * replaced.
+ *
+ * So over a photograph the towers retire and the identity is carried by the
+ * pieces the photograph does NOT supply: the peacocks, and the toran garland
+ * rendered by the caller. Jewellery on a picture, rather than the picture.
+ */
+export function TempleHeroArch({ onPhoto = false }: { onPhoto?: boolean }) {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <GopuramTower className="absolute left-0 top-0 h-[30rem] w-28 text-[color:var(--primary)] opacity-25 sm:w-40 sm:opacity-[0.55] lg:w-52" />
-      <GopuramTower
-        flip
-        className="absolute right-0 top-0 h-[30rem] w-28 text-[color:var(--primary)] opacity-25 sm:w-40 sm:opacity-[0.55] lg:w-52"
+      {onPhoto ? null : (
+        <>
+          <GopuramTower className="absolute left-0 top-0 h-[30rem] w-28 text-[color:var(--primary)] opacity-25 sm:w-40 sm:opacity-[0.55] lg:w-52" />
+          <GopuramTower
+            flip
+            className="absolute right-0 top-0 h-[30rem] w-28 text-[color:var(--primary)] opacity-25 sm:w-40 sm:opacity-[0.55] lg:w-52"
+          />
+        </>
+      )}
+      {/* Peacocks perched at the tower bases, facing inward. Shown on phones
+          too once they are the only ornament left in the band — `hidden` was
+          affordable while two towers carried the composition behind them. */}
+      <Peacock
+        className={`absolute left-8 top-[19rem] h-44 text-[color:var(--accent)] lg:left-24 ${
+          onPhoto ? "block opacity-95" : "hidden opacity-80 sm:block"
+        }`}
       />
-      {/* Peacocks perched at the tower bases, facing inward */}
-      <Peacock className="absolute left-8 top-[19rem] hidden h-44 text-[color:var(--accent)] opacity-80 sm:block lg:left-24" />
       <Peacock
         flip
-        className="absolute right-8 top-[19rem] hidden h-44 text-[color:var(--accent)] opacity-80 sm:block lg:right-24"
+        className={`absolute right-8 top-[19rem] h-44 text-[color:var(--accent)] lg:right-24 ${
+          onPhoto ? "block opacity-95" : "hidden opacity-80 sm:block"
+        }`}
       />
     </div>
   );

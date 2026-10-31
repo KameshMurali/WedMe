@@ -25,6 +25,20 @@ type TemplateRegistryEntry = {
   // one layout — including Atoll White, which is described as "kept pale so
   // the water stays the brightest thing on the page" and came out dark teal.
   previewHeroImage?: string;
+  // The design's OWN photographic ground, shown behind the drawn ornament.
+  //
+  // The twelve ornamented designs shipped with no photography at all: their
+  // hero was a drawn SVG on a tinted field, which is why real couples called
+  // them "very basic". The ornament stays - the owner's decision - but it now
+  // sits ON a photograph instead of being the whole picture, because the two
+  // do different jobs: the photograph carries material, light and depth, the
+  // ornament carries the graphic identity.
+  //
+  // Distinct from previewHeroImage, which only dresses the /templates preview
+  // with a stand-in couple photo. This is part of the design itself, so it
+  // renders on a real couple's site too and sits BEHIND their own hero photo
+  // rather than competing with it.
+  heroBackdrop?: string;
   // Drives the page chrome: backdrop, footer panel and header treatment.
   // These used to be switch statements over template keys, written when there
   // were five templates; the eleven added since all fell through to the
@@ -60,6 +74,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "A luminous editorial layout with refined serif typography and warm ivory surfaces.",
     mood: "Timeless luxury",
     previewGradient: "linear-gradient(135deg, #fffaf5 0%, #f1e7dc 45%, #d8b98c 100%)",
+    heroBackdrop: "/templates/hero/classic-elegant.webp",
     heroVariant: "classic",
     chromeStyle: "wash",
     cardVariant: "glass",
@@ -101,6 +116,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Soft petals, layered blush gradients, and a dreamy tone built for emotionally rich storytelling.",
     mood: "Garden romance",
     previewGradient: "linear-gradient(135deg, #fff8fb 0%, #f9dce5 40%, #f0b3c6 100%)",
+    heroBackdrop: "/templates/hero/floral-romantic.webp",
     heroVariant: "editorial",
     chromeStyle: "wash",
     cardVariant: "soft",
@@ -142,6 +158,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "A crisp, restrained system with generous whitespace, elegant contrast, and premium restraint.",
     mood: "Modern luxury",
     previewGradient: "linear-gradient(135deg, #ffffff 0%, #f1f0ed 50%, #c8c0b4 100%)",
+    heroBackdrop: "/templates/hero/minimal-luxury.webp",
     heroVariant: "split",
     chromeStyle: "grid",
     cardVariant: "outline",
@@ -183,6 +200,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Darker, moodier layers designed for video-led storytelling and dramatic event presentation.",
     mood: "Cinematic celebration",
     previewGradient: "linear-gradient(135deg, #1f1c2c 0%, #3a2f4f 45%, #7f5f89 100%)",
+    heroBackdrop: "/templates/hero/cinematic-modern.webp",
     heroVariant: "cinematic",
     chromeStyle: "vignette",
     cardVariant: "glass",
@@ -224,6 +242,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "A vibrant cultural template that balances ceremony richness with practical event guidance.",
     mood: "Festive heritage",
     previewGradient: "linear-gradient(135deg, #fff6ec 0%, #f4d8b2 45%, #c45d24 100%)",
+    heroBackdrop: "/templates/hero/traditional-celebration.webp",
     heroVariant: "celebration",
     chromeStyle: "radiant",
     cardVariant: "shadow",
@@ -265,6 +284,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Carved gopuram towers, a hanging mango-leaf toran and peacocks in terracotta, temple teal and gold \u2014 the full traditional South Indian invitation.",
     mood: "South Indian temple",
     previewGradient: "linear-gradient(135deg, #fdf6ec 0%, #e8b98a 40%, #2f6f6b 100%)",
+    heroBackdrop: "/templates/hero/temple-gold.webp",
     heroVariant: "celebration",
     chromeStyle: "radiant",
     cardVariant: "shadow",
@@ -306,6 +326,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Cusped palace arches, pierced jaali, hanging jhoomar lamps and ceremonial elephants in deep rose and gold \u2014 a North Indian shaadi with the volume up.",
     mood: "North Indian palace",
     previewGradient: "linear-gradient(135deg, #fdf5ec 0%, #e7bb62 38%, #a3234e 100%)",
+    heroBackdrop: "/templates/hero/marigold-festive.webp",
     heroVariant: "celebration",
     chromeStyle: "radiant",
     cardVariant: "soft",
@@ -347,6 +368,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Emerald, pearl and restrained geometry: an unfigured palette suited to Nikah and Walima celebrations.",
     mood: "Islamic elegance",
     previewGradient: "linear-gradient(135deg, #f6fbf8 0%, #cfe6d8 45%, #0f5c46 100%)",
+    heroBackdrop: "/templates/hero/emerald-pearl.webp",
     heroVariant: "editorial",
     chromeStyle: "veil",
     cardVariant: "glass",
@@ -388,6 +410,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Ivory, dove grey and stained-glass blue with quiet symmetry, shaped around a church ceremony and reception.",
     mood: "Christian classic",
     previewGradient: "linear-gradient(135deg, #fcfcfa 0%, #e4e7ee 45%, #46618f 100%)",
+    heroBackdrop: "/templates/hero/chapel-ivory.webp",
     heroVariant: "classic",
     chromeStyle: "veil",
     cardVariant: "outline",
@@ -429,6 +452,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Lacquer crimson and leaf gold with generous negative space, made for tea ceremonies and banquet evenings.",
     mood: "Chinese double happiness",
     previewGradient: "linear-gradient(135deg, #fff7f4 0%, #f0c9a0 40%, #b3121e 100%)",
+    heroBackdrop: "/templates/hero/crimson-gold.webp",
     heroVariant: "cinematic",
     chromeStyle: "radiant",
     cardVariant: "shadow",
@@ -470,6 +494,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Sand, oud brown and muted brass: an understated palette for Khaleeji and wider Arabic celebrations.",
     mood: "Arabic understatement",
     previewGradient: "linear-gradient(135deg, #fdfaf5 0%, #e6d7c1 45%, #6f5137 100%)",
+    heroBackdrop: "/templates/hero/desert-neutral.webp",
     heroVariant: "editorial",
     chromeStyle: "horizon",
     cardVariant: "glass",
@@ -511,6 +536,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     description: "Warm greige, rose and sage with a drawn kolam and a botanical monogram \u2014 Tamil invitation typography, in a soft editorial register.",
     mood: "Tamil invitation",
     previewGradient: "linear-gradient(135deg, #f6f1ec 0%, #e3d7cd 45%, #c2687f 100%)",
+    heroBackdrop: "/templates/hero/kolam-blush.webp",
     heroVariant: "editorial",
     chromeStyle: "wash",
     cardVariant: "soft",
