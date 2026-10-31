@@ -96,8 +96,19 @@ function HeroMediaFrame({
   return (
     <div className={cn("relative overflow-hidden rounded-[calc(var(--radius)+0.2rem)]", className)}>
       {snapshot.site.heroVideoUrl ? (
+        /* `poster` is the fix that matters here. Without it this element is a
+           black box until the first frame decodes, and if the video never
+           arrives — a slow link, a codec the browser will not take, a 404 on a
+           URL the couple pasted — it stays black permanently, because the
+           image branch below is unreachable once heroVideoUrl is set. The
+           couple's own hero photo is exactly the right still to hold that
+           space, and it is already loaded for the card elsewhere on the page.
+
+           This stays a server component, so there is no onError to catch a
+           failure in: the poster IS the error state. */
         <video
           src={snapshot.site.heroVideoUrl}
+          poster={snapshot.site.heroImageUrl ?? undefined}
           autoPlay
           muted
           loop
