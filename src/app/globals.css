@@ -285,6 +285,46 @@ a {
   box-shadow: 0 24px 80px var(--elevation);
 }
 
+/* THE HERO BACKDROP, and why the scrim is the design rather than a filter.
+   ---------------------------------------------------------------------------
+   The twelve ornamented templates now carry their own photograph behind the
+   drawn ornament. A photograph under a light template is a contrast problem
+   before it is anything else: the hero type is --text on --surface, and a
+   mid-tone picture put behind it drops it from 12:1 to around 2:1.
+
+   So the picture is held at the band's EDGES and washed back to --surface
+   through the middle, where the monogram and the couple's names sit. The
+   radial does the work; the two linears only deepen the top edge, where the
+   toran hangs, and settle the bottom into the page. Every stop is mixed from
+   --surface, so a template that redefines its palette redefines its own scrim
+   and no second value has to be kept in step.
+
+   Keep the centre stops at or near full --surface. Thinning them is what would
+   put dark ink back on a photograph. */
+.hero-backdrop-scrim {
+  background:
+    radial-gradient(
+      116% 82% at 50% 64%,
+      var(--surface) 0%,
+      color-mix(in srgb, var(--surface) 96%, transparent) 30%,
+      color-mix(in srgb, var(--surface) 72%, transparent) 50%,
+      color-mix(in srgb, var(--surface) 28%, transparent) 70%,
+      transparent 86%
+    ),
+    linear-gradient(180deg, color-mix(in srgb, var(--text) 22%, transparent) 0%, transparent 26%),
+    linear-gradient(0deg, var(--surface) 0%, transparent 22%);
+}
+
+/* The ornament stops being a ghost once there is a picture under it.
+   At opacity-25 on a flat tint the drawn figures read as a faint sketch -
+   the complaint that started this work. Over a photograph they can be
+   confident, because the picture gives them something to sit ON: the shadow
+   is what makes the difference between ink printed on the image and ink
+   floating above it. */
+.hero-on-photo svg {
+  filter: drop-shadow(0 2px 10px color-mix(in srgb, var(--text) 55%, transparent));
+}
+
 .section-shell {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
 }

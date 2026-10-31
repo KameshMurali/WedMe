@@ -497,12 +497,40 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
 
 export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
   const template = findTemplateByKey(snapshot.theme.templateKey);
+  const heroBackdrop = template?.heroBackdrop ?? null;
 
   return (
     <section className="section-shell pt-10">
-      <div className="relative overflow-hidden rounded-[calc(var(--radius)+0.7rem)] border border-[color:var(--accent)]/16 bg-[color:var(--surface)] rich-shadow">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-[color:var(--accent)]/10" />
-        <div className="absolute inset-0 premium-grid opacity-15" />
+      <div
+        className={`relative overflow-hidden rounded-[calc(var(--radius)+0.7rem)] border border-[color:var(--accent)]/16 bg-[color:var(--surface)] rich-shadow${
+          heroBackdrop ? " hero-on-photo" : ""
+        }`}
+      >
+        {/* THE DESIGN'S OWN PHOTOGRAPH, under the ornament rather than beside
+            it. The scrim is the load-bearing part: it holds the picture at the
+            band's edges and washes it back to --surface where the monogram and
+            the couple's names sit, so the type keeps its contrast against the
+            template's own colour instead of fighting the photograph. A hero
+            that darkens for white type would be a different design; this one
+            stays the light, warm invitation it already is. */}
+        {heroBackdrop ? (
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+            <Image
+              src={heroBackdrop}
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 100vw, 1200px"
+              className="object-cover"
+            />
+            <div className="hero-backdrop-scrim absolute inset-0" />
+          </div>
+        ) : null}
+        {heroBackdrop ? null : (
+          <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-[color:var(--accent)]/10" />
+        )}
+        {/* premium-grid is a 34px crosshatch. Over a photograph it reads as a
+            dirty screen, so it only paints when there is no photograph. */}
+        {heroBackdrop ? null : <div className="absolute inset-0 premium-grid opacity-15" />}
         {/* Cultural ornament for the premium templates, drifting slowly as the
             hero scrolls. Sits behind everything and is purely decorative. */}
         <ParallaxLayer
@@ -514,7 +542,9 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
             className="h-[140%] w-full object-cover"
           />
         </ParallaxLayer>
-        {usesTempleOrnament(snapshot.theme.templateKey) ? <TempleHeroArch /> : null}
+        {usesTempleOrnament(snapshot.theme.templateKey) ? (
+          <TempleHeroArch onPhoto={Boolean(heroBackdrop)} />
+        ) : null}
         {usesPalaceOrnament(snapshot.theme.templateKey) ? <PalaceHeroArch /> : null}
         {ornamentKindFor(snapshot.theme.templateKey) === "girih" ? <GirihHeroArch /> : null}
         {ornamentKindFor(snapshot.theme.templateKey) === "chapel" ? <ChapelHeroArch /> : null}
