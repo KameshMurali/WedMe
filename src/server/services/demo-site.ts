@@ -76,7 +76,7 @@ export const demoSiteSnapshot = {
     weddingDate: weddingDate.toISOString(),
     heroImageUrl:
       "/demo/hero.webp",
-    heroVideoUrl: null,
+    heroVideoUrl: "/demo/hero.mp4",
     locationSummary: "Dubai, United Arab Emirates",
     seoTitle: "KamMonBeginnings | Kamesh & Monisha Wedding",
     seoDescription:

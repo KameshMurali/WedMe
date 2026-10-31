@@ -94,6 +94,11 @@ async function main() {
       weddingDate: new Date("2027-02-14T09:30:00.000Z"),
       heroImageUrl:
         "/demo/hero.webp",
+      // The still above is the clip's own opening frame, so it doubles as the
+      // <video poster> and the video cross-fades up from the frame it is about
+      // to show. Without this line a freshly seeded database rendered a still
+      // hero while the static demoSiteSnapshot rendered a moving one.
+      heroVideoUrl: "/demo/hero.mp4",
       locationSummary: "Dubai, United Arab Emirates",
       seoTitle: "KamMonBeginnings | Kamesh & Monisha Wedding",
       seoDescription:

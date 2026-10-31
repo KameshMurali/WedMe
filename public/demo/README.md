@@ -41,3 +41,29 @@ The alt text in `demo-site.ts` describes these specific images and was rewritten
 when they changed. If you swap a photograph, rewrite its alt text in the same
 commit — it is read aloud, so an alt describing the previous image is simply
 wrong.
+
+## The hero clip
+
+`hero.mp4` — 960x540, H.264 High, yuv420p, no audio track, 438K, 5.8s.
+
+It is driven from `hero.webp`, which is its own opening frame, so the still and
+the motion are the same scene and `<video poster>` cross-fades up from the frame
+it is about to show. That is the rule `public/hero/README.md` sets for the
+marketing hero, and it applies here for the same reason.
+
+**It is a palindrome.** Frames run 1→36 then 35→2, so the slow push-in reverses
+out instead of cutting back to the start. A push-in loops badly otherwise —
+the jump is the first thing the eye catches on a hero that never stops playing.
+
+Encoded per the recipe in `public/hero/README.md`: `-pix_fmt yuv420p` converts
+the HEVC Main 10 master (`yuv420p10le`), `-an` drops the audio rather than
+muting it, `+faststart` moves the moov atom so playback can begin before the
+whole file lands.
+
+One file rather than the marketing hero's two tiers and two codecs, because
+`heroVideoUrl` is a single URL a couple pastes in — there is no `<source>` list
+to fall back through, so it has to be the codec every browser takes.
+
+Replacing it: keep it silent, keep it slow, and regenerate `hero.webp` from its
+first frame in the same commit, or the poster will show a different moment than
+the video opens on.
