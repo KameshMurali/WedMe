@@ -15,11 +15,16 @@ const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
   // white against their deep brown primary.
   solid:
     "bg-[var(--primary)] text-[color:var(--primary-ink,#ffffff)] shadow-glow hover:bg-[color:var(--accent)] hover:text-ink",
+  // These three used to fill with literal white. That was invisible while every
+  // page was cream, and it breaks the moment a button sits in a dark scope: a
+  // white fill under --text, which is near-white there, is 1.8:1. Filling from
+  // --surface instead makes the variant follow whatever scope it lands in, and
+  // on a light page --surface is #fbfafd, so nothing visibly changes there.
   outline:
-    "border border-[color:var(--primary)]/20 bg-white/70 text-[color:var(--text)] hover:border-[color:var(--accent)] hover:bg-white",
-  ghost: "bg-transparent text-[color:var(--text)] hover:bg-white/70",
+    "border border-[color:var(--primary)]/20 bg-[color:var(--surface)]/70 text-[color:var(--text)] hover:border-[color:var(--accent)] hover:bg-[color:var(--surface)]",
+  ghost: "bg-transparent text-[color:var(--text)] hover:bg-[color:var(--surface)]/70",
   secondary:
-    "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-black/5 hover:bg-white",
+    "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:var(--border)] hover:bg-[color:var(--elevated)]",
 };
 
 const sizes: Record<NonNullable<ButtonProps["size"]>, string> = {
