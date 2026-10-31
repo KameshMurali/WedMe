@@ -27,6 +27,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { GallerySpotlight } from "@/components/public/gallery-spotlight";
 import { findTemplateByKey } from "@/lib/template-registry";
+import { isDarkColor } from "@/lib/color";
 import { getYoutubeEmbedUrl } from "@/lib/youtube";
 import { cn, formatDate, formatEnumLabel, formatTimeRange, groupBy } from "@/lib/utils";
 import type { SiteSnapshot } from "@/types";
@@ -498,12 +499,24 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
 export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
   const template = findTemplateByKey(snapshot.theme.templateKey);
   const heroBackdrop = template?.heroBackdrop ?? null;
+  // A SCRIM EXISTS TO PROTECT DARK TEXT ON A PHOTOGRAPH. On a dark palette the
+  // hero type is already light, so a dark photograph is the ideal ground and
+  // the scrim is working against the design rather than for it: cinematic-modern
+  // measured 0.0 photo visibility - the picture was there, loaded and painting,
+  // and completely indistinguishable from its own #201625 surface. Derived from
+  // the palette rather than hand-flagged, so a couple who customises their
+  // colours gets the right treatment without anyone editing the registry.
+  const lightHeroInk = !isDarkColor(snapshot.theme.textColor ?? template?.themeDefaults.textColor ?? null);
 
   return (
     <section className="section-shell pt-10">
       <div
         className={`relative overflow-hidden rounded-[calc(var(--radius)+0.7rem)] border border-[color:var(--accent)]/16 bg-[color:var(--surface)] rich-shadow${
-          heroBackdrop ? " hero-on-photo" : ""
+          heroBackdrop
+            ? ` hero-on-photo${lightHeroInk ? " hero-scrim-minimal" : ""}${
+                template?.heroScrimSide ? " hero-scrim-side" : ""
+              }`
+            : ""
         }`}
       >
         {/* THE DESIGN'S OWN PHOTOGRAPH, under the ornament rather than beside

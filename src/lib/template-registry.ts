@@ -39,6 +39,16 @@ type TemplateRegistryEntry = {
   // renders on a real couple's site too and sits BEHIND their own hero photo
   // rather than competing with it.
   heroBackdrop?: string;
+  // Extra side protection for the hero scrim, set from MEASUREMENT only.
+  //
+  // The default scrim ramps vertically, leaving the top of the band clear so
+  // the photograph reads. One template failed that at 3.42:1 - classic-elegant,
+  // whose hero variant puts the names in a left column at mid height over a
+  // candlelit, dark photograph. The variant does not predict it (chapel-ivory
+  // is also `classic` and holds 13.97 on pale limestone), and CSS cannot see an
+  // image's luminance, so this is an explicit flag rather than a heuristic.
+  // Set it when a template measures below ~7:1, and re-measure after.
+  heroScrimSide?: boolean;
   // Drives the page chrome: backdrop, footer panel and header treatment.
   // These used to be switch statements over template keys, written when there
   // were five templates; the eleven added since all fell through to the
@@ -75,6 +85,7 @@ export const templateRegistry: TemplateRegistryEntry[] = [
     mood: "Timeless luxury",
     previewGradient: "linear-gradient(135deg, #fffaf5 0%, #f1e7dc 45%, #d8b98c 100%)",
     heroBackdrop: "/templates/hero/classic-elegant.webp",
+    heroScrimSide: true,
     heroVariant: "classic",
     chromeStyle: "wash",
     cardVariant: "glass",
