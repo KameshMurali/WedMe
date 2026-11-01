@@ -394,6 +394,24 @@ a {
     linear-gradient(0deg, var(--background) 0%, color-mix(in srgb, var(--background) 45%, transparent) 14%, transparent 34%);
 }
 
+/* A FROSTED PANEL OVER A PHOTOGRAPH IS NOT FROSTED ENOUGH.
+   ---------------------------------------------------------------------------
+   .glass-panel is --surface at 78%, so 22% of whatever is behind it shows
+   through. That is the right material on a flat tint and the wrong one over a
+   photograph: the picture drags the effective backdrop dark and the --muted
+   label on top of it goes with it. The hero's date and location pills measured
+   1.00-2.62:1 against their real composited background - and 2.6 of that was
+   already live before any of this work, so it is not a regression so much as a
+   defect the photograph made visible.
+   Inside a photographic hero the panels go opaque. Scoped to .hero-on-photo so
+   every other frosted surface on the site keeps the material it was designed
+   with, and it changes no palette. */
+.hero-on-photo .glass-panel,
+.hero-on-photo .panel-soft,
+.hero-on-photo .panel-faint {
+  background-color: var(--surface);
+}
+
 /* The ornament stops being a ghost once there is a picture under it.
    At opacity-25 on a flat tint the drawn figures read as a faint sketch -
    the complaint that started this work. Over a photograph they can be

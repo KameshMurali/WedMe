@@ -139,7 +139,13 @@ export function CoupleMonogram({
       viewport={{ once: true, margin: "-40px" }}
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.14 } } }}
     >
-      {showCrest ? <LotusBloom className="h-auto w-20 text-[color:var(--primary)] sm:w-24" /> : null}
+      {/* THE CREST CROWNS THE HEADLINE, it does not compete with it.
+          At w-20/w-24 above 128px initials this block measured 313px tall and
+          pushed the couple's names 421-533px down the band - on the designs
+          whose whole identity is the ornament. traditional-celebration, which
+          has no monogram at all, put its first text at 108px, which is what
+          showed the monogram was the entire cost. */}
+      {showCrest ? <LotusBloom className="h-auto w-12 text-[color:var(--primary)] sm:w-14" /> : null}
 
       <div
         className={cn(
@@ -150,7 +156,8 @@ export function CoupleMonogram({
         <motion.span
           aria-hidden="true"
           variants={reduceMotion ? undefined : letterVariants}
-          className="font-display text-[6rem] leading-[0.85] text-[color:var(--primary)] sm:text-[8rem]"
+          style={{ fontSize: "clamp(2.75rem, 1.6rem + 2.6vw, 4.25rem)" }}
+          className="font-display leading-[0.85] text-[color:var(--primary)]"
         >
           {first}
         </motion.span>
@@ -159,10 +166,10 @@ export function CoupleMonogram({
           <motion.span
             aria-hidden="true"
             variants={reduceMotion ? undefined : letterVariants}
+            style={{ fontSize: "clamp(2.75rem, 1.6rem + 2.6vw, 4.25rem)" }}
             className={cn(
               "font-display leading-[0.85] text-[color:var(--accent)]",
-              "text-[6rem] sm:text-[8rem]",
-              interlock ? "-ml-4 sm:-ml-6" : null,
+              interlock ? "-ml-3 sm:-ml-4" : null,
             )}
           >
             {second}
@@ -170,7 +177,7 @@ export function CoupleMonogram({
         ) : null}
 
         {second && showCrest ? (
-          <span className="pointer-events-none absolute -right-5 bottom-2 w-6 text-[color:var(--accent)] sm:-right-7 sm:w-8">
+          <span className="pointer-events-none absolute -right-3 bottom-1 w-4 text-[color:var(--accent)] sm:-right-4 sm:w-5">
             <LeafSprig className="h-auto w-full" />
           </span>
         ) : null}
