@@ -172,7 +172,16 @@ function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSna
         <span
           className={cn(
             "inline-flex items-center gap-2 rounded-full px-4 py-2",
-            dark ? "bg-white/10 text-white/85 ring-1 ring-white/10" : "bg-white/78 text-[color:var(--muted)] ring-1 ring-black/5",
+            dark
+              ? "bg-black/45 text-white ring-1 ring-white/20"
+              // bg-white/78 was a LITERAL white at 78% carrying --muted type -
+              // the same defect already fixed on the buttons. On a dark palette
+              // it is simply the wrong material, and over a photograph 22% of
+              // the picture came through and dragged the label with it: these
+              // pills measured 1.00-2.62:1, and 2.6 of that was live before any
+              // of this work. The wedding date is primary information, not a
+              // caption, so it takes --text on the template's own surface.
+              : "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:var(--accent)]/20",
           )}
         >
           <CalendarDays className="h-4 w-4" />
@@ -182,7 +191,16 @@ function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSna
           <span
             className={cn(
               "inline-flex items-center gap-2 rounded-full px-4 py-2",
-              dark ? "bg-white/10 text-white/85 ring-1 ring-white/10" : "bg-white/78 text-[color:var(--muted)] ring-1 ring-black/5",
+              dark
+              ? "bg-black/45 text-white ring-1 ring-white/20"
+              // bg-white/78 was a LITERAL white at 78% carrying --muted type -
+              // the same defect already fixed on the buttons. On a dark palette
+              // it is simply the wrong material, and over a photograph 22% of
+              // the picture came through and dragged the label with it: these
+              // pills measured 1.00-2.62:1, and 2.6 of that was live before any
+              // of this work. The wedding date is primary information, not a
+              // caption, so it takes --text on the template's own surface.
+              : "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:var(--accent)]/20",
             )}
           >
             <MapPin className="h-4 w-4" />
@@ -280,10 +298,6 @@ function HeroSectionEditorial({ snapshot }: { snapshot: SiteSnapshot }) {
   return (
     <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-12">
       <div className="self-center">
-        <div className={glassPanel("mb-6 inline-flex max-w-md items-center gap-3 px-4 py-3")}>
-          <Heart className="h-4 w-4 text-[color:var(--primary)]" />
-          <p className="text-sm text-[color:var(--muted)]">An editorial, memory-rich wedding website for guests to explore.</p>
-        </div>
         <HeroCopy snapshot={snapshot} large />
       </div>
       <div className="relative">
@@ -487,19 +501,6 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
       </div>
       <div className="grid gap-4">
         <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className={glassPanel("px-5 py-5")}>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Guest note</p>
-            <p className="mt-3 text-lg font-semibold text-[color:var(--text)]">
-              Travel tips, dress guidance, RSVP flows, and memories all live in one welcoming place.
-            </p>
-          </div>
-          <div className={glassPanel("px-5 py-5")}>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Live site</p>
-            <p className="mt-3 font-display text-3xl text-[color:var(--text)]">/{snapshot.site.slug}</p>
-            <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">A shareable wedding site that feels curated, not generic.</p>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -650,7 +651,7 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
               // was pt-24 sm:pt-32 - a 250px gap between a small crest and the
               // headline it crowns, which put the first visible text 183-590px
               // down every ornamented hero.
-              className="flex justify-center px-6 pt-10 sm:pt-14"
+              className="flex justify-center px-6 pt-6 sm:pt-8"
             >
               <CoupleMonogram
                 coupleNames={snapshot.site.coupleNames}
@@ -1114,12 +1115,6 @@ export function ExperienceSection({
             </div>
           </Card>
 
-          <div className={glassPanel("px-5 py-5")}>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Guest note</p>
-            <p className="mt-3 text-lg font-semibold text-[color:var(--text)]">
-              Bring this page with you. It is designed to work like a beautiful, pocket-sized weekend concierge.
-            </p>
-          </div>
         </div>
       </div>
     </section>
