@@ -19,6 +19,28 @@
    is one specific typeface on one template. Swap in the package if that trade
    ever stops being worth it. */
 :root {
+
+  /* Width and rhythm vocabulary for wide screens. Additive: nothing reads
+     these until a section opts in. */
+  --shell-gutter: 1rem;
+  --measure: 68ch;
+  --measure-tight: 58ch;
+
+  /* Fluid type. globals.css contained zero clamp() and zero vw before this, so
+     the h1 reached 72px at 1024px and then stopped — 72px at 1440, 1920 AND
+     2560 — while every section h2 sat at 48px from 640px upward.
+     The two steps have DELIBERATELY DIFFERENT MINIMUMS: at 390px the h1 and all
+     seven section headings currently render at an identical 36px, so there is
+     no hierarchy at all on a phone. 40px against 32px restores a 1.25 step for
+     nothing. */
+  --step-display: clamp(2.5rem, 1.1rem + 3.4vw, 5.25rem);
+  --step-h2: clamp(2rem, 1.5rem + 1.9vw, 4rem);
+
+  /* Hero height band, named once so a seventh variant inherits the contract
+     instead of inventing a seventh number. svh, not vh: mobile browser chrome
+     must not push the first call to action below the fold. */
+  --hero-min: clamp(30rem, 62svh, 48rem);
+  --hero-min-tall: clamp(34rem, 78svh, 64rem); /* 1024px: 70%+ of a 1440-tall screen */
   --font-manrope: "Manrope";
   --font-cormorant: "Cormorant Garamond";
   --font-cinzel: "Cinzel";
@@ -384,6 +406,66 @@ a {
 
 .section-shell {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* THE SHELL LADDER — added BESIDE .section-shell, never instead of it.
+   ===========================================================================
+   .section-shell caps content at 1280px and is used 50 times across 32 files:
+   the dashboard layout, the admin shell, all four auth pages, terms, privacy,
+   error and not-found, plus 10 usages inside components/public/sections.tsx.
+   Widening it in place would stretch login forms and legal prose to 1920px —
+   actively worse — and silently restyle all sixteen guest designs. So it does
+   not move, and anything that wants a wider frame opts in to a rung here.
+
+   THE CEILINGS ARE NOT ARBITRARY. 1536px is the largest width at which a three
+   or four column card grid still yields 480-500px columns, which at the 14px
+   card body size is 70-71 characters — inside the 65-75 target. 1920px is for
+   furniture and imagery, where there is no measure to protect, and is a hard
+   ceiling because past it even furniture reads as stretched.
+
+   FULL BLEED IS NOT A CLASS. It is a block-level sibling carrying no shell
+   class and no width constraint — which is already how the hero, .breather and
+   .rite-band do it, and those are the three things that look expensive at
+   2560. Do NOT write `margin-inline: calc(50% - 50vw); width: 100vw`: 100vw
+   includes the scrollbar gutter, so it produces real horizontal overflow that
+   test:layout catches at 320px. */
+@media (min-width: 640px) {
+  :root { --shell-gutter: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  :root { --shell-gutter: 2rem; }
+}
+@media (min-width: 1600px) {
+  :root { --shell-gutter: 3.5rem; }
+}
+@media (min-width: 2200px) {
+  :root { --shell-gutter: 5rem; }
+}
+
+.shell-wide,
+.shell-xwide {
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: var(--shell-gutter);
+}
+
+.shell-wide {
+  max-width: 96rem; /* 1536px — the widest a card grid holds its measure */
+}
+
+.shell-xwide {
+  max-width: 120rem; /* 1920px — furniture and imagery only */
+}
+
+/* The reading measure, in characters rather than pixels, because these pages
+   swap in CJK, Tamil and Arabic faces whose `0` advance differs considerably
+   from Manrope. The min() keeps a sane cap when `ch` resolves wide. */
+.measure {
+  max-width: min(var(--measure), 42rem);
+}
+
+.measure-tight {
+  max-width: min(var(--measure-tight), 34rem);
 }
 
 @layer components {

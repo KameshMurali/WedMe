@@ -191,9 +191,18 @@ function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSna
         ) : null}
       </div>
       <h1
+        // FLUID, because it was not. The couple's names rendered at 60-72px at
+        // 1440, 1920 AND 2560 - the step classes stop at the lg breakpoint, so
+        // a name that filled a laptop looked lost on a 27-inch screen.
+        // --step-display is a clamp, so it keeps a floor on a phone and reaches
+        // ~84px on an ultrawide. overflow-wrap matters here: a long pair like
+        // "Alexandra & Christopher" has to break rather than overflow at 320px.
+        style={{
+          fontSize: large ? "var(--step-display)" : "var(--step-h2)",
+          overflowWrap: "break-word",
+        }}
         className={cn(
           "mt-6 font-display leading-[0.95]",
-          large ? "text-5xl sm:text-6xl lg:text-7xl" : "text-4xl sm:text-5xl lg:text-6xl",
           dark ? "text-white" : "text-[color:var(--text)]",
         )}
       >
@@ -508,10 +517,52 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
   // colours gets the right treatment without anyone editing the registry.
   const lightHeroInk = !isDarkColor(snapshot.theme.textColor ?? template?.themeDefaults.textColor ?? null);
 
+  // THE BLEED DECISION IS PER VARIANT, and that is the whole point.
+  //
+  // Measured before this changed: every hero was 1216x661 at 1440, 1920 AND
+  // 2560 - it responded to the viewport on NEITHER axis, so at 2560 it read as
+  // a dashboard widget with 672px of empty page either side. But one bleed rule
+  // for sixteen designs would flatten Temple Gopuram, Kolam Blush and Chapel
+  // Ivory into the same wide photo band and erase the distinction /templates
+  // exists to sell. So:
+  //
+  //   destination, cinematic  the photograph IS the design - bleed outright
+  //   split, classic, editorial  widen to the 1536 rung, keep the two columns,
+  //                              which simply gain better proportions
+  //   celebration  the BACKGROUND bleeds while the drawn architecture stays at
+  //                the measure it was drawn for. Push the arch wider and
+  //                temple-gold's towers land on TempleFrame's edge towers -
+  //                four gopurams in one screen - and the toran stretches into a
+  //                2560px swag with a thousand pixels of nothing in the middle.
+  const variant = template?.heroVariant ?? "classic";
+  const photographLed = variant === "destination" || variant === "cinematic";
+  // No shell at all on the photograph-led variants: their media is the band.
+  // Wrapping them capped the picture at 1760px on a 2560 screen - 69% - which
+  // is the same complaint one level down. Their copy carries its own container.
+  const contentShell = photographLed
+    ? ""
+    : variant === "celebration"
+      ? "section-shell"
+      : "shell-wide";
+  // Photographic variants get the taller band; the copy-led ones stay shorter
+  // so the first call to action is not pushed under the fold. svh, not vh.
+  const heroMinVar =
+    photographLed || variant === "split" ? "var(--hero-min-tall)" : "var(--hero-min)";
+
   return (
-    <section className="section-shell pt-10">
+    <section className="relative w-full">
+      {/* A FULL-BLEED BAND HAS NO CARD CHROME. The rounded corner, the border
+          and the shadow were what made this read as a widget floating on a
+          page. They go; .section-shell stays exactly as it is for everything
+          BELOW the hero, because the schedule, dress code and FAQ are reading
+          material and want the 1280 measure.
+          Bleed is a block-level sibling at width:100% - never
+          `margin-inline: calc(50% - 50vw)` with `100vw`, which includes the
+          scrollbar gutter and produces real horizontal overflow that
+          test:layout catches at 320px. */}
       <div
-        className={`relative overflow-hidden rounded-[calc(var(--radius)+0.7rem)] border border-[color:var(--accent)]/16 bg-[color:var(--surface)] rich-shadow${
+        style={{ minHeight: heroMinVar }}
+        className={`relative flex w-full flex-col justify-center overflow-hidden bg-[color:var(--surface)]${
           heroBackdrop
             ? ` hero-on-photo${lightHeroInk ? " hero-scrim-minimal" : ""}${
                 template?.heroScrimSide ? " hero-scrim-side" : ""
@@ -555,25 +606,52 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
             className="h-[140%] w-full object-cover"
           />
         </ParallaxLayer>
-        {usesTempleOrnament(snapshot.theme.templateKey) ? (
-          <TempleHeroArch onPhoto={Boolean(heroBackdrop)} />
-        ) : null}
-        {usesPalaceOrnament(snapshot.theme.templateKey) ? <PalaceHeroArch /> : null}
-        {ornamentKindFor(snapshot.theme.templateKey) === "girih" ? <GirihHeroArch /> : null}
-        {ornamentKindFor(snapshot.theme.templateKey) === "chapel" ? <ChapelHeroArch /> : null}
-        {ornamentKindFor(snapshot.theme.templateKey) === "lantern" ? <LanternHeroArch /> : null}
-        {ornamentKindFor(snapshot.theme.templateKey) === "desert" ? <DesertHeroArch /> : null}
-        {usesTempleOrnament(snapshot.theme.templateKey) ? (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 text-[color:var(--primary)]">
-            <ToranGarland className="h-24 sm:h-32" />
-          </div>
-        ) : null}
-        <div className="relative">
+        {/* THE ORNAMENT KEEPS THE WIDTH IT WAS DRAWN FOR, even though the band
+            no longer does. These arches place their figures with edge offsets -
+            TempleHeroArch's peacocks sit at left-8 / right-8 - so letting them
+            inherit a 2560px band strands them in the far corners with a
+            thousand pixels of nothing between, and the toran becomes a swag
+            with no middle. The photograph, the scrim and the colour wash bleed;
+            the drawn architecture does not. */}
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-1/2 w-full -translate-x-1/2",
+            // 96rem, not the content's own 7xl: these figures are placed with
+            // edge offsets (left-8 / right-8), so matching the content width
+            // exactly lands them ON the copy. One rung wider puts them just
+            // outside it at every size - at 1920 the peacocks sit at ~224 and
+            // ~1696 with the text running 320-1600.
+            photographLed ? null : "max-w-[96rem]",
+          )}
+        >
+          {usesTempleOrnament(snapshot.theme.templateKey) ? (
+            <TempleHeroArch onPhoto={Boolean(heroBackdrop)} />
+          ) : null}
+          {usesPalaceOrnament(snapshot.theme.templateKey) ? <PalaceHeroArch /> : null}
+          {ornamentKindFor(snapshot.theme.templateKey) === "girih" ? <GirihHeroArch /> : null}
+          {ornamentKindFor(snapshot.theme.templateKey) === "chapel" ? <ChapelHeroArch /> : null}
+          {ornamentKindFor(snapshot.theme.templateKey) === "lantern" ? <LanternHeroArch /> : null}
+          {ornamentKindFor(snapshot.theme.templateKey) === "desert" ? <DesertHeroArch /> : null}
+          {usesTempleOrnament(snapshot.theme.templateKey) ? (
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 text-[color:var(--primary)]">
+              <ToranGarland className="h-24 sm:h-32" />
+            </div>
+          ) : null}
+        </div>
+        {/* The CONTENT stays measured while the photograph, scrim and ornament
+            run edge to edge. Which rung it gets is the per-variant decision
+            above; without this the couple's names would span 2560px. */}
+        <div className={cn("relative", contentShell)}>
           {usesKolamOrnament(snapshot.theme.templateKey) ||
           usesTempleOrnament(snapshot.theme.templateKey) ||
           usesPalaceOrnament(snapshot.theme.templateKey) ||
           ornamentKindFor(snapshot.theme.templateKey) ? (
-            <div className="flex justify-center px-6 pt-24 sm:pt-32">
+            <div
+              // was pt-24 sm:pt-32 - a 250px gap between a small crest and the
+              // headline it crowns, which put the first visible text 183-590px
+              // down every ornamented hero.
+              className="flex justify-center px-6 pt-10 sm:pt-14"
+            >
               <CoupleMonogram
                 coupleNames={snapshot.site.coupleNames}
                 // Lotus only on the Indic templates; the others crown the hero
