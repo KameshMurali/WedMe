@@ -61,28 +61,44 @@ const WHY_PRODUCTION =
   "  PLAYWRIGHT_EXTERNAL_SERVER=1 PLAYWRIGHT_PORT=4100 npx playwright test reveal-contract";
 
 /**
- * ASK THE SERVER, DON'T GUESS FROM THE PORT.
+ * TWO CONDITIONS, BECAUSE EACH ONE ALONE HAS FAILED.
  *
- * This guard first read `PLAYWRIGHT_PORT !== "3000"` and called that a
- * production server. It is not: playwright.config.ts builds its `webServer`
- * command from the same variable, so `PLAYWRIGHT_PORT=4100` starts
- * `next dev -p 4100` — which satisfied the guard and ran all 116 browser tests
- * against the exact build the guard exists to reject. A guard that its own
- * config can defeat is worse than no guard, because it reports numbers instead
- * of skipping.
+ * 1. An explicit opt-in. This guard first read `PLAYWRIGHT_PORT !== "3000"` and
+ *    called that a production server. It is not: playwright.config.ts builds
+ *    its `webServer` command from the same variable, so `PLAYWRIGHT_PORT=4100`
+ *    starts `next dev -p 4100` — satisfying the guard and running all 116
+ *    browser tests against the exact build it exists to reject.
+ *    PLAYWRIGHT_EXTERNAL_SERVER cannot be set as a side effect of choosing a
+ *    port: it means "a server is already running, do not start one", which is
+ *    only true when somebody started `next start` deliberately.
  *
- * So probe the thing we actually care about. `next dev` serves React Refresh
- * into every page and the production build never does; that is a property of
- * the build, not of a port or an environment variable someone has to set
- * truthfully. Fetched once per worker and memoised — 116 tests, one request.
+ * 2. No dev markers in the served HTML. The opt-in is still a promise, and a
+ *    promise can be wrong, so verify it. This half has to be measured rather
+ *    than recalled: the first attempt looked for `react-refresh`,
+ *    `__nextjs_original-stack-frame` and `webpack-hmr`, and Next 16's dev
+ *    output contains NONE of the three — the probe returned "production" for a
+ *    dev server and was worse than the port check it replaced, because it
+ *    reported numbers where the old one at least skipped. What this build
+ *    actually ships in dev and never in production, counted on both:
+ *
+ *      hmr-client     dev 4, prod 0   <- the Turbopack HMR client
+ *      next-devtools  dev 2, prod 0
+ *      turbopack      dev 4, prod 1   <- NOT usable: react-server-dom-turbopack
+ *                                        is in the production bundle too
+ *
+ * Fetched once per worker and memoised: 116 tests, one request. Keep condition
+ * 1 first — it is the deterministic half, so a future Next release renaming its
+ * chunks can only make the suite skip, never make it lie.
  */
+const EXTERNAL_SERVER = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
+
 let devServerProbe: Promise<boolean> | undefined;
 
 function isDevServer(request: { get: (url: string) => Promise<{ text: () => Promise<string> }> }) {
   devServerProbe ??= request
     .get("/")
     .then((res) => res.text())
-    .then((html) => /react-refresh|__nextjs_original-stack-frame|webpack-hmr/.test(html))
+    .then((html) => /hmr-client|next-devtools/.test(html))
     // A server that cannot be reached is not a production server we can
     // measure, so treat the failure as "skip" rather than letting 116 tests
     // fail with a connection error apiece.
@@ -93,6 +109,7 @@ function isDevServer(request: { get: (url: string) => Promise<{ text: () => Prom
 /** Called in each browser-backed describe; the static blocks omit it. */
 function productionServerOnly() {
   test.beforeEach(async ({ request }) => {
+    test.skip(!EXTERNAL_SERVER, WHY_PRODUCTION);
     test.skip(await isDevServer(request), WHY_PRODUCTION);
   });
 }
