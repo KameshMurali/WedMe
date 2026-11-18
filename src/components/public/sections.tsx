@@ -88,12 +88,29 @@ function HeroMediaFrame({
   className,
   imageClassName,
   imageSizes = "100vw",
+  hasBackdrop = false,
 }: {
   snapshot: SiteSnapshot;
   className?: string;
   imageClassName?: string;
   imageSizes?: string;
+  // True when the TEMPLATE brings its own hero photograph (registry
+  // `heroBackdrop`). It is already painting behind this frame, so a frame with
+  // no couple photo in it must get out of the way instead of composing a
+  // substitute over the top of it.
+  hasBackdrop?: boolean;
 }) {
+  // Owner-only. A guest should never be told the site is unfinished, and the
+  // fallbacks below are meant to stand on their own for a couple who simply
+  // never uploads anything.
+  const addPhotoHint = snapshot.ownerPreview ? (
+    <div className="absolute inset-x-0 bottom-0 flex justify-center p-4">
+      <p className="rounded-full bg-black/45 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/90 backdrop-blur">
+        Add a hero photo in Settings to replace this
+      </p>
+    </div>
+  ) : null;
+
   return (
     <div className={cn("relative overflow-hidden rounded-[calc(var(--radius)+0.2rem)]", className)}>
       {snapshot.site.heroVideoUrl ? (
@@ -126,12 +143,28 @@ function HeroMediaFrame({
           sizes={imageSizes}
           className={cn("h-full w-full object-cover", imageClassName)}
         />
+      ) : hasBackdrop ? (
+        // THE DESIGN'S OWN PHOTOGRAPH IS ALREADY THERE, so this frame defers to
+        // it. The composed dusk below was correct when the ornamented templates
+        // had no photography of their own; now that all twelve set a
+        // `heroBackdrop` it is a dead colour slab — 300x400 at 390, up to
+        // 800x540 at 1440 — and on the two `cinematic` templates, where this
+        // frame is `absolute inset-0`, it covered the design's photograph
+        // entirely. cinematic-modern's hero showed no picture at all.
+        //
+        // Transparent, not removed: the frame still carries the band's
+        // rounding, the bottom gradient below, and the owner's hint.
+        <div className={cn("h-full w-full", imageClassName)}>{addPhotoHint}</div>
       ) : (
-        // No photo yet. bg-hero-mesh was a fixed warm-beige gradient from the
-        // Tailwind config, which is the one thing this must not be: the
-        // destination heroes lay white copy over a four-stop dark scrim, so a
-        // pale slab left the couple's names unreadable, and every template got
-        // the same beige regardless of palette.
+        // No photo and no backdrop — the four destination templates, which set
+        // no `heroBackdrop` because on them the couple's own photograph IS the
+        // design and a stand-in drawn by us would be a different product.
+        //
+        // bg-hero-mesh was a fixed warm-beige gradient from the Tailwind
+        // config, which is the one thing this must not be: the destination
+        // heroes lay white copy over a four-stop dark scrim, so a pale slab
+        // left the couple's names unreadable, and every template got the same
+        // beige regardless of palette.
         //
         // This composes a dusk from the template's own --primary and --accent,
         // so Shoreline Blue reads as a blue evening and Palm & Teak as a green
@@ -145,16 +178,7 @@ function HeroMediaFrame({
             ].join(", "),
           }}
         >
-          {/* Owner-only. A guest should never be told the site is unfinished,
-              and the fallback above is meant to stand on its own for a couple
-              who simply never uploads anything. */}
-          {snapshot.ownerPreview ? (
-            <div className="absolute inset-x-0 bottom-0 flex justify-center p-4">
-              <p className="rounded-full bg-black/45 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/90 backdrop-blur">
-                Add a hero photo in Settings to replace this
-              </p>
-            </div>
-          ) : null}
+          {addPhotoHint}
         </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
@@ -181,7 +205,12 @@ function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSna
               // pills measured 1.00-2.62:1, and 2.6 of that was live before any
               // of this work. The wedding date is primary information, not a
               // caption, so it takes --text on the template's own surface.
-              : "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:var(--accent)]/20",
+              //
+              // The ring is color-mix rather than `ring-...-/20` because
+              // Tailwind 3 drops an opacity modifier on an arbitrary var()
+              // colour and falls back to its default blue - which is what
+              // these pills were actually rendering. See the day badge below.
+              : "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]",
           )}
         >
           <CalendarDays className="h-4 w-4" />
@@ -200,7 +229,12 @@ function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSna
               // pills measured 1.00-2.62:1, and 2.6 of that was live before any
               // of this work. The wedding date is primary information, not a
               // caption, so it takes --text on the template's own surface.
-              : "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:var(--accent)]/20",
+              //
+              // The ring is color-mix rather than `ring-...-/20` because
+              // Tailwind 3 drops an opacity modifier on an arbitrary var()
+              // colour and falls back to its default blue - which is what
+              // these pills were actually rendering. See the day badge below.
+              : "bg-[color:var(--surface)] text-[color:var(--text)] ring-1 ring-[color:color-mix(in_srgb,var(--accent)_20%,transparent)]",
             )}
           >
             <MapPin className="h-4 w-4" />
@@ -254,7 +288,7 @@ function HeroCopy({ snapshot, large = false, dark = false }: { snapshot: SiteSna
   );
 }
 
-function HeroSectionClassic({ snapshot }: { snapshot: SiteSnapshot }) {
+function HeroSectionClassic({ snapshot, hasBackdrop }: { snapshot: SiteSnapshot; hasBackdrop: boolean }) {
   const spotlightEvent = snapshot.events[0];
 
   return (
@@ -266,7 +300,7 @@ function HeroSectionClassic({ snapshot }: { snapshot: SiteSnapshot }) {
         </div>
       </div>
       <div className="grid gap-4">
-        <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
+        <HeroMediaFrame snapshot={snapshot} hasBackdrop={hasBackdrop} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
         <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">
           <div className={glassPanel("px-5 py-5")}>
             <p className="text-[11px] uppercase tracking-[0.24em] text-[color:var(--muted)]">Weekend note</p>
@@ -291,7 +325,7 @@ function HeroSectionClassic({ snapshot }: { snapshot: SiteSnapshot }) {
   );
 }
 
-function HeroSectionEditorial({ snapshot }: { snapshot: SiteSnapshot }) {
+function HeroSectionEditorial({ snapshot, hasBackdrop }: { snapshot: SiteSnapshot; hasBackdrop: boolean }) {
   const firstMilestone = snapshot.storyMilestones[0];
   const firstEvent = snapshot.events[0];
 
@@ -304,6 +338,7 @@ function HeroSectionEditorial({ snapshot }: { snapshot: SiteSnapshot }) {
         <div className="absolute -left-4 top-10 hidden h-28 w-28 rounded-full bg-[color:var(--accent)]/16 blur-3xl lg:block" />
         <HeroMediaFrame
           snapshot={snapshot}
+          hasBackdrop={hasBackdrop}
           className="ml-auto min-h-[420px] max-w-[44rem]"
           imageClassName="h-full min-h-[420px]"
           imageSizes="(max-width: 1024px) 100vw, min(44rem, 55vw)"
@@ -333,7 +368,7 @@ function HeroSectionEditorial({ snapshot }: { snapshot: SiteSnapshot }) {
   );
 }
 
-function HeroSectionSplit({ snapshot }: { snapshot: SiteSnapshot }) {
+function HeroSectionSplit({ snapshot, hasBackdrop }: { snapshot: SiteSnapshot; hasBackdrop: boolean }) {
   const firstEvent = snapshot.events[0];
 
   return (
@@ -345,7 +380,7 @@ function HeroSectionSplit({ snapshot }: { snapshot: SiteSnapshot }) {
         </div>
       </div>
       <div className="relative min-h-[520px] border-t border-[color:var(--accent)]/14 lg:border-l lg:border-t-0">
-        <HeroMediaFrame snapshot={snapshot} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[520px]" imageSizes="(max-width: 1024px) 100vw, 56vw" />
+        <HeroMediaFrame snapshot={snapshot} hasBackdrop={hasBackdrop} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[520px]" imageSizes="(max-width: 1024px) 100vw, 56vw" />
         <div className="absolute inset-0 bg-gradient-to-l from-black/12 via-transparent to-[color:var(--background)]/16" />
         <div className="absolute bottom-6 left-6 right-6 grid gap-4 sm:grid-cols-2">
           {/* This panel used to read "A spacious, modern layout that keeps
@@ -392,11 +427,12 @@ function HeroSectionSplit({ snapshot }: { snapshot: SiteSnapshot }) {
 // bright sky behind white type is unreadable. So the type never sits on the
 // bare image — a two-stop scrim runs bottom-to-top under the copy, strong
 // enough to hold white text over a pale image and unobtrusive over a dark one.
-function HeroSectionDestination({ snapshot }: { snapshot: SiteSnapshot }) {
+function HeroSectionDestination({ snapshot, hasBackdrop }: { snapshot: SiteSnapshot; hasBackdrop: boolean }) {
   return (
     <div className="relative min-h-[640px] overflow-hidden sm:min-h-[760px]">
       <HeroMediaFrame
         snapshot={snapshot}
+        hasBackdrop={hasBackdrop}
         className="absolute inset-0 rounded-none"
         imageClassName="h-full min-h-[640px] sm:min-h-[760px]"
         imageSizes="100vw"
@@ -440,12 +476,12 @@ function HeroSectionDestination({ snapshot }: { snapshot: SiteSnapshot }) {
   );
 }
 
-function HeroSectionCinematic({ snapshot }: { snapshot: SiteSnapshot }) {
+function HeroSectionCinematic({ snapshot, hasBackdrop }: { snapshot: SiteSnapshot; hasBackdrop: boolean }) {
   const highlightEvents = snapshot.events.slice(0, 3);
 
   return (
     <div className="relative min-h-[620px] overflow-hidden">
-      <HeroMediaFrame snapshot={snapshot} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[620px]" />
+      <HeroMediaFrame snapshot={snapshot} hasBackdrop={hasBackdrop} className="absolute inset-0 rounded-none" imageClassName="h-full min-h-[620px]" />
       <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(10,8,12,0.82)_0%,rgba(10,8,12,0.46)_42%,rgba(10,8,12,0.74)_100%)]" />
       <div className="absolute inset-0 premium-grid opacity-10" />
       <div className="relative grid min-h-[620px] gap-8 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:p-14">
@@ -476,7 +512,7 @@ function HeroSectionCinematic({ snapshot }: { snapshot: SiteSnapshot }) {
   );
 }
 
-function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
+function HeroSectionCelebration({ snapshot, hasBackdrop }: { snapshot: SiteSnapshot; hasBackdrop: boolean }) {
   const highlightEvents = snapshot.events.slice(0, 4);
 
   return (
@@ -500,7 +536,7 @@ function HeroSectionCelebration({ snapshot }: { snapshot: SiteSnapshot }) {
         </div>
       </div>
       <div className="grid gap-4">
-        <HeroMediaFrame snapshot={snapshot} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
+        <HeroMediaFrame snapshot={snapshot} hasBackdrop={hasBackdrop} className="min-h-[360px]" imageClassName="h-full min-h-[360px]" imageSizes="(max-width: 1024px) 100vw, 48vw" />
       </div>
     </div>
   );
@@ -661,12 +697,24 @@ export function HeroSection({ snapshot }: { snapshot: SiteSnapshot }) {
               />
             </div>
           ) : null}
-          {template.heroVariant === "editorial" ? <HeroSectionEditorial snapshot={snapshot} /> : null}
-          {template.heroVariant === "split" ? <HeroSectionSplit snapshot={snapshot} /> : null}
-          {template.heroVariant === "cinematic" ? <HeroSectionCinematic snapshot={snapshot} /> : null}
-          {template.heroVariant === "celebration" ? <HeroSectionCelebration snapshot={snapshot} /> : null}
-          {template.heroVariant === "classic" ? <HeroSectionClassic snapshot={snapshot} /> : null}
-          {template.heroVariant === "destination" ? <HeroSectionDestination snapshot={snapshot} /> : null}
+          {template.heroVariant === "editorial" ? (
+            <HeroSectionEditorial snapshot={snapshot} hasBackdrop={Boolean(heroBackdrop)} />
+          ) : null}
+          {template.heroVariant === "split" ? (
+            <HeroSectionSplit snapshot={snapshot} hasBackdrop={Boolean(heroBackdrop)} />
+          ) : null}
+          {template.heroVariant === "cinematic" ? (
+            <HeroSectionCinematic snapshot={snapshot} hasBackdrop={Boolean(heroBackdrop)} />
+          ) : null}
+          {template.heroVariant === "celebration" ? (
+            <HeroSectionCelebration snapshot={snapshot} hasBackdrop={Boolean(heroBackdrop)} />
+          ) : null}
+          {template.heroVariant === "classic" ? (
+            <HeroSectionClassic snapshot={snapshot} hasBackdrop={Boolean(heroBackdrop)} />
+          ) : null}
+          {template.heroVariant === "destination" ? (
+            <HeroSectionDestination snapshot={snapshot} hasBackdrop={Boolean(heroBackdrop)} />
+          ) : null}
         </div>
       </div>
       {/* Drawn kolam closing the hero, in place of a plain rule. */}
@@ -793,6 +841,11 @@ export function EventsSection({
         {items.map((event, index) => (
           <StaggerItem
             key={event.id}
+            // The ROW index, not the card index. The first card spans both
+            // columns, so cards 1 and 2 share a row and must arrive together;
+            // feeding the card index instead would leave the last card of a
+            // long list several screens behind the first.
+            index={index === 0 ? 0 : Math.floor((index + 1) / 2)}
             className={index === 0 ? "lg:col-span-2" : undefined}
           >
           <Card
@@ -834,7 +887,32 @@ export function EventsSection({
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 flex flex-wrap gap-2">
-                  <Badge>{event.dayLabel}</Badge>
+                  {/* A SURFACE CHIP, because this sits over a photograph the
+                      product cannot see. Badge's default is an --accent/10
+                      ground — effectively transparent — carrying --primary ink,
+                      which was illegible over a light upload on
+                      classic-elegant, temple-gold and marigold-festive. Its
+                      sibling below already solved it; both now arrive in the
+                      template's own material and ink, so no literal colour and
+                      no per-template branch is needed.
+
+                      THE RING IS THE ONLY THING SEPARATING THESE TWO NOW. Both
+                      chips had to end up in the same material and the same ink
+                      to be legible over an unknown photograph, which left
+                      "FRIDAY" and "ALL GUESTS" as identical pills with no
+                      hierarchy between date and audience. The ring restores it
+                      without touching either glyph colour, so the measured
+                      contrast floor is unchanged.
+
+                      color-mix, NOT `ring-[color:var(--accent)]/30`. Tailwind 3
+                      cannot fold an opacity modifier into an arbitrary var()
+                      colour: it drops the utility and `--tw-ring-color` falls
+                      back to the default #3b82f680, so the modifier form puts
+                      a BLUE ring on all sixteen palettes. Measured, not
+                      guessed - it is what the hero pills above were doing. */}
+                  <Badge className="panel-solid text-[color:var(--text)] ring-1 ring-[color:color-mix(in_srgb,var(--accent)_30%,transparent)]">
+                    {event.dayLabel}
+                  </Badge>
                   <Badge className="panel-solid text-[color:var(--text)]">
                     {formatEnumLabel(event.audience, "ALL GUESTS")}
                   </Badge>

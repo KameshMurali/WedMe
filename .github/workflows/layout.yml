@@ -18,7 +18,20 @@ on:
 jobs:
   overflow:
     name: No horizontal overflow
-    runs-on: ubuntu-latest
+    # PINNED, not `ubuntu-latest`. GitHub rolled that label to Ubuntu 26.04 and
+    # Playwright 1.56.0 refuses to install a browser there:
+    #
+    #   Cannot install dependencies for ubuntu26.04-x64 with Playwright 1.56.0!
+    #   ERROR: Playwright does not support chromium on ubuntu26.04-x64
+    #
+    # The job died at `playwright install`, before a single test ran, so every
+    # PR after the roll failed with nothing to do with its own diff.
+    #
+    # The fix is the runner and not the Playwright version because the pin runs
+    # the other way too: 1.56.0 matches the Chromium build in the dev container
+    # (see CLAUDE.md), so bumping it here to chase a newer runner image would
+    # break local runs instead. Both ends have to move together, deliberately.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

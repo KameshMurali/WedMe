@@ -103,6 +103,23 @@
      an object arriving. */
   --ease-settle: cubic-bezier(0.22, 1, 0.3, 1);
   --dur-enter: 0.85s;
+
+  /* Reveal cadence, as tokens rather than numbers baked into the keyframe.
+     These three are the HOUSE default and reproduce exactly what .scroll-reveal
+     did before they existed, so the marketing pages that already use the class
+     are unchanged. The public site re-declares them per chromeStyle further
+     down, which is the point: one class, sixteen arrivals. A design that
+     settles and a design that cuts must not share a cadence, or porting the
+     guest reveal onto this class would be the move that makes the sixteen
+     designs more alike.
+
+     --reveal-lift   how far the block travels (keyframe, resolved on the element)
+     --reveal-span   how much of `cover` the arrival occupies
+     --reveal-stagger per-sibling shift of the RANGE, since a scroll-driven
+                      animation has no time axis for a delay to live on. */
+  --reveal-lift: 26px;
+  --reveal-span: 30%;
+  --reveal-stagger: 3%;
 }
 
 /* The per-template scope. site-shell sets --primary/--accent/--surface/etc as
@@ -123,6 +140,83 @@
 .theme-scope[data-tone="dark"] {
   --border: color-mix(in srgb, var(--primary) 24%, transparent);
   --elevation: rgba(0, 0, 0, 0.55);
+}
+
+/* REVEAL CADENCE PER TEMPLATE, which is what keeps the shared class from
+   flattening the set. data-chrome and data-hero-variant are registry
+   properties written onto .theme-scope by site-shell.tsx, the same shape as the
+   two per-template decisions the hero already makes (bleed per heroVariant,
+   scrim per heroScrimSide). Nothing here reads a palette value.
+
+   The compound chrome+variant selectors are deliberate rather than tidier
+   single-attribute ones: `destination` spans two chromes (veil and horizon) and
+   `cinematic` spans two (vignette and radiant), and a bare variant rule would
+   hand two different chromes an identical cadence — the one outcome this block
+   exists to prevent. */
+.theme-scope[data-chrome="wash"] {
+  /* Petals come to rest rather than slide in: a long arrival, a short lift. */
+  --reveal-lift: 10px;
+  --reveal-span: 40%;
+  --reveal-stagger: 3%;
+}
+
+.theme-scope[data-chrome="veil"] {
+  /* The same settle as wash, held a little longer and closer in. */
+  --reveal-lift: 8px;
+  --reveal-span: 44%;
+  --reveal-stagger: 2.5%;
+}
+
+.theme-scope[data-chrome="vignette"] {
+  /* Sections CUT rather than fade. No lift at all and the shortest span in the
+     set, so an arrival reads as an edit between shots. */
+  --reveal-lift: 0px;
+  --reveal-span: 16%;
+  --reveal-stagger: 1.5%;
+}
+
+.theme-scope[data-chrome="radiant"] {
+  /* The ceremonies arrive one per beat, so the stagger is the largest here and
+     the lift is big enough to be felt between them. */
+  --reveal-lift: 22px;
+  --reveal-span: 28%;
+  --reveal-stagger: 6%;
+}
+
+.theme-scope[data-chrome="grid"] {
+  /* The smallest lift of the sixteen. Doing less than everything around it IS
+     this design's differentiator, so its cadence has to say so too. */
+  --reveal-lift: 4px;
+  --reveal-span: 24%;
+  --reveal-stagger: 2%;
+}
+
+.theme-scope[data-chrome="horizon"] {
+  /* A held horizon: no lift, the slowest span. Nothing rises on these. */
+  --reveal-lift: 0px;
+  --reveal-span: 48%;
+  --reveal-stagger: 2%;
+}
+
+/* The photograph-led variants inside a chrome, where the picture is the design
+   and the furniture should not appear to assemble itself over it. */
+.theme-scope[data-chrome="veil"][data-hero-variant="destination"] {
+  --reveal-lift: 0px;
+  --reveal-span: 52%;
+  --reveal-stagger: 2.5%;
+}
+
+.theme-scope[data-chrome="horizon"][data-hero-variant="destination"] {
+  --reveal-lift: 0px;
+  --reveal-span: 46%;
+  --reveal-stagger: 1.8%;
+}
+
+.theme-scope[data-chrome="radiant"][data-hero-variant="cinematic"] {
+  /* A cinematic cut, but kept in radiant's beat rather than vignette's. */
+  --reveal-lift: 0px;
+  --reveal-span: 18%;
+  --reveal-stagger: 4%;
 }
 
 /* The marketing site's own ink scope, built the same way the template tone
@@ -486,6 +580,34 @@ a {
   max-width: min(var(--measure-tight), 34rem);
 }
 
+/* THE RAG IS THE DESIGN at a wedding site's content density. "Kamesh weds
+   Monisha" broke after "weds" at 390 and left one word on the second line, and
+   "A timeline of moments that shaped the journey." stranded "journey." alone at
+   1440. Balancing the display sizes costs nothing and reads as art direction,
+   and because it operates on each template's own heading face and measure the
+   resulting break differs per headingFontKey — it changes line breaks, never
+   colour, type or ornament, so it cannot make the sixteen more alike.
+
+   Element selectors, not a utility: every display line on the public site is an
+   h1 or an h2, and a utility class still outranks these if one ever needs to
+   opt out. Headings ONLY — balance has a layout cost and browsers stop applying
+   it past about six lines, so body copy must not carry it.
+
+   `text-wrap`, the shorthand, rather than the `text-wrap-style` longhand, whose
+   support lands later. */
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+/* `pretty` on the reading measures instead: it leaves line count alone and only
+   cleans up the last line. Firefox treats it as normal wrapping, so this is
+   purely additive. */
+.measure,
+.measure-tight {
+  text-wrap: pretty;
+}
+
 @layer components {
   /* Panel surfaces. Every one of these used to be a literal bg-white/NN, which
      is why the dark template rendered white cards carrying near-white text, and
@@ -774,6 +896,7 @@ a {
      at opacity 0. */
   .scroll-reveal,
   .hero-media-drift,
+  .hero-ornament-drift,
   .card-unsheathe {
     animation: none !important;
   }
@@ -833,12 +956,20 @@ input[type="time"]::-webkit-inner-spin-button {
    already doing (Reveal, HeroShowcase, the drawn ornaments); nothing here
    duplicates that.
 
-   Every rule is behind @supports. animation-timeline is unflagged in Chromium
-   and recent Safari, but Firefox is still the gap, so this must be additive:
-   each class is written so the UNANIMATED state is the finished state. A
-   browser without timeline support, or a visitor who has asked for reduced
-   motion, sees the content exactly as it should end up — just without the
-   movement. Nothing on this page is gated behind an animation running.
+   Every rule is behind @supports, and the framing of that gate has inverted:
+   scroll-driven animation now ships by default in every engine we target, so
+   THIS is the default path and a JS reveal is the legacy one. The guest side
+   runs on it too — the sixteen public designs reveal through .scroll-reveal,
+   not through motion/react. No version number and no date is asserted here on
+   purpose: a date in a code comment turns into a fact, and the only sources
+   for one were second-hand. State the behaviour, not the release.
+
+   The gate stays exactly as it is regardless, because a wedding guest list is
+   not a browser-support table: each class is written so the UNANIMATED state is
+   the finished state. A browser without timeline support, or a visitor who has
+   asked for reduced motion, sees the content exactly as it should end up — just
+   without the movement. Nothing on this page is gated behind an animation
+   running.
    --------------------------------------------------------------------------- */
 
 @supports (animation-timeline: view()) {
@@ -863,8 +994,13 @@ input[type="time"]::-webkit-inner-spin-button {
          passes the ROW index (`index % 4`) rather than the card index: at four
          columns the old version left the sixteenth card 1.2s behind the first,
          so the fourth row was still waiting on cards that had entered three
-         screens earlier. Siblings with no `--i` are unaffected. */
-      animation-range: entry calc(var(--i, 0) * 3%) cover calc(30% + var(--i, 0) * 3%);
+         screens earlier. Siblings with no `--i` are unaffected.
+         The three numbers are now tokens, re-declared per chromeStyle on
+         .theme-scope, so the sixteen public designs arrive at sixteen cadences
+         off one class. var() inside animation-range resolves on the animated
+         element, so they cascade from .theme-scope like any other token. */
+      animation-range: entry calc(var(--i, 0) * var(--reveal-stagger, 3%)) cover
+        calc(var(--reveal-span, 30%) + var(--i, 0) * var(--reveal-stagger, 3%));
     }
 
     /* The hero media drifts and swells as the band scrolls away, which is what
@@ -873,6 +1009,26 @@ input[type="time"]::-webkit-inner-spin-button {
        no entry phase to animate over. */
     .hero-media-drift {
       animation: hero-media-drift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+
+    /* Reading-progress hairline. See the display:none default below for why
+       this whole rule lives inside the gate rather than beside it. */
+    .scroll-progress-hairline {
+      display: block;
+      transform-origin: left;
+      animation: scroll-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    /* The hero ornament's one depth gesture, previously motion/react's
+       useScroll + useTransform on the main thread. scroll(root block), not
+       view(), for the same reason .hero-media-drift uses it: the hero is
+       already in view at load, so a view() timeline has no entry phase to
+       animate over. */
+    .hero-ornament-drift {
+      animation: hero-ornament-drift linear both;
       animation-timeline: scroll(root block);
       animation-range: 0 100vh;
     }
@@ -893,10 +1049,56 @@ input[type="time"]::-webkit-inner-spin-button {
 @keyframes scroll-reveal {
   from {
     opacity: 0;
-    transform: translateY(26px);
+    transform: translateY(var(--reveal-lift, 26px));
+  }
+  /* OPACITY FINISHES EARLY, the travel does not. The guest pages are
+     11.6k-12.6k px tall at 390 and a single event card is taller than the
+     phone viewport, so a range measured in `cover` keeps running long after
+     the card's heading is on screen and being read. Landing the ink at 40% of
+     the range means the slow cadences (wash, veil, horizon) spend their length
+     on the settle rather than on half-faded text. */
+  40% {
+    opacity: 1;
   }
   to {
     opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* A PROGRESS BAR HAS NO HONEST RESTING STATE. Everything else here is written
+   so the unanimated element shows finished content; a full-width hairline with
+   nothing driving it would instead claim the page had been read to the end. So
+   it paints nothing at all unless a scroll timeline is there to move it: the
+   rule that SHOWS it lives inside the @supports + no-preference gate earlier in
+   this file, and this is the default it has to beat.
+
+   :where() IS LOAD-BEARING. This default must lose to that gated rule, and a
+   bare `.scroll-progress-hairline` cannot: both selectors are specificity
+   (0,1,0), @supports adds none, neither is in a cascade layer, and this one is
+   LATER in the file — so it won unconditionally and the hairline was dead on
+   every page in every browser. :where() drops this to (0,0,0) so the gate wins
+   wherever either rule is moved to. */
+:where(.scroll-progress-hairline) {
+  display: none;
+}
+
+@keyframes scroll-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Runs TO translateY(0): the ornament's resting place is where layout put it,
+   so a browser with no timeline leaves it exactly there. */
+@keyframes hero-ornament-drift {
+  from {
+    transform: translateY(var(--ornament-drift, 40px));
+  }
+  to {
     transform: translateY(0);
   }
 }

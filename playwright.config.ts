@@ -3,6 +3,14 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 3000);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
+// Set when a server is ALREADY running and Playwright must not start one.
+// tests/reveal-contract.spec.ts has to measure a production build (`next dev`
+// serves a CSP without unsafe-eval, so React never hydrates and the reveals
+// read as permanently hidden), and the `webServer` block below can only start
+// `next dev`. Without this the config would try to start dev on the port the
+// production server already holds.
+const EXTERNAL_SERVER = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -17,7 +25,7 @@ export default defineConfig({
 
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 
-  webServer: {
+  webServer: EXTERNAL_SERVER ? undefined : {
     // `next dev`, NOT `npm run build && next start`: the build script begins
     // with `prisma migrate deploy`, which needs a live database. Dev does not.
     //
