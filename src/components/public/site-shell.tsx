@@ -141,6 +141,17 @@ export function SiteShell({
       // since the theme table existed, and no public component ever read it.
       // Now that elevation is a token it can finally mean something.
       data-shadow={snapshot.theme.shadowStyle}
+      // THE REVEAL CADENCE IS A PER-TEMPLATE DECISION, like the hero's bleed
+      // and scrim already are. The guest reveal now runs on one CSS class
+      // (.scroll-reveal) instead of sixteen identical motion/react animations,
+      // and these two attributes are what stop that from flattening the set:
+      // globals.css re-declares --reveal-lift / --reveal-span /
+      // --reveal-stagger per chrome, so a design that settles and a design that
+      // cuts arrive differently off the same markup. Registry properties, not
+      // keys and not palette values — a seventeenth template inherits a cadence
+      // from its chrome rather than needing one added here.
+      data-chrome={template.chromeStyle}
+      data-hero-variant={template.heroVariant}
     >
       {/* Decorations live in their own overflow-hidden layer that is a SIBLING
           of the sticky header, not an ancestor. An overflow-hidden ancestor

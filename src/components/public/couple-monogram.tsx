@@ -1,7 +1,3 @@
-"use client";
-
-import { motion, useReducedMotion, type Variants } from "motion/react";
-
 import { cn } from "@/lib/utils";
 
 // The couple's monogram, generated from their names rather than uploaded.
@@ -44,34 +40,26 @@ export function deriveInitials(coupleNames: string): { first: string; second: st
   return { first: initialOf(cleaned), second: null };
 }
 
-// Original lotus, drawn as a ring of petals so it can bloom outward from the
-// centre. Not traced from the reference image.
+// Original lotus, drawn as a ring of petals. Not traced from the reference
+// image.
+//
+// The petals used to bloom outward one at a time through motion/react, which
+// meant five <path> elements left the SERVER at inline opacity:0 — invisible
+// without JS, on the crest that crowns the couple's own names. The crest now
+// renders at rest and the whole mark arrives together via .scroll-reveal on the
+// wrapper below, which is a better reading of it anyway: it is one piece of
+// jewellery, not five petals assembling themselves.
 function LotusBloom({ className }: { className?: string }) {
-  const reduceMotion = useReducedMotion();
   const petals = [-64, -32, 0, 32, 64];
 
   return (
     <svg className={className} viewBox="0 0 100 72" fill="none" aria-hidden="true">
       {petals.map((angle, index) => (
-        // The rotation lives on a STATIC <g>, never on the animated element.
-        // motion writes transforms to CSS, and a CSS transform overrides an
-        // SVG transform attribute entirely — putting rotate() on the motion
-        // element collapsed all five petals onto one unrotated stack.
         <g key={angle} transform={`rotate(${angle} 50 66)`}>
-          <motion.path
+          <path
             d="M50 66 C40 48 40 28 50 10 C60 28 60 48 50 66 Z"
             fill="currentColor"
             fillOpacity={index === 2 ? 0.85 : 0.5}
-            initial={reduceMotion ? false : { scaleY: 0.15, opacity: 0 }}
-            whileInView={{ scaleY: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            style={{ transformOrigin: "50px 66px" }}
-            transition={{
-              duration: 0.7,
-              ease: "easeOut",
-              // Petals open from the centre outward, not left to right.
-              delay: 0.3 + Math.abs(index - 2) * 0.1,
-            }}
           />
         </g>
       ))}
@@ -104,15 +92,9 @@ export function CoupleMonogram({
   // rosette, a rose window, a moon gate), so the crest simply switches off.
   showCrest?: boolean;
 }) {
-  const reduceMotion = useReducedMotion();
   const { first, second } = deriveInitials(coupleNames);
 
   if (!first) return null;
-
-  const letterVariants: Variants = {
-    hidden: { opacity: 0, y: 18 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: "easeOut" } },
-  };
 
   // Latin capitals can be kerned into each other for the classic interlocked
   // monogram look. Non-Latin scripts cannot — Tamil glyphs are wider, carry
@@ -130,14 +112,20 @@ export function CoupleMonogram({
     // behind the glyph in the identical --primary colour and was invisible, and
     // any side placement that clears a Latin "S" collides with a wider Tamil
     // or Devanagari glyph. A crest is script-independent.
-    <motion.div
+    //
+    // THE MARK ARRIVES AS A WHOLE, through .scroll-reveal. The initials used to
+    // rise one letter at a time off a motion/react `hidden: { opacity: 0 }`
+    // variant, which is how the K and the M — the couple's own initials, on
+    // twelve of the sixteen designs — were served at inline opacity:0 and
+    // stayed invisible with JS off. .scroll-reveal is CSS-only, gated behind
+    // @supports + prefers-reduced-motion, and its keyframe runs TO the resting
+    // state, so the letters are legible before anything moves. Its cadence is
+    // the template's own (--reveal-lift / -span / -stagger), so the crest
+    // arrives differently on kolam-blush than on temple-gold.
+    <div
       role="img"
       aria-label={coupleNames}
-      className={cn("relative inline-flex flex-col items-center", className)}
-      initial={reduceMotion ? false : "hidden"}
-      whileInView="visible"
-      viewport={{ once: true, margin: "-40px" }}
-      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.14 } } }}
+      className={cn("scroll-reveal relative inline-flex flex-col items-center", className)}
     >
       {/* THE CREST CROWNS THE HEADLINE, it does not compete with it.
           At w-20/w-24 above 128px initials this block measured 313px tall and
@@ -153,19 +141,17 @@ export function CoupleMonogram({
           interlock ? null : "gap-2",
         )}
       >
-        <motion.span
+        <span
           aria-hidden="true"
-          variants={reduceMotion ? undefined : letterVariants}
           style={{ fontSize: "clamp(2.75rem, 1.6rem + 2.6vw, 4.25rem)" }}
           className="font-display leading-[0.85] text-[color:var(--primary)]"
         >
           {first}
-        </motion.span>
+        </span>
 
         {second ? (
-          <motion.span
+          <span
             aria-hidden="true"
-            variants={reduceMotion ? undefined : letterVariants}
             style={{ fontSize: "clamp(2.75rem, 1.6rem + 2.6vw, 4.25rem)" }}
             className={cn(
               "font-display leading-[0.85] text-[color:var(--accent)]",
@@ -173,7 +159,7 @@ export function CoupleMonogram({
             )}
           >
             {second}
-          </motion.span>
+          </span>
         ) : null}
 
         {second && showCrest ? (
@@ -182,6 +168,6 @@ export function CoupleMonogram({
           </span>
         ) : null}
       </div>
-    </motion.div>
+    </div>
   );
 }
